@@ -850,18 +850,18 @@
     </div>
     <div class="troop-editor-row">
       <div class="troop-name"><div class="dot dot-i"></div>Infantry</div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="inf-t10" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="143000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="inf-t9" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="26000" min="0"></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="inf-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="143000" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="inf-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="26000" min="0"></div>
     </div>
     <div class="troop-editor-row">
       <div class="troop-name"><div class="dot dot-c"></div>Cavalry</div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="cav-t10" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="105000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="cav-t9" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="48000" min="0"></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="cav-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="105000" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="cav-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="48000" min="0"></div>
     </div>
     <div class="troop-editor-row">
       <div class="troop-name"><div class="dot dot-a"></div>Archers</div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="arc-t10" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="156000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="arc-t9" oninput="updateMarchRec(); saveArmy(); updateTotals()" value="15000" min="0"></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="arc-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="156000" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="arc-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips()" value="15000" min="0"></div>
     </div>
     <!-- TOTALS ROW -->
     <div id="army-totals" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid rgba(201,168,76,0.15);">
@@ -891,7 +891,7 @@
         <div style="height:7px;background:rgba(0,0,0,0.4);border-radius:4px;overflow:hidden;">
           <div id="arc-pct-bar" style="height:100%;border-radius:4px;transition:width 0.6s ease;width:0%;"></div>
         </div>
-        <div style="font-size:10px;color:var(--gold-dim);margin-top:3px;">Target: 80%+ Archers for max damage</div>
+        <div id="arc-pct-note" style="font-size:10px;color:var(--gold-dim);margin-top:3px;">Target: 80%+ Archers for max damage</div>
       </div>
     </div>
   </div>
@@ -900,12 +900,14 @@
   <div class="settings-row">
     <div class="setting-box">
       <div class="section-title">📋 <span data-i18n="numMarches">Number of Marches</span></div>
-      <div class="toggle-row">
-        <button class="toggle-btn" onclick="setMarches(2,this)" data-n="2">2</button>
-        <button class="toggle-btn" onclick="setMarches(3,this)" data-n="3">3</button>
-        <button class="toggle-btn active" onclick="setMarches(4,this)" data-n="4">4</button>
-        <button class="toggle-btn" onclick="setMarches(5,this)" data-n="5">5</button>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;" id="marches-toggle-row">
+        <button class="toggle-btn" onclick="setMarches(2,this)" data-n="2" style="width:100%;text-align:center;">2</button>
+        <button class="toggle-btn" onclick="setMarches(3,this)" data-n="3" style="width:100%;text-align:center;">3</button>
+        <button class="toggle-btn active" onclick="setMarches(4,this)" data-n="4" style="width:100%;text-align:center;">4</button>
+        <button class="toggle-btn" onclick="setMarches(5,this)" data-n="5" style="width:100%;text-align:center;">5</button>
+        <button class="toggle-btn" onclick="setMarches(6,this)" data-n="6" style="width:100%;text-align:center;">6</button>
       </div>
+      <div id="march-tooltips" style="margin-top:4px;display:none;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
     </div>
     <div class="setting-box">
       <div class="section-title">👑 <span data-i18n="rallyLeader">Rally Leader</span></div>
@@ -917,8 +919,10 @@
       <div style="margin-top:10px;">
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">⚔ March Capacity</div>
         <input type="number" id="march-capacity" value="130000" min="10000" step="5000"
+          placeholder="e.g. 130,000"
           oninput="updateMarchRec(); saveArmy()"
           style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:var(--gold-light);font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;padding:8px 10px;outline:none;-moz-appearance:textfield;">
+        <div style="font-size:10px;color:var(--gold-dim);margin-top:4px;">Max troops per march slot (check in-game march screen)</div>
       </div>
       <div id="leader-hero-pick" style="display:none; margin-top:10px;">
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Pick your 3 heroes (tap in order: Front → Mid → Back):</div>
@@ -981,9 +985,12 @@
     </div>
     <div class="tips-box">
       <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
-      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text" data-i18n="tip1"><strong>Always T10 before T9</strong> – T10 troops deal ~40% more damage. Use T9 only to fill remaining slots</span></div>
-      <div class="tip-item"><span class="tip-icon">🎯</span><span class="tip-text" data-i18n="tip2"><strong>Archers = main DPS</strong> in Bear Trap. Infantry absorbs damage, Cavalry fills the rest</span></div>
-      <div class="tip-item"><span class="tip-icon">⏰</span><span class="tip-text" data-i18n="tip3"><strong>6 minutes before Bear Trap ends</strong> – everyone opens Rallies simultaneously for maximum final damage. If 4 Chenkos already in rally → send troops only!</span></div>
+      <div class="tip-item"><span class="tip-icon">⚔️</span><span class="tip-text"><strong>Always T10 before T9</strong> – T10 troops deal ~40% more damage. Use T9 only to fill remaining slots.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏙️</span><span class="tip-text"><strong>Activate city buffs</strong> such as Attack or Lethality before the event starts.</span></div>
+      <div class="tip-item"><span class="tip-icon">👑</span><span class="tip-text"><strong>Rally leader:</strong> Activate capacity buff before opening the rally.</span></div>
+      <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Make sure your Expeditions skill is maxed</strong> before joining or leading a rally.</span></div>
+      <div class="tip-item"><span class="tip-icon">⏰</span><span class="tip-text"><strong>6 minutes before Bear Trap ends</strong> – everyone opens Rallies simultaneously for maximum final damage.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers = main DPS</strong> in Bear Trap. Infantry absorbs damage, Cavalry fills the rest.</span></div>
     </div>
   </div>
 
@@ -1135,8 +1142,11 @@
 
   function setMarches(n, btn) {
     numMarches = n;
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    window._manualMarchOverride = true;
+    document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.n) === n);
+      b.style.outline = '';
+    });
     updateMarchRec();
   }
 
@@ -1296,7 +1306,7 @@
     }
     if (errBox) errBox.style.display = 'none';
     // Max total marches: 5 joiners + 1 leader = 6, or just 5 without leader
-    const maxTotal = isRallyLeader ? 6 : 5;
+    const maxTotal = isRallyLeader ? 7 : 6;
     // Find max marches where each gets >= MIN_ARC archers AND fits in capacity
     const capacity = parseInt(document.getElementById('march-capacity')?.value) || 130000;
     let recTotal = 1;
@@ -1319,17 +1329,46 @@
 
     box.className = 'march-rec-box show' + (isWarning ? ' warning' : '');
 
-    // Auto-set numMarches to recommended and update toggle buttons
-    numMarches = recJoiners;
-    document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
-      const n = parseInt(b.dataset.n);
-      const isRec = (n === recJoiners);
-      b.classList.toggle('active', isRec);
-      b.style.outline = isRec ? '2px solid var(--gold)' : '';
-    });
+    // Auto-set numMarches to recommended unless user manually overrode
+    if (!window._manualMarchOverride) {
+      numMarches = recJoiners;
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        const isRec = (n === recJoiners);
+        b.classList.toggle('active', isRec);
+        b.style.outline = isRec ? '2px solid var(--gold)' : '';
+      });
+    } else {
+      // Just highlight recommended with outline, keep active on manual choice
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        b.style.outline = (n === recJoiners) ? '2px solid var(--gold-dim)' : '';
+      });
+    }
   }
 
 
+
+
+  function updateMarchTooltips() {
+    const arc = (parseInt(document.getElementById('arc-t10').value)||0)
+              + (parseInt(document.getElementById('arc-t9').value)||0);
+    const tooltipDiv = document.getElementById('march-tooltips');
+    if (!tooltipDiv || arc < 1000) { if(tooltipDiv) tooltipDiv.style.display='none'; return; }
+    tooltipDiv.style.display = 'grid';
+    let tips = '';
+    for (let n = 2; n <= 6; n++) {
+      const arcEach = Math.floor(arc / n);
+      const totalEach = Math.floor(arcEach / 0.85);
+      const ok = totalEach >= 70000;
+      const color = ok ? '#5ba85b' : '#c0392b';
+      tips += `<div style="text-align:center;line-height:1.3;">` +
+              `<div style="font-size:11px;color:${color};font-weight:700;">${fmt(arcEach)}</div>` +
+              `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
+              `</div>`;
+    }
+    tooltipDiv.innerHTML = tips;
+  }
 
   function updateTotals() {
     const inf = (parseInt(document.getElementById('inf-t10').value)||0) + (parseInt(document.getElementById('inf-t9').value)||0);
@@ -1358,6 +1397,19 @@
       arcPctLbl.textContent = arcPct + '% Archers — ' + note;
       arcPctLbl.style.color = color;
       arcPctEl.style.display = 'block';
+      const noteEl = document.getElementById('arc-pct-note');
+      if (noteEl) {
+        if (arcPct >= 80) {
+          noteEl.textContent = '✅ Great archer ratio — max damage output';
+          noteEl.style.color = '#5ba85b';
+        } else if (arcPct >= 60) {
+          noteEl.textContent = `⚠️ Low archers — your DPS is reduced. Ideal: 80%+ (you need ${fmt(Math.ceil(grandT * 0.8) - arc)} more archers)`;
+          noteEl.style.color = '#c9a84c';
+        } else {
+          noteEl.textContent = `❌ Too few archers — Bear Trap damage will be low. You need ${fmt(Math.ceil(grandT * 0.8) - arc)} more archers to reach 80%`;
+          noteEl.style.color = '#c0392b';
+        }
+      }
     } else if (arcPctEl) {
       arcPctEl.style.display = 'none';
     }
@@ -1449,6 +1501,16 @@
     document.body.removeChild(ta);
   }
 
+
+  function resetMarches() {
+    numMarches = 4;
+    document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.n) === 4);
+      b.style.outline = '';
+    });
+    updateMarchRec();
+  }
+
   function resetArmy() {
     ['inf-t10','inf-t9','cav-t10','cav-t9','arc-t10','arc-t9','march-capacity'].forEach(id => {
       const el = document.getElementById(id);
@@ -1488,7 +1550,7 @@
     const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 59,500
     // Find max marches where each march gets >= 59,500 archers (= 70k total at 85%)
     const totalArchers = arcT10 + arcT9;
-    const maxTotal = isRallyLeader ? 6 : 5;
+    const maxTotal = isRallyLeader ? 7 : 6;
     const marchCapacity = parseInt(document.getElementById('march-capacity')?.value) || 130000;
     let optimalTotal = 1;
     for (let n = maxTotal; n >= 1; n--) {
@@ -1496,16 +1558,23 @@
       const totalPerM = Math.floor(arcPerM / 0.85);
       if (arcPerM >= MIN_ARC_PER_MARCH && totalPerM <= marchCapacity) { optimalTotal = n; break; }
     }
-    // Always use optimal (based on 70k minimum)
-    const N = optimalTotal;
-    // Update numMarches and toggle buttons to reflect optimal joiner count
+    // Use manual selection if user overrode, otherwise use optimal
     const optimalJoiners = isRallyLeader ? Math.max(1, optimalTotal - 1) : optimalTotal;
-    numMarches = optimalJoiners;
-    document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
-      const n = parseInt(b.dataset.n);
-      b.classList.toggle('active', n === optimalJoiners);
-      b.style.outline = n === optimalJoiners ? '2px solid var(--gold)' : '';
-    });
+    if (!window._manualMarchOverride) {
+      numMarches = optimalJoiners;
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        b.classList.toggle('active', n === optimalJoiners);
+        b.style.outline = n === optimalJoiners ? '2px solid var(--gold)' : '';
+      });
+    } else {
+      // Keep manual choice, just show recommended outline
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        if (!b.classList.contains('active')) b.style.outline = n === optimalJoiners ? '2px solid rgba(201,168,76,0.4)' : '';
+      });
+    }
+    const N = isRallyLeader ? numMarches + 1 : numMarches;
     window._marchesList = [];
     let marchesList = window._marchesList;
 
@@ -2013,7 +2082,7 @@
     content.innerHTML = html;
   }
 
-  window.onload = () => { loadTheme(); renderHeroes(); calculate(); initParticles(); updateMarchRec(); updateTotals(); };
+  window.onload = () => { loadTheme(); updateMarchTooltips(); renderHeroes(); calculate(); initParticles(); updateMarchRec(); updateTotals(); };
 
 </script>
 </body>
