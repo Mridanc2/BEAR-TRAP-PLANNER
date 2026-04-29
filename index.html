@@ -953,6 +953,7 @@
       <button class="lang-btn" onclick="setLang('ar')">🇸🇦 AR</button>
       <button class="lang-btn" onclick="setLang('es')">🇪🇸 ES</button>
       <button class="lang-btn" onclick="setLang('pt')">🇧🇷 PT</button>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">🌙</button>
     </div>
     <!-- CLAN NAME -->
     <div class="clan-name">
@@ -1074,11 +1075,12 @@
       <div style="font-size:12px; color:var(--gold-dim); margin-top:8px; font-style:italic;" id="rally-sub" data-i18n="rallySub">Enable if one of your marches is the rally leader</div>
       <div style="margin-top:10px;">
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">⚔ My March Capacity</div>
-        <input type="number" id="march-capacity" value="130000" min="10000" max="300000" min="10000" step="5000"
+        <input type="number" id="march-capacity" value="130000" min="50000" max="300000" step="5000"
           placeholder="e.g. 130,000"
-          oninput="updateMarchRec(); saveArmy()"
+          oninput="updateMarchRec(); saveArmy(); updateCapacityHint()"
           style="width:100%;background:rgba(0,20,55,0.85);border:1.5px solid rgba(100,180,255,0.45);border-radius:8px;color:#f0f8ff;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;padding:8px 10px;outline:none;-moz-appearance:textfield;box-shadow:0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4);">
         <div style="font-size:10px;color:var(--gold-dim);margin-top:4px;">Max troops you can send in one march — check your in-game march screen</div>
+        <div id="capacity-warn" style="display:none;font-size:11px;color:#e74c3c;margin-top:4px;font-weight:600;">⚠️ Value too low — typical capacity is 100,000–200,000. Did you mean to add a zero?</div>
       </div>
       <div id="leader-hero-pick" style="display:none; margin-top:10px;">
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Pick your 3 heroes (tap in order: Front → Mid → Back):</div>
@@ -1139,7 +1141,7 @@
       </div>
       <div class="donut-legend" id="donut-legend"></div>
     </div>
-    <div class="section-title" style="text-align:center; margin-bottom:16px;">⚔️ <span data-i18n="yourMarches">Your Marches</span></div>
+    <div class="section-title" id="marches-section-title" style="text-align:center; margin-bottom:16px; scroll-margin-top: 16px;">⚔️ <span data-i18n="yourMarches">Your Marches</span></div>
     <div class="marches-grid" id="marches-grid"></div>
     <div class="summary-box">
       <div class="section-title">📊 <span data-i18n="summary">Usage Summary</span></div>
@@ -1482,24 +1484,59 @@
     // Max total marches: 5 joiners + 1 leader = 6, or just 5 without leader
     const maxTotal = isRallyLeader ? 7 : 6;
     // Find max marches where each gets >= MIN_ARC archers AND fits in capacity
-    const capacity = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    const rawCapacity = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    // Safety: capacity below 50,000 is unrealistic (likely missing zero) — fall back to default
+    const capacity = rawCapacity < 50000 ? 130000 : rawCapacity;
+    const capacityWarning = rawCapacity < 50000;
+
+    // Helper: compute actual per-march total for given N (mirrors _doCalculate logic)
+    const recCavTotal = (parseInt(document.getElementById('cav-t10').value)||0)
+                      + (parseInt(document.getElementById('cav-t9').value)||0)
+                      + getT8Val('cav');
+    const recInfTotal = (parseInt(document.getElementById('inf-t10').value)||0)
+                      + (parseInt(document.getElementById('inf-t9').value)||0)
+                      + getT8Val('inf');
+    const grandTot = recArcTotal + recCavTotal + recInfTotal;
+    function actualPerMarch(N) {
+      if (N <= 0) return 0;
+      const cap = Math.min(Math.floor(grandTot / N), capacity);
+      const arcAvail = Math.floor(recArcTotal / N);
+      const cavAvail = Math.floor(recCavTotal / N);
+      const infAvail = Math.floor(recInfTotal / N);
+      // Compute targets BEFORE capping (matches _doCalculate)
+      let arcT = Math.round(cap * 0.85);
+      let cavT = Math.round(cap * 0.10);
+      let infT = cap - arcT - cavT;
+      // Cap to available
+      arcT = Math.min(arcT, arcAvail);
+      cavT = Math.min(cavT, cavAvail);
+      infT = Math.min(infT, infAvail);
+      // Add surplus to archers if there's room
+      const surplus = cap - (arcT + cavT + infT);
+      if (surplus > 0 && arcT + surplus <= arcAvail) arcT += surplus;
+      return arcT + cavT + infT;
+    }
+
     let recTotal = 1;
     for (let n = maxTotal; n >= 1; n--) {
       const arcPerMarch = Math.floor(recArcTotal / n);
-      const totalPerMarch = Math.floor(arcPerMarch / 0.85);
+      // Use ACTUAL per-march total (not theoretical 85%) for capacity check
+      const totalPerMarch = actualPerMarch(n);
       if (arcPerMarch >= MIN_ARC && totalPerMarch <= capacity) { recTotal = n; break; }
     }
     // Convert to joiner count (what the toggle shows)
     const recJoiners = isRallyLeader ? Math.max(1, recTotal - 1) : recTotal;
-    const perMarch = Math.floor((recArcTotal / recTotal) / 0.85);
+    const perMarch = actualPerMarch(recTotal);
     const current = numMarches + (isRallyLeader ? 1 : 0);
     const isWarning = current > recTotal;
 
     icon.textContent = isWarning ? '⚠️' : '✅';
     const leaderNote = isRallyLeader ? ` (${recJoiners} joiners + 1 leader)` : '';
     title.textContent = `Recommended: ${recTotal} march${recTotal>1?'es':''}${leaderNote}`;
-    sub.textContent = `${fmt(recArcTotal)} archers ÷ ${recTotal} = ~${fmt(Math.floor(recArcTotal/recTotal))} each · ~${fmt(perMarch)} per march`
-      + (isWarning ? ` · ⚠️ currently ${current} = only ${fmt(Math.floor(total/current))} each` : '');
+    let subText = `${fmt(recArcTotal)} archers ÷ ${recTotal} = ~${fmt(Math.floor(recArcTotal/recTotal))} archers each · ~${fmt(perMarch)} troops per march`;
+    if (isWarning) subText += ` · ⚠️ at ${current} marches = only ${fmt(Math.floor(recArcTotal/current))} archers each`;
+    if (capacityWarning) subText += ` · ⚠️ March Capacity ${fmt(rawCapacity)} too low — using 130,000`;
+    sub.textContent = subText;
 
     box.className = 'march-rec-box show' + (isWarning ? ' warning' : '');
 
@@ -1740,16 +1777,30 @@
     const wrap = document.getElementById(troop + '-t8-wrap');
     // Return 0 if wrap doesn't exist or is hidden
     if (!wrap) return 0;
-    const disp = wrap.style.display;
-    if (disp !== 'grid') return 0;
+    if (wrap.style.display === 'none') return 0;
     return parseInt(document.getElementById(troop + '-t8')?.value) || 0;
+  }
+  function updateCapacityHint() {
+    const input = document.getElementById('march-capacity');
+    const warn  = document.getElementById('capacity-warn');
+    if (!input || !warn) return;
+    const v = parseInt(input.value) || 0;
+    if (v > 0 && v < 50000) {
+      warn.style.display = 'block';
+      input.style.borderColor = '#e74c3c';
+      input.style.boxShadow = '0 0 10px rgba(231,76,60,0.4),inset 0 1px 3px rgba(0,0,0,0.4)';
+    } else {
+      warn.style.display = 'none';
+      input.style.borderColor = 'rgba(100,180,255,0.45)';
+      input.style.boxShadow = '0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4)';
+    }
   }
   function toggleT8(troop) {
     const wrap  = document.getElementById(troop + '-t8-wrap');
     const btn   = document.getElementById(troop + '-t8-btn');
     const input = document.getElementById(troop + '-t8');
     const isOpen = wrap.style.display !== 'none';
-    wrap.style.display = isOpen ? 'none' : 'block';
+    wrap.style.display = isOpen ? 'none' : 'grid';
     btn.textContent = isOpen ? '＋ T8' : '－ T8';
     btn.classList.toggle('active', !isOpen);
     if (isOpen && input) { input.value = 0; updateTotals(); updateMarchRec(); saveArmy(); }
@@ -1798,7 +1849,9 @@
     // Find max marches where each march gets >= 59,500 archers (= 70k total at 85%)
     const totalArchers = arcT10 + arcT9 + (arcT8||0);
     const maxTotal = isRallyLeader ? 7 : 6;
-    const marchCapacity = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    const marchCapacityRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    // Safety: capacity below 50,000 is unrealistic — use default
+    const marchCapacity = marchCapacityRaw < 50000 ? 130000 : marchCapacityRaw;
     let optimalTotal = 1;
     for (let n = maxTotal; n >= 1; n--) {
       const arcPerM = Math.floor(totalArchers / n);
@@ -2048,6 +2101,14 @@
       const sp = calcBtn.querySelector('span');
       if (sp) sp.innerHTML = '⚔️ <span data-i18n="calcBtn">Calculate Ideal Marches</span>';
     }
+    // Smooth scroll to "Your Marches" section
+    setTimeout(() => {
+      const target = document.getElementById('marches-section-title');
+      if (target) {
+        const y = target.getBoundingClientRect().top + window.pageYOffset - 12;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 120);
   }
 
   function drawDonut(arc, cav, inf, total) {
@@ -2358,7 +2419,18 @@
     content.innerHTML = html;
   }
 
-  window.onload = () => { loadTheme(); updateMarchTooltips(); updatePromoteTip(); initSparkles(); renderHeroes(); initParticles(); loadArmy(); updateTotals(); updateMarchRec(); updatePromoteTip(); };
+  window.onload = () => {
+    loadTheme();
+    initSparkles();
+    initParticles();
+    renderHeroes();
+    loadArmy();              // ← Load saved data FIRST (opens T8 wraps if needed)
+    updateTotals();          // ← Then compute totals (now sees T8 values)
+    updateMarchRec();
+    updateMarchTooltips();   // ← Now correctly includes T8
+    updatePromoteTip();
+    updateCapacityHint();
+  };
 
 </script>
 </body>
