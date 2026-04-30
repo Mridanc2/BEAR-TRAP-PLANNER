@@ -134,7 +134,10 @@
     line-height: 1;
     -webkit-text-stroke: 1px rgba(255,235,150,0.3);
     animation: xxx-pulse 3s ease-in-out infinite;
+    display: inline-flex; align-items: baseline;
   }
+  .clan-xxx .x-small { font-size: 0.65em; opacity: 0.92; }
+  .clan-xxx .x-big   { font-size: 1.25em; margin: 0 -0.04em; }
   @keyframes xxx-pulse {
     0%, 100% { filter: drop-shadow(0 0 22px rgba(201,168,76,0.7)) drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
     50%      { filter: drop-shadow(0 0 36px rgba(255,215,100,1))   drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
@@ -835,6 +838,15 @@
     font-weight: 700; letter-spacing: 0.18em;
     animation: shimmer 4s linear infinite;
   }
+  .sig-visitors {
+    font-size: 10px; color: var(--gold-dim); opacity: 0.5;
+    letter-spacing: 0.18em; text-transform: uppercase; margin-top: 12px;
+    font-family: 'Cinzel', serif;
+  }
+  .sig-visitors #visitor-count {
+    color: #f0d080; font-weight: 700; opacity: 0.95;
+    text-shadow: 0 0 8px rgba(201,168,76,0.4);
+  }
 
   /* HERO SECTION */
   .hero-section {
@@ -982,7 +994,7 @@
       <div class="clan-crown">👑</div>
       <div class="clan-xxx-wrap">
         <span class="side-sword">⚔</span>
-        <span class="clan-xxx">xXx</span>
+        <span class="clan-xxx"><span class="x-small">x</span><span class="x-big">X</span><span class="x-small">x</span></span>
         <span class="side-sword">⚔</span>
       </div>
       <span class="clan-commanders">COMMANDERS</span>
@@ -1181,6 +1193,12 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
+    <div class="sig-visitors">
+      <img src="https://abacus.jasoncameron.dev/hits/xxx-commanders/bear-trap-planner.svg?style=flat&color=c9a84c&background=0a1228&label=⚔%20commanders%20served"
+           alt="Visitors counter"
+           style="opacity:0.85;height:22px;vertical-align:middle;"
+           onerror="this.style.display='none'">
+    </div>
   </div>
 </div>
 
@@ -2464,15 +2482,12 @@
     updateCapacityHint();
 
     // Auto-select content when focusing a number input with value 0
-    // — saves users from manually deleting the 0 before typing
     document.querySelectorAll('input[type="number"]').forEach(inp => {
       inp.addEventListener('focus', function() {
         if (this.value === '0' || this.value === '' || parseInt(this.value) === 0) {
-          // Use setTimeout for mobile browser compatibility
           setTimeout(() => this.select(), 0);
         }
       });
-      // Also handle click (some mobile keyboards focus before click)
       inp.addEventListener('click', function() {
         if (this.value === '0' || parseInt(this.value) === 0) {
           this.select();
