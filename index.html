@@ -1216,6 +1216,9 @@
   <div class="settings-row">
     <div class="setting-box">
       <div class="section-title">📋 <span data-i18n="numMarches">Number of Marches</span></div>
+      <div style="font-size:10px;color:var(--gold-dim);opacity:0.7;letter-spacing:0.05em;margin:-2px 0 8px;font-style:italic;">
+        <span data-i18n="joinersHint">Joiners only — Rally Leader adds +1 march if enabled</span>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;" id="marches-toggle-row">
         <button class="toggle-btn" onclick="setMarches(1,this)" data-n="1" style="width:100%;text-align:center;">1</button>
         <button class="toggle-btn" onclick="setMarches(2,this)" data-n="2" style="width:100%;text-align:center;">2</button>
@@ -1225,6 +1228,9 @@
         <button class="toggle-btn" onclick="setMarches(6,this)" data-n="6" style="width:100%;text-align:center;">6</button>
       </div>
       <div id="march-tooltips" style="margin-top:4px;display:none;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
+      <div id="march-total-info" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:6px;font-size:11px;color:#e8c87c;text-align:center;letter-spacing:0.05em;">
+        <span id="march-total-info-text"></span>
+      </div>
     </div>
     <div class="setting-box">
       <div class="section-title">👑 <span data-i18n="rallyLeader">Rally Leader</span></div>
@@ -1845,6 +1851,23 @@
               `</div>`;
     }
     tooltipDiv.innerHTML = tips;
+    updateMarchTotalInfo();
+  }
+
+  function updateMarchTotalInfo() {
+    const box = document.getElementById('march-total-info');
+    const text = document.getElementById('march-total-info-text');
+    if (!box || !text) return;
+    const isRL = (typeof isRallyLeader !== 'undefined') && isRallyLeader;
+    const joiners = (typeof numMarches !== 'undefined') ? numMarches : 4;
+    if (isRL) {
+      const total = joiners + 1;
+      text.innerHTML = `<strong>${joiners}</strong> joiners + <strong>1</strong> Rally Leader = <strong style="color:#f0d080">${total} total marches</strong>`;
+      box.style.display = 'block';
+    } else {
+      text.innerHTML = `<strong>${joiners}</strong> joiners — no Rally Leader`;
+      box.style.display = 'block';
+    }
   }
 
 
