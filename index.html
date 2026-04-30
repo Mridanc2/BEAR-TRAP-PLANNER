@@ -848,6 +848,141 @@
     text-shadow: 0 0 8px rgba(201,168,76,0.4);
   }
 
+  /* === COMMENTS SECTION === */
+  .comments-section {
+    margin: 32px auto 16px;
+    padding: 20px 18px;
+    background: linear-gradient(180deg, rgba(15,30,60,0.6) 0%, rgba(8,18,40,0.4) 100%);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    max-width: 100%;
+  }
+  .comments-title {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: #d4b15c;
+    margin-bottom: 16px;
+    text-shadow: 0 0 8px rgba(201,168,76,0.3);
+  }
+  /* Ticker (rotating approved comments) */
+  .comments-ticker {
+    position: relative;
+    height: 80px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ticker-item {
+    position: absolute;
+    inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 10px 16px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+  }
+  .ticker-item.active { opacity: 1; pointer-events: auto; }
+  .ticker-msg {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: #e8d68a;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .ticker-author {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #c9a84c;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+  .ticker-empty {
+    color: var(--gold-dim); opacity: 0.5;
+    font-style: italic; font-size: 13px;
+    font-family: 'Crimson Pro', serif;
+  }
+  /* Comment form */
+  .comment-form {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .comment-form input,
+  .comment-form textarea {
+    width: 100%; box-sizing: border-box;
+    background: rgba(0,20,55,0.7);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 6px;
+    color: #f0f8ff;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .comment-form input:focus,
+  .comment-form textarea:focus {
+    border-color: rgba(201,168,76,0.7);
+    box-shadow: 0 0 8px rgba(201,168,76,0.2);
+  }
+  .comment-form textarea {
+    resize: vertical;
+    min-height: 60px;
+    max-height: 120px;
+    font-family: 'Crimson Pro', serif;
+  }
+  .comment-form button {
+    padding: 9px 16px;
+    background: linear-gradient(180deg, rgba(201,168,76,0.25) 0%, rgba(138,96,16,0.2) 100%);
+    border: 1px solid rgba(201,168,76,0.5);
+    color: #f0d080;
+    font-family: 'Cinzel', serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .comment-form button:hover:not(:disabled) {
+    background: linear-gradient(180deg, rgba(201,168,76,0.4) 0%, rgba(138,96,16,0.3) 100%);
+    box-shadow: 0 0 12px rgba(201,168,76,0.3);
+  }
+  .comment-form button:disabled { opacity: 0.5; cursor: wait; }
+  .comment-status {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 4px;
+    font-family: 'Crimson Pro', serif;
+    min-height: 14px;
+  }
+  .comment-status.success { color: #5ba85b; }
+  .comment-status.error   { color: #c0392b; }
+  .comment-status.info    { color: var(--gold-dim); }
+  .comment-counter-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: var(--gold-dim); opacity: 0.55;
+    margin-top: -6px;
+  }
+  @media (max-width: 480px) {
+    .comments-section { margin: 24px auto 12px; padding: 16px 12px; }
+    .comments-title { font-size: 12px; letter-spacing: 0.2em; }
+    .comments-ticker { height: 88px; }
+    .ticker-msg { font-size: 13px; }
+    .ticker-author { font-size: 9px; }
+  }
+
   /* HERO SECTION */
   .hero-section {
     background: linear-gradient(135deg, #0c1828, #122034);
@@ -1081,14 +1216,15 @@
   <div class="settings-row">
     <div class="setting-box">
       <div class="section-title">📋 <span data-i18n="numMarches">Number of Marches</span></div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;" id="marches-toggle-row">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;" id="marches-toggle-row">
+        <button class="toggle-btn" onclick="setMarches(1,this)" data-n="1" style="width:100%;text-align:center;">1</button>
         <button class="toggle-btn" onclick="setMarches(2,this)" data-n="2" style="width:100%;text-align:center;">2</button>
         <button class="toggle-btn" onclick="setMarches(3,this)" data-n="3" style="width:100%;text-align:center;">3</button>
         <button class="toggle-btn active" onclick="setMarches(4,this)" data-n="4" style="width:100%;text-align:center;">4</button>
         <button class="toggle-btn" onclick="setMarches(5,this)" data-n="5" style="width:100%;text-align:center;">5</button>
         <button class="toggle-btn" onclick="setMarches(6,this)" data-n="6" style="width:100%;text-align:center;">6</button>
       </div>
-      <div id="march-tooltips" style="margin-top:4px;display:none;grid-template-columns:repeat(5,1fr);gap:8px;"></div>
+      <div id="march-tooltips" style="margin-top:4px;display:none;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
     </div>
     <div class="setting-box">
       <div class="section-title">👑 <span data-i18n="rallyLeader">Rally Leader</span></div>
@@ -1179,6 +1315,24 @@
       <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Make sure your Expeditions skill is maxed</strong> before joining or leading a rally.</span></div>
       <div class="tip-item"><span class="tip-icon">⏰</span><span class="tip-text"><strong>6 minutes before Bear Trap ends</strong> – everyone opens Rallies simultaneously for maximum final damage.</span></div>
       <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers = main DPS</strong> in Bear Trap. Infantry absorbs damage, Cavalry fills the rest.</span></div>
+    </div>
+  </div>
+
+  <!-- COMMENTS SECTION -->
+  <div class="comments-section">
+    <div class="comments-title">💬 <span data-i18n="commentsTitle">Commander Feedback</span></div>
+    <div class="comments-ticker" id="comments-ticker">
+      <div class="ticker-empty" id="ticker-empty" data-i18n="commentsEmpty">Be the first to leave a comment ⚔️</div>
+    </div>
+    <div class="comment-form">
+      <input type="text" id="comment-name" maxlength="40" placeholder="Your name (optional)" data-i18n-ph="commentName">
+      <textarea id="comment-message" maxlength="500" placeholder="Share your thoughts about the planner..." data-i18n-ph="commentMessage"></textarea>
+      <div class="comment-counter-row">
+        <span id="comment-counter">0 / 500</span>
+        <span style="opacity:0.7;" data-i18n="commentReview">Comments are reviewed before posting</span>
+      </div>
+      <button id="comment-submit" onclick="submitComment()" data-i18n="commentSubmit">Send Comment</button>
+      <div class="comment-status" id="comment-status"></div>
     </div>
   </div>
 
@@ -1372,6 +1526,7 @@
     if (isRallyLeader) buildLeaderPicker();
     renderHeroes();
     updateMarchRec();
+    updateMarchTooltips(); // refresh archer-per-march numbers (RL adds +1)
     updateTotals(); // refresh archer rating bar (rally leader adds +1 march)
   }
 
@@ -1674,9 +1829,13 @@
     const tooltipDiv = document.getElementById('march-tooltips');
     if (!tooltipDiv || arc < 1000) { if(tooltipDiv) tooltipDiv.style.display='none'; return; }
     tooltipDiv.style.display = 'grid';
+    // Each toggle button's `n` represents JOINERS, but archers are split across ALL marches
+    // (joiners + leader). So when Rally Leader is on, divide by n+1.
+    const isRL = (typeof isRallyLeader !== 'undefined') && isRallyLeader;
     let tips = '';
-    for (let n = 2; n <= 6; n++) {
-      const arcEach = Math.floor(arc / n);
+    for (let n = 1; n <= 6; n++) {
+      const totalMarches = n + (isRL ? 1 : 0);
+      const arcEach = Math.floor(arc / totalMarches);
       const totalEach = Math.floor(arcEach / 0.85);
       const ok = totalEach >= 70000;
       const color = ok ? '#5ba85b' : '#c0392b';
@@ -1890,6 +2049,115 @@
   }
 
 
+
+  // =====================================================================
+  // COMMENTS SYSTEM
+  // =====================================================================
+  // ⚠️  REPLACE THIS URL with your Cloudflare Worker URL after deploying it
+  const COMMENTS_API = 'https://YOUR-WORKER.workers.dev';
+
+  let _commentsList = [];
+  let _tickerIdx = 0;
+  let _tickerInterval = null;
+
+  async function loadComments() {
+    const ticker = document.getElementById('comments-ticker');
+    const empty = document.getElementById('ticker-empty');
+    if (!ticker) return;
+    if (COMMENTS_API.includes('YOUR-WORKER')) return; // not configured yet
+    try {
+      const res = await fetch(`${COMMENTS_API}/comments`);
+      if (!res.ok) throw new Error('Failed');
+      const data = await res.json();
+      if (!data.ok || !Array.isArray(data.comments) || data.comments.length === 0) return;
+      _commentsList = data.comments;
+      if (empty) empty.style.display = 'none';
+      ticker.querySelectorAll('.ticker-item').forEach(el => el.remove());
+      _commentsList.forEach((c, i) => {
+        const item = document.createElement('div');
+        item.className = 'ticker-item' + (i === 0 ? ' active' : '');
+        item.innerHTML = `<div class="ticker-msg">"${escapeHtml(c.message)}"</div><div class="ticker-author">— ${escapeHtml(c.name || 'Anonymous')}</div>`;
+        ticker.appendChild(item);
+      });
+      if (_commentsList.length > 1) startTicker();
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  function startTicker() {
+    if (_tickerInterval) clearInterval(_tickerInterval);
+    _tickerInterval = setInterval(() => {
+      const items = document.querySelectorAll('#comments-ticker .ticker-item');
+      if (items.length === 0) return;
+      items[_tickerIdx].classList.remove('active');
+      _tickerIdx = (_tickerIdx + 1) % items.length;
+      items[_tickerIdx].classList.add('active');
+    }, 5000);
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  async function submitComment() {
+    const nameEl = document.getElementById('comment-name');
+    const msgEl = document.getElementById('comment-message');
+    const btn = document.getElementById('comment-submit');
+    const status = document.getElementById('comment-status');
+    const name = (nameEl?.value || '').trim();
+    const message = (msgEl?.value || '').trim();
+
+    if (COMMENTS_API.includes('YOUR-WORKER')) {
+      status.className = 'comment-status error';
+      status.textContent = '❌ Comments service not configured';
+      return;
+    }
+    if (message.length < 3) {
+      status.className = 'comment-status error';
+      status.textContent = 'Message too short (min 3 characters)';
+      return;
+    }
+
+    btn.disabled = true;
+    status.className = 'comment-status info';
+    status.textContent = 'Sending...';
+
+    try {
+      const res = await fetch(`${COMMENTS_API}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name || 'Anonymous', message }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        status.className = 'comment-status success';
+        status.textContent = '✅ ' + (data.message || 'Comment submitted! Pending review.');
+        if (msgEl) msgEl.value = '';
+        if (nameEl) nameEl.value = '';
+        updateCommentCounter();
+      } else {
+        status.className = 'comment-status error';
+        status.textContent = '❌ ' + (data.error || 'Failed to submit');
+      }
+    } catch (err) {
+      status.className = 'comment-status error';
+      status.textContent = '❌ Network error — please try again';
+    } finally {
+      btn.disabled = false;
+      setTimeout(() => {
+        if (status) { status.textContent = ''; status.className = 'comment-status'; }
+      }, 6000);
+    }
+  }
+
+  function updateCommentCounter() {
+    const msgEl = document.getElementById('comment-message');
+    const counter = document.getElementById('comment-counter');
+    if (msgEl && counter) counter.textContent = `${msgEl.value.length} / 500`;
+  }
 
   function getT8Val(troop) {
     return parseInt(document.getElementById(troop + '-t8')?.value) || 0;
@@ -2584,6 +2852,11 @@
         }
       });
     });
+
+    // Comment system: live char counter & load approved comments
+    const msgEl = document.getElementById('comment-message');
+    if (msgEl) msgEl.addEventListener('input', updateCommentCounter);
+    loadComments();
   };
 
 </script>
