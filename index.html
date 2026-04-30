@@ -190,7 +190,7 @@
   }
   .army-editor::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
 
-  .troop-editor-row { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 6px; align-items: end; margin-bottom: 2px; }
+  .troop-editor-row { display: grid; grid-template-columns: 60px 1fr 1fr 1fr; gap: 6px; align-items: end; margin-bottom: 8px; }
   .troop-editor-row:last-child { margin-bottom: 0; }
   .troop-name { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--parchment); text-align: center; }
 
@@ -734,40 +734,6 @@
   }
 
 
-  .t8-toggle-btn {
-    background: rgba(160,160,180,0.08);
-    border: 1px solid rgba(160,160,180,0.2);
-    border-radius: 5px;
-    color: #888899;
-    font-size: 11px;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    align-self: end;
-    margin-bottom: 2px;
-  }
-  .t8-toggle-btn.active {
-    background: rgba(160,160,180,0.15);
-    border-color: rgba(160,160,180,0.4);
-    color: #b0b0c8;
-  }
-
-
-  .t8-row-wrap {
-    display: grid;
-    grid-template-columns: 60px 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .t8-input-wrap {
-    grid-column: 2;
-  }
-  .t8-input-wrap input { width: 100%; }
   footer { text-align: center; margin-top: 36px; font-size: 12px; color: var(--gold-dim); opacity: 0.35; letter-spacing: 0.12em; text-transform: uppercase; }
   .clan-signature {
     margin-top: 48px;
@@ -927,7 +893,9 @@
 
   @media (max-width: 480px) {
     .settings-row { grid-template-columns: 1fr; }
-    .troop-editor-row { grid-template-columns: 70px 1fr 1fr; }
+    .troop-editor-row { grid-template-columns: 56px 1fr 1fr 1fr; gap: 4px; }
+    .troop-editor-row .input-label { font-size: 10px; }
+    .troop-editor-row input { font-size: 14px; padding: 6px 4px; }
     .donut-wrap { flex-direction: column; text-align: center; }
     .clan-signature { margin-top: 36px; padding: 24px 12px 18px; }
     .sig-xxx { font-size: 18px; letter-spacing: 0.35em; margin-bottom: 12px; }
@@ -982,43 +950,28 @@
       <div class="troop-name">
         <div class="dot dot-i"></div>
         <div style="font-size:9px;">INFANTRY</div>
-        <button class="t8-toggle-btn" id="inf-t8-btn" onclick="toggleT8('inf')">＋T8</button>
       </div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="inf-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="143000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="inf-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="26000" min="0"></div>
-    </div>
-    <div class="t8-row-wrap" id="inf-t8-wrap" style="display:none;">
-      <div></div>
-      <div class="input-group t8-input-wrap"><div class="input-label" style="color:#a0a0b0;">T8</div><input type="number" id="inf-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
-      <div></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="inf-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="inf-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T8</div><input type="number" id="inf-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
     </div>
     <div class="troop-editor-row">
       <div class="troop-name">
         <div class="dot dot-c"></div>
         <div style="font-size:9px;">CAVALRY</div>
-        <button class="t8-toggle-btn" id="cav-t8-btn" onclick="toggleT8('cav')">＋T8</button>
       </div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="cav-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="105000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="cav-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="48000" min="0"></div>
-    </div>
-    <div class="t8-row-wrap" id="cav-t8-wrap" style="display:none;">
-      <div></div>
-      <div class="input-group t8-input-wrap"><div class="input-label" style="color:#a0a0b0;">T8</div><input type="number" id="cav-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
-      <div></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="cav-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="cav-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T8</div><input type="number" id="cav-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
     </div>
     <div class="troop-editor-row">
       <div class="troop-name">
         <div class="dot dot-a"></div>
         <div style="font-size:9px;">ARCHERS</div>
-        <button class="t8-toggle-btn" id="arc-t8-btn" onclick="toggleT8('arc')">＋T8</button>
       </div>
-      <div class="input-group"><div class="input-label">T10</div><input type="number" id="arc-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="156000" min="0"></div>
-      <div class="input-group"><div class="input-label">T9</div><input type="number" id="arc-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="15000" min="0"></div>
-    </div>
-    <div class="t8-row-wrap" id="arc-t8-wrap" style="display:none;">
-      <div></div>
-      <div class="input-group t8-input-wrap"><div class="input-label" style="color:#a0a0b0;">T8</div><input type="number" id="arc-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
-      <div></div>
+      <div class="input-group"><div class="input-label">T10</div><input type="number" id="arc-t10" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T9</div><input type="number" id="arc-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+      <div class="input-group"><div class="input-label">T8</div><input type="number" id="arc-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
     </div>
     <!-- TOTALS ROW -->
     <div id="army-totals" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid rgba(201,168,76,0.15);">
@@ -1317,6 +1270,8 @@
 
   function setMarches(n, btn) {
     numMarches = n;
+    // Only set override if user picked something different from recommendation
+    // (this is set after updateMarchRec runs, so we check below)
     window._manualMarchOverride = true;
     document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
       b.classList.toggle('active', parseInt(b.dataset.n) === n);
@@ -1527,6 +1482,29 @@
     // Convert to joiner count (what the toggle shows)
     const recJoiners = isRallyLeader ? Math.max(1, recTotal - 1) : recTotal;
     const perMarch = actualPerMarch(recTotal);
+
+    // Auto-set numMarches to recommended unless user manually overrode
+    // (Do this BEFORE computing warning, so warning reflects the actual state)
+    if (!window._manualMarchOverride) {
+      numMarches = recJoiners;
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        const isRec = (n === recJoiners);
+        b.classList.toggle('active', isRec);
+        b.style.outline = isRec ? '2px solid var(--gold)' : '';
+      });
+    } else {
+      // Manual override - keep user's choice but highlight recommended with outline
+      // Sync numMarches with the actually-active button (in case it drifted)
+      const activeBtn = document.querySelector('.toggle-btn[data-n].active');
+      if (activeBtn) numMarches = parseInt(activeBtn.dataset.n);
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        const n = parseInt(b.dataset.n);
+        b.style.outline = (n === recJoiners) ? '2px solid var(--gold-dim)' : '';
+      });
+    }
+
+    // NOW compute warning based on (possibly updated) numMarches
     const current = numMarches + (isRallyLeader ? 1 : 0);
     const isWarning = current > recTotal;
 
@@ -1539,23 +1517,6 @@
     sub.textContent = subText;
 
     box.className = 'march-rec-box show' + (isWarning ? ' warning' : '');
-
-    // Auto-set numMarches to recommended unless user manually overrode
-    if (!window._manualMarchOverride) {
-      numMarches = recJoiners;
-      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
-        const n = parseInt(b.dataset.n);
-        const isRec = (n === recJoiners);
-        b.classList.toggle('active', isRec);
-        b.style.outline = isRec ? '2px solid var(--gold)' : '';
-      });
-    } else {
-      // Just highlight recommended with outline, keep active on manual choice
-      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
-        const n = parseInt(b.dataset.n);
-        b.style.outline = (n === recJoiners) ? '2px solid var(--gold-dim)' : '';
-      });
-    }
   }
 
 
@@ -1689,16 +1650,6 @@
         const el = document.getElementById(id);
         if (el && data[id] !== undefined) el.value = data[id];
       });
-      // Auto-open T8 wrap if saved value > 0
-      ['inf','cav','arc'].forEach(t => {
-        const val = parseInt(data[t+'-t8']) || 0;
-        if (val > 0) {
-          const wrap = document.getElementById(t+'-t8-wrap');
-          const btn  = document.getElementById(t+'-t8-btn');
-          if (wrap) wrap.style.display = 'grid';
-          if (btn)  { btn.textContent = '－'; btn.classList.add('active'); }
-        }
-      });
     } catch(e) {}
   }
 
@@ -1774,10 +1725,6 @@
 
 
   function getT8Val(troop) {
-    const wrap = document.getElementById(troop + '-t8-wrap');
-    // Return 0 if wrap doesn't exist or is hidden
-    if (!wrap) return 0;
-    if (wrap.style.display === 'none') return 0;
     return parseInt(document.getElementById(troop + '-t8')?.value) || 0;
   }
   function updateCapacityHint() {
@@ -1795,24 +1742,50 @@
       input.style.boxShadow = '0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4)';
     }
   }
-  function toggleT8(troop) {
-    const wrap  = document.getElementById(troop + '-t8-wrap');
-    const btn   = document.getElementById(troop + '-t8-btn');
-    const input = document.getElementById(troop + '-t8');
-    const isOpen = wrap.style.display !== 'none';
-    wrap.style.display = isOpen ? 'none' : 'grid';
-    btn.textContent = isOpen ? '＋ T8' : '－ T8';
-    btn.classList.toggle('active', !isOpen);
-    if (isOpen && input) { input.value = 0; updateTotals(); updateMarchRec(); saveArmy(); }
-    if (!isOpen) setTimeout(() => { if(input) { input.select(); } }, 80);
-  }
-
   function resetArmy() {
-    ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
+    // Reset troop inputs to 0 (and dispatch input event so listeners fire)
+    ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.value = '';
+      if (el) {
+        el.value = 0;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     });
-    document.getElementById('results').className = '';
+    // Reset march capacity to default
+    const cap = document.getElementById('march-capacity');
+    if (cap) {
+      cap.value = 130000;
+      cap.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    // Clear localStorage
+    try { localStorage.removeItem('btArmy'); } catch(e) {}
+    // Reset state flags
+    window._manualMarchOverride = false;
+    numMarches = 4;
+    // Hide results section AND clear march cards from DOM
+    const results = document.getElementById('results');
+    if (results) results.className = '';
+    const grid = document.getElementById('marches-grid');
+    if (grid) grid.innerHTML = '';
+    const summary = document.getElementById('summary-table');
+    if (summary) summary.innerHTML = '';
+    // Hide leftover panels
+    const armyTotals = document.getElementById('army-totals');
+    if (armyTotals) armyTotals.style.display = 'none';
+    const tooltipDiv = document.getElementById('march-tooltips');
+    if (tooltipDiv) tooltipDiv.style.display = 'none';
+    const recBox = document.getElementById('march-rec-box');
+    if (recBox) recBox.className = 'march-rec-box';
+    const errBox = document.getElementById('army-error-box');
+    if (errBox) errBox.style.display = 'none';
+    // Refresh all panels (defensively, in case events didn't fire)
+    if (typeof updateTotals === 'function') updateTotals();
+    if (typeof updateMarchRec === 'function') updateMarchRec();
+    if (typeof updateMarchTooltips === 'function') updateMarchTooltips();
+    if (typeof updatePromoteTip === 'function') updatePromoteTip();
+    if (typeof updateCapacityHint === 'function') updateCapacityHint();
+    // Scroll back to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function fmt(n) { return n.toLocaleString('en-US'); }
@@ -2430,6 +2403,23 @@
     updateMarchTooltips();   // ← Now correctly includes T8
     updatePromoteTip();
     updateCapacityHint();
+
+    // Auto-select content when focusing a number input with value 0
+    // — saves users from manually deleting the 0 before typing
+    document.querySelectorAll('input[type="number"]').forEach(inp => {
+      inp.addEventListener('focus', function() {
+        if (this.value === '0' || this.value === '' || parseInt(this.value) === 0) {
+          // Use setTimeout for mobile browser compatibility
+          setTimeout(() => this.select(), 0);
+        }
+      });
+      // Also handle click (some mobile keyboards focus before click)
+      inp.addEventListener('click', function() {
+        if (this.value === '0' || parseInt(this.value) === 0) {
+          this.select();
+        }
+      });
+    });
   };
 
 </script>
