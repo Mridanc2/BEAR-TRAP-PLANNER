@@ -1066,13 +1066,13 @@
       </div>
       <div id="arc-pct-bar-wrap" style="display:none;margin-top:10px;padding-top:8px;border-top:1px solid rgba(201,168,76,0.1);">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-size:10px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;">🏹 Archers %</span>
+          <span style="font-size:10px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;">🏹 Archer Strength</span>
           <span id="arc-pct-label" style="font-size:12px;font-weight:700;"></span>
         </div>
         <div style="height:7px;background:rgba(0,0,0,0.4);border-radius:4px;overflow:hidden;">
           <div id="arc-pct-bar" style="height:100%;border-radius:4px;transition:width 0.6s ease;width:0%;"></div>
         </div>
-        <div id="arc-pct-note" style="font-size:10px;color:var(--gold-dim);margin-top:3px;">Target: 80%+ Archers for max damage</div>
+        <div id="arc-pct-note" style="font-size:10px;color:var(--gold-dim);margin-top:3px;">Per-march archer count rating</div>
       </div>
     </div>
   </div>
@@ -1355,6 +1355,7 @@
       b.style.outline = '';
     });
     updateMarchRec();
+    updateTotals(); // refresh archer rating bar (depends on marches count)
   }
 
   function toggleRally() {
@@ -1370,6 +1371,8 @@
     if (leaderPick) leaderPick.style.display = isRallyLeader ? 'block' : 'none';
     if (isRallyLeader) buildLeaderPicker();
     renderHeroes();
+    updateMarchRec();
+    updateTotals(); // refresh archer rating bar (rally leader adds +1 march)
   }
 
   // Rally leader - select up to 3 heroes
@@ -1662,32 +1665,54 @@
     const grandT = inf + cav + arc;
     const totalAll = document.getElementById('total-all');
     if (totalAll) totalAll.textContent = fmt(grandT);
-    // Archer % indicator
+    // Archer rating — based on archers PER MARCH (what actually matters for Bear Trap)
+    // not on % of total army (which can mislead when you have lots of cav/inf)
     const arcPctEl = document.getElementById('arc-pct-bar-wrap');
     const arcPctBar = document.getElementById('arc-pct-bar');
     const arcPctLbl = document.getElementById('arc-pct-label');
     if (grandT > 0 && arcPctEl) {
-      const arcPct = Math.round(arc / grandT * 100);
-      const color = arcPct >= 80 ? '#5ba85b' : arcPct >= 60 ? '#c9a84c' : '#c0392b';
-      const note = arcPct >= 80 ? '✅ Good' : arcPct >= 60 ? '⚠️ Low' : '❌ Too low';
-      arcPctBar.style.width = arcPct + '%';
+      // How many marches will the user actually run?
+      // Use current numMarches (+1 for rally leader if enabled), capped at maxTotal
+      const isRL = (typeof isRallyLeader !== 'undefined') && isRallyLeader;
+      const marches = (typeof numMarches !== 'undefined' ? numMarches : 4) + (isRL ? 1 : 0);
+      const arcPerMarch = Math.floor(arc / Math.max(marches, 1));
+
+      // Thresholds based on Bear Trap minimum (70K/march × 85% = 59,500 archers/march)
+      const TIER_GREAT = 59500;   // ≥ 70K full march
+      const TIER_GOOD  = 42500;   // ≥ 50K reasonable march
+      const TIER_OK    = 25500;   // ≥ 30K minimum viable
+
+      let color, note, pctForBar, msg, msgColor;
+      if (arcPerMarch >= TIER_GREAT) {
+        color = '#5ba85b'; note = '✅ Excellent';
+        pctForBar = 100;
+        msg = `✅ Strong archer count — ${fmt(arcPerMarch)} archers per march (max damage output)`;
+        msgColor = '#5ba85b';
+      } else if (arcPerMarch >= TIER_GOOD) {
+        color = '#8bbb40'; note = '✅ Good';
+        pctForBar = 80;
+        msg = `✅ Good archer count — ${fmt(arcPerMarch)} archers per march`;
+        msgColor = '#8bbb40';
+      } else if (arcPerMarch >= TIER_OK) {
+        color = '#c9a84c'; note = '⚠️ Reduce marches';
+        pctForBar = 55;
+        const needed = (TIER_GREAT * marches) - arc;
+        msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — try ${Math.max(1, marches - 1)} marches, or train ${fmt(needed)} more archers`;
+        msgColor = '#c9a84c';
+      } else {
+        color = '#c0392b'; note = '❌ Too few';
+        pctForBar = 25;
+        msg = `❌ Only ${fmt(arcPerMarch)} archers per march — too low for Bear Trap. Reduce marches or train more archers`;
+        msgColor = '#c0392b';
+      }
+
+      arcPctBar.style.width = pctForBar + '%';
       arcPctBar.style.background = `linear-gradient(90deg, ${color}88, ${color})`;
-      arcPctLbl.textContent = arcPct + '% Archers — ' + note;
+      arcPctLbl.textContent = `${fmt(arcPerMarch)} archers / march — ${note}`;
       arcPctLbl.style.color = color;
       arcPctEl.style.display = 'block';
       const noteEl = document.getElementById('arc-pct-note');
-      if (noteEl) {
-        if (arcPct >= 80) {
-          noteEl.textContent = '✅ Great archer ratio — max damage output';
-          noteEl.style.color = '#5ba85b';
-        } else if (arcPct >= 60) {
-          noteEl.textContent = `⚠️ Low archers — your DPS is reduced. Ideal: 80%+ (you need ${fmt(Math.ceil(grandT * 0.8) - arc)} more archers)`;
-          noteEl.style.color = '#c9a84c';
-        } else {
-          noteEl.textContent = `❌ Too few archers — Bear Trap damage will be low. You need ${fmt(Math.ceil(grandT * 0.8) - arc)} more archers to reach 80%`;
-          noteEl.style.color = '#c0392b';
-        }
-      }
+      if (noteEl) { noteEl.textContent = msg; noteEl.style.color = msgColor; }
     } else if (arcPctEl) {
       arcPctEl.style.display = 'none';
     }
