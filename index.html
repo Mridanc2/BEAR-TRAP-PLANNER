@@ -1431,28 +1431,89 @@
     tip.innerHTML = `<div style="font-size:11px;color:var(--gold-dim);margin-bottom:4px;">👑 Your heroes:</div><div style="display:flex;gap:8px;">${heroesHtml}</div>`;
   }
 
-  // Joiner hero priority
-  // Fixed joiner hero per march position
-  const MARCH_JOINER = [
-    {name:'Chenko',  note:'If <4 Chenkos in rally — else no hero'},
-    {name:'Yeonwoo', note:'+Lethality joiner'},
-    {name:'Amane',   note:'+ATK support'},
-    {name:'Amadeus', note:'Best overall joiner'},
+  // Joiner heroes per march position
+  // March 1-3: FIXED heroes (everyone has these — Chenko, Yeonwoo, Amane)
+  // March 4: Amadeus (premium, can be marked as missing)
+  // March 5-6: No hero — these always deploy solo
+  const MARCH_JOINER_OPTIONS = [
+    [{name:'Chenko',  note:'If <4 Chenkos in rally — else no hero'}],
+    [{name:'Yeonwoo', note:'+Lethality joiner'}],
+    [{name:'Amane',   note:'+ATK support'}],
+    [{name:'Amadeus', note:'Best overall joiner'}],
+    [],   // March 5: always no hero
+    [],   // March 6: always no hero
   ];
+  // Persistent: which heroes the user marked as "don't have"
+  function getMissingHeroes() {
+    try { return JSON.parse(localStorage.getItem('btMissingHeroes') || '[]'); }
+    catch(e) { return []; }
+  }
+  function setMissingHeroes(list) {
+    try { localStorage.setItem('btMissingHeroes', JSON.stringify(list)); } catch(e) {}
+  }
+  function toggleMissingHero(name, marchIdx) {
+    const list = getMissingHeroes();
+    const i = list.indexOf(name);
+    if (i >= 0) list.splice(i, 1);
+    else list.push(name);
+    setMissingHeroes(list);
+    if (typeof window._marchesList !== 'undefined' && window._marchesList) calculate();
+  }
+  function pickJoinerHero(marchIdx) {
+    const options = MARCH_JOINER_OPTIONS[Math.min(marchIdx, MARCH_JOINER_OPTIONS.length - 1)];
+    // Marches 5-6 have no options — always solo (intentional, not "missing")
+    if (!options || options.length === 0) {
+      return { hero: null, primary: null, allMissing: false, alwaysSolo: true };
+    }
+    const missing = getMissingHeroes();
+    const available = options.find(h => !missing.includes(h.name));
+    return { hero: available || null, primary: options[0], allMissing: !available, alwaysSolo: false };
+  }
 
   function buildJoinerHeroTip(isLeader, marchIdx) {
     if (isLeader) return '';
-    const joiner = MARCH_JOINER[Math.min(marchIdx, MARCH_JOINER.length - 1)];
-    const img = HERO_IMAGES[joiner.name];
+    const { hero, primary, allMissing, alwaysSolo } = pickJoinerHero(marchIdx);
+
+    // Marches 5-6: always solo, no hero, no toggle button
+    if (alwaysSolo) {
+      return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 8px;background:rgba(100,100,120,0.06);border:1px dashed rgba(150,150,170,0.2);border-radius:6px;">
+        <span style="font-size:22px;opacity:0.5;">🐻</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:rgba(180,180,200,0.8)">No joiner hero</div>
+          <div style="font-size:11px;color:var(--gold-dim);opacity:0.8;">March will deploy solo</div>
+        </div>
+      </div>`;
+    }
+
+    // March 4 with Amadeus marked missing: show "send without hero" with restore button
+    if (allMissing) {
+      return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 8px;background:rgba(100,100,120,0.08);border:1px dashed rgba(150,150,170,0.25);border-radius:6px;">
+        <span style="font-size:22px;opacity:0.6;">🐻</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:rgba(180,180,200,0.85)">Send without hero</div>
+          <div style="font-size:11px;color:var(--gold-dim);opacity:0.85;">No joiner hero — march will deploy solo</div>
+        </div>
+        <button onclick="toggleMissingHero('${primary.name}', ${marchIdx}); event.stopPropagation();" style="background:rgba(100,180,255,0.15);border:1px solid rgba(100,180,255,0.4);color:rgba(150,200,255,0.9);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">↺ I have it</button>
+      </div>`;
+    }
+
+    // Normal display — only show "Don't have" button for Amadeus (march 4)
+    const display = hero;
+    const img = HERO_IMAGES[display.name];
     const portrait = img
       ? `<img src="${img}" style="width:30px;height:30px;border-radius:5px;object-fit:cover;object-position:center top;flex-shrink:0;">`
       : `<span style="font-size:22px">🐻</span>`;
-    return `<div style="display:flex;align-items:center;gap:8px;">
+    const showDontHaveBtn = (display.name === 'Amadeus');
+    const haveBtn = showDontHaveBtn
+      ? `<button onclick="toggleMissingHero('${display.name}', ${marchIdx}); event.stopPropagation();" style="margin-left:auto;background:rgba(100,100,120,0.15);border:1px solid rgba(150,150,170,0.3);color:rgba(180,180,200,0.7);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">✗ Don't have</button>`
+      : '';
+    return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       ${portrait}
-      <div>
-        <div style="font-size:13px;font-weight:700;color:var(--gold-light)">🐻 LEFT: ${joiner.name}</div>
-        <div style="font-size:11px;color:var(--gold-dim)">${joiner.note}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold-light)">🐻 LEFT: ${display.name}</div>
+        <div style="font-size:11px;color:var(--gold-dim)">${display.note}</div>
       </div>
+      ${haveBtn}
     </div>`;
   }
 
