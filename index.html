@@ -1597,6 +1597,10 @@
     sub.textContent = subText;
 
     box.className = 'march-rec-box show' + (isWarning ? ' warning' : '');
+
+    // numMarches may have changed above — refresh archer rating bar
+    // (which reads numMarches to compute archers per march)
+    try { updateTotals(); } catch(e) {}
   }
 
 
