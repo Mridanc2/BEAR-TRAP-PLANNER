@@ -1649,10 +1649,10 @@
   .ocr-first-time-info {
     background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(201,168,76,0.03));
     border: 1px solid rgba(201,168,76,0.35);
-    border-radius: 6px;
-    padding: 12px 14px;
+    border-radius: 8px;
+    padding: 14px;
     margin: 4px 0 14px 0;
-    font-size: 12px;
+    font-size: 12.5px;
     line-height: 1.55;
     color: var(--text);
   }
@@ -1660,25 +1660,58 @@
     font-family: 'Cinzel Decorative', serif;
     font-weight: 700;
     color: var(--gold-light);
-    font-size: 13px;
-    margin-bottom: 8px;
+    font-size: 14px;
+    margin-bottom: 10px;
     letter-spacing: 0.03em;
+    text-align: center;
+  }
+  .ocr-first-time-info .ocr-fti-intro {
+    margin-bottom: 12px;
+    color: rgba(232,223,192,0.9);
+  }
+  .ocr-first-time-info .ocr-fti-cta {
+    display: block;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(201,168,76,0.35), rgba(201,168,76,0.18));
+    border: 1px solid rgba(201,168,76,0.7);
+    color: var(--gold-light);
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13.5px;
+    text-decoration: none;
+    margin: 10px 0 14px 0;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(201,168,76,0.15);
+    letter-spacing: 0.02em;
+  }
+  .ocr-first-time-info .ocr-fti-cta:hover,
+  .ocr-first-time-info .ocr-fti-cta:active {
+    background: linear-gradient(135deg, rgba(201,168,76,0.5), rgba(201,168,76,0.25));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(201,168,76,0.25);
+  }
+  .ocr-first-time-info .ocr-fti-steps-title {
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+    font-size: 12px;
   }
   .ocr-first-time-info ol {
     list-style: none;
     counter-reset: fti;
     padding: 0;
-    margin: 0 0 8px 0;
+    margin: 0 0 10px 0;
   }
   .ocr-first-time-info ol li {
     counter-increment: fti;
-    padding: 3px 0 3px 24px;
+    padding: 4px 0 4px 26px;
     position: relative;
   }
   .ocr-first-time-info ol li::before {
     content: counter(fti);
     position: absolute;
-    left: 0; top: 3px;
+    left: 0; top: 4px;
     width: 18px; height: 18px;
     background: rgba(201,168,76,0.2);
     border: 1px solid rgba(201,168,76,0.5);
@@ -1689,17 +1722,20 @@
     text-align: center;
     line-height: 16px;
   }
-  .ocr-first-time-info a {
+  .ocr-first-time-info code {
+    background: rgba(0,0,0,0.4);
+    padding: 1px 6px;
+    border-radius: 3px;
     color: var(--gold-light);
-    text-decoration: underline;
-    text-decoration-color: rgba(201,168,76,0.4);
+    font-size: 11px;
   }
   .ocr-first-time-info .ocr-fti-footnote {
-    font-size: 10.5px;
-    color: rgba(220,210,180,0.55);
-    margin-top: 6px;
-    padding-top: 8px;
+    font-size: 11px;
+    color: rgba(220,210,180,0.6);
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid rgba(201,168,76,0.15);
+    line-height: 1.5;
   }
   body.light-mode .ocr-first-time-info {
     background: linear-gradient(135deg, rgba(122,96,48,0.08), rgba(122,96,48,0.02));
@@ -1707,7 +1743,17 @@
     color: #5a4830;
   }
   body.light-mode .ocr-first-time-info .ocr-fti-title { color: #6b4d18; }
-  body.light-mode .ocr-first-time-info a { color: #6b4d18; }
+  body.light-mode .ocr-first-time-info .ocr-fti-intro { color: #5a4830; }
+  body.light-mode .ocr-first-time-info .ocr-fti-cta {
+    background: linear-gradient(135deg, rgba(122,96,48,0.25), rgba(122,96,48,0.12));
+    border-color: rgba(122,96,48,0.6);
+    color: #6b4d18;
+  }
+  body.light-mode .ocr-first-time-info .ocr-fti-steps-title { color: #6b4d18; }
+  body.light-mode .ocr-first-time-info code {
+    background: rgba(255,255,255,0.5);
+    color: #6b4d18;
+  }
   body.light-mode .ocr-first-time-info .ocr-fti-footnote { color: rgba(90,72,48,0.7); }
   .alliance-modal-textarea {
     width: 100%;
@@ -2649,14 +2695,23 @@
 
           <!-- First-time info (shown only when no API key saved) -->
           <div id="ocr-first-time-info" class="ocr-first-time-info" style="display:none;">
-            <div class="ocr-fti-title">⚔️ First time? Quick setup (free)</div>
+            <div class="ocr-fti-title">⚔️ First time? Read this</div>
+            <div class="ocr-fti-intro">
+              To read your screenshot, BEAR uses Google's free AI.<br>
+              You need a <strong>free key from Google</strong> — takes 30 seconds, no credit card.
+            </div>
+            <a href="https://aistudio.google.com/apikey" target="_blank" class="ocr-fti-cta">
+              🔑 Get my free Google key →
+            </a>
+            <div class="ocr-fti-steps-title">Then come back here and:</div>
             <ol>
-              <li>Open <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> and sign in with Google.</li>
-              <li>Click <strong>Create API key</strong>, copy it (starts with <code style="color:var(--gold-light);">AIza...</code>).</li>
-              <li>Paste it in the field below — saved on your device only.</li>
+              <li>Copy your key (it starts with <code>AIza...</code>)</li>
+              <li>Paste it in the box below ↓</li>
+              <li>Upload your screenshots — done!</li>
             </ol>
             <div class="ocr-fti-footnote">
-              🔒 Your key never leaves your phone. · ✨ Free tier: 250 screenshots/day, no credit card needed.
+              🔒 Your key stays on your phone — only used to read your screenshots.<br>
+              ✨ 250 free screenshots per day.
             </div>
           </div>
 
