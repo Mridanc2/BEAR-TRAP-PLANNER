@@ -5477,6 +5477,7 @@
 
     let allMembers = [];
     let lastError = '';
+    let debugInfo = '';
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -5534,13 +5535,7 @@ Rules:
         );
         const data = await response.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        
-        // DEBUG: show response in modal
-        const debugEl = document.getElementById('ocr-processing');
-        if (debugEl) debugEl.innerHTML = `<div style="color:#90e890;font-size:11px;word-break:break-all;padding:10px;background:rgba(0,0,0,0.5);border-radius:8px;max-height:200px;overflow-y:auto;">
-          <strong>API Response:</strong><br>${rawText ? rawText.slice(0, 300) : 'EMPTY: ' + JSON.stringify(data).slice(0, 200)}
-        </div>`;
-        debugEl.style.display = 'block';
+        debugInfo = rawText ? rawText.slice(0, 200) : 'EMPTY RESPONSE: ' + JSON.stringify(data).slice(0, 200);
         
         if (!rawText) continue;
         const clean = rawText.replace(/```json|```/g, '').trim();
@@ -5597,10 +5592,9 @@ Rules:
       // Show debug info in results section
       const resultsSection = document.getElementById('ocr-results-section');
       const resultsList = document.getElementById('ocr-results-list');
-      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:12px;padding:10px;background:rgba(0,0,0,0.5);border-radius:8px;word-break:break-all;">
-        ❌ No members detected. ${lastError ? 'Error: ' + lastError : ''}<br><br>
-        Try: uncheck "Online only" and try again.<br>
-        Or use Bulk Paste instead.
+      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:11px;padding:10px;background:rgba(0,0,0,0.5);border-radius:8px;word-break:break-all;max-height:300px;overflow-y:auto;">
+        ${lastError ? '❌ Error: ' + lastError + '<br><br>' : ''}
+        📡 Gemini said: <span style="color:#90e890">${debugInfo || 'no response'}</span>
       </div>`;
       if (resultsSection) resultsSection.style.display = 'block';
     }
