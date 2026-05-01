@@ -5697,10 +5697,8 @@ Rules:
     renderPlanHistory();
     // Restore last active view
     try {
-      const lastView = localStorage.getItem(ALLIANCE_LS_VIEW);
-      if (lastView === 'alliance') {
-        switchPlannerView('alliance');
-      }
+      // Always start on Personal tab
+      // (removed auto-restore to alliance view)
     } catch (e) {}
   }
 
