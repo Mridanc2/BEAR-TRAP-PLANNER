@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Bear Trap Planner – KingShot</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#c9a84c">
@@ -4986,15 +4989,15 @@
   }
 
   // Dynamic message grouping for game chat (400 char limit, but game compresses
-  // whitespace beyond ~250 chars — so we split aggressively to keep formatting).
+  // whitespace beyond ~180-220 chars — so we split aggressively to keep formatting).
   function copyAlliancePlan() {
     if (!window._lastAlliancePlan) generateAlliancePlan();
     const plan = window._lastAlliancePlan;
     if (!plan || !plan.waves || !plan.waves.length) return;
 
-    // Group waves into messages that fit under 250 chars (KingShot compresses
-    // newlines beyond ~250 chars even though limit is 400)
-    const messages = groupWavesIntoMessages(plan, 250);
+    // Group waves into messages that fit under 180 chars (KingShot compresses
+    // newlines aggressively — keep it small to preserve wave-by-wave formatting)
+    const messages = groupWavesIntoMessages(plan, 180);
     
     let msgIdx = window._allianceCopyIdx || 0;
     if (msgIdx >= messages.length) msgIdx = 0;
@@ -5040,7 +5043,7 @@
     }
   }
 
-  function groupWavesIntoMessages(plan, maxCharsPerMsg = 250) {
+  function groupWavesIntoMessages(plan, maxCharsPerMsg = 180) {
     const messages = [];
     let currentMsg = '';
     let currentMsgWaves = [];
@@ -5093,7 +5096,7 @@
       return;
     }
     // Calculate how many messages we'll need
-    const messages = groupWavesIntoMessages(plan, 250);
+    const messages = groupWavesIntoMessages(plan, 180);
     const msgIdx = window._allianceCopyIdx || 0;
     btn.innerHTML = `📋 ${t('copyMsgBtn').replace('{n}', msgIdx + 1).replace('{total}', messages.length)}`;
   }
@@ -5113,7 +5116,7 @@
     if (!window._lastAlliancePlan) generateAlliancePlan();
     const plan = window._lastAlliancePlan;
     if (!plan || !plan.waves || !plan.waves.length) return;
-    const messages = groupWavesIntoMessages(plan, 250);
+    const messages = groupWavesIntoMessages(plan, 180);
     const fullText = messages.map(m => m.text).join('\n\n---\n\n');
     const url = 'https://wa.me/?text=' + encodeURIComponent(fullText);
     window.open(url, '_blank');
