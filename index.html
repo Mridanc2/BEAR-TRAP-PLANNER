@@ -3179,7 +3179,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r3</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r4</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -3685,6 +3685,7 @@
     });
     updateMarchRec();
     updateTotals(); // refresh archer rating bar (depends on marches count)
+    saveArmy(); // persist marches selection to current preset
   }
 
   function toggleRally() {
@@ -3703,6 +3704,7 @@
     updateMarchRec();
     updateMarchTooltips(); // refresh archer-per-march numbers (RL adds +1)
     updateTotals(); // refresh archer rating bar (rally leader adds +1 march)
+    saveArmy(); // persist rally leader toggle to current preset
   }
 
   // Rally leader - select up to 3 heroes
@@ -3740,6 +3742,7 @@
       selectedLeaderHeroes.push(name); // select up to 3
     }
     buildLeaderPicker();
+    saveArmy(); // persist hero selection to current preset
   }
 
   function updateLeaderMarchHeroes() {
@@ -4211,6 +4214,11 @@
     ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
       data[id] = document.getElementById(id).value;
     });
+    // Save additional per-preset state
+    data._numMarches = numMarches;
+    data._isRallyLeader = isRallyLeader;
+    data._selectedLeaderHeroes = Array.isArray(selectedLeaderHeroes) ? [...selectedLeaderHeroes] : [];
+    data._manualMarchOverride = !!window._manualMarchOverride;
     try { localStorage.setItem(_armyKey(), JSON.stringify(data)); } catch(e) {}
   }
 
@@ -4218,19 +4226,46 @@
     try {
       // Try new per-preset key, fallback to old 'btArmy' for preset 1
       const raw = localStorage.getItem(_armyKey()) || (_currentPreset === 1 ? localStorage.getItem('btArmy') : null);
-      const data = JSON.parse(raw);
-      if (!data) {
-        // Clear all fields for empty preset
-        ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '0';
-        });
-        return;
-      }
+      const data = raw ? JSON.parse(raw) : null;
+
+      // Load troop counts (or reset to 0 if no saved data)
       ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
         const el = document.getElementById(id);
-        if (el && data[id] !== undefined) el.value = data[id];
+        if (!el) return;
+        if (data && data[id] !== undefined) el.value = data[id];
+        else el.value = (id === 'march-capacity') ? '' : '0';
       });
+
+      // Load extended state — fall back to defaults if not present (older saves or new preset)
+      numMarches = (data && typeof data._numMarches === 'number') ? data._numMarches : 4;
+      isRallyLeader = !!(data && data._isRallyLeader);
+      selectedLeaderHeroes = (data && Array.isArray(data._selectedLeaderHeroes))
+        ? [...data._selectedLeaderHeroes]
+        : [];
+      window._manualMarchOverride = !!(data && data._manualMarchOverride);
+
+      // Refresh UI to match loaded state
+      // 1. Marches toggle buttons
+      document.querySelectorAll('.toggle-btn[data-n]').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.n) === numMarches);
+        b.style.outline = '';
+      });
+      // 2. Rally leader switch
+      const sw = document.getElementById('rally-switch');
+      const lb = document.getElementById('rally-label');
+      const sub = document.getElementById('rally-sub');
+      if (sw)  sw.className  = 'switch' + (isRallyLeader ? ' on' : '');
+      if (lb) {
+        lb.className = 'switch-label' + (isRallyLeader ? ' on' : '');
+        lb.textContent = isRallyLeader ? t('rallyOn') : t('rallyOff');
+      }
+      if (sub) sub.textContent = isRallyLeader ? t('rallySubOn') : t('rallySub');
+      const leaderPick = document.getElementById('leader-hero-pick');
+      if (leaderPick) leaderPick.style.display = isRallyLeader ? 'block' : 'none';
+      // 3. Leader heroes picker
+      if (isRallyLeader && typeof buildLeaderPicker === 'function') buildLeaderPicker();
+      if (typeof renderHeroes === 'function') renderHeroes();
+      if (typeof updateMarchTooltips === 'function') updateMarchTooltips();
     } catch(e) {}
   }
 
@@ -6757,7 +6792,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r3';
+  const BEAR_BUILD = 'v2026.05.01-r4';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
