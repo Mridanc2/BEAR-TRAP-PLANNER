@@ -2515,11 +2515,11 @@
         ⚔️ <span data-i18n="waveAssignments">Wave Assignments</span>
       </div>
       <div id="alliance-waves"></div>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <button class="alliance-copy-btn" onclick="copyAlliancePlan()" style="flex:1;">
+      <div style="display:flex;gap:8px;margin-top:4px;align-items:stretch;">
+        <button class="alliance-copy-btn" onclick="copyAlliancePlan()" style="flex:1 1 auto;min-width:0;">
           📋 <span data-i18n="copyPlan">Copy to Clipboard</span>
         </button>
-        <button class="alliance-copy-btn" onclick="shareWhatsApp()" style="flex:0 0 auto;padding:12px 14px;background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1));border-color:rgba(37,211,102,0.5);color:#25d366;" title="Share on WhatsApp">
+        <button class="alliance-copy-btn" onclick="shareWhatsApp()" style="flex:0 0 auto;width:auto;padding:12px 16px;background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1));border-color:rgba(37,211,102,0.5);color:#25d366;font-size:18px;" title="Share on WhatsApp" aria-label="Share on WhatsApp">
           📲
         </button>
       </div>
@@ -4930,15 +4930,16 @@
     }).join('');
   }
 
-  // Dynamic message grouping for game chat (400 char limit).
-  // Automatically splits waves into the optimal number of messages.
+  // Dynamic message grouping for game chat (400 char limit, but game compresses
+  // whitespace beyond ~250 chars — so we split aggressively to keep formatting).
   function copyAlliancePlan() {
     if (!window._lastAlliancePlan) generateAlliancePlan();
     const plan = window._lastAlliancePlan;
     if (!plan || !plan.waves || !plan.waves.length) return;
 
-    // Group waves into messages that fit under 350 chars (buffer under 400 limit)
-    const messages = groupWavesIntoMessages(plan, 350);
+    // Group waves into messages that fit under 250 chars (KingShot compresses
+    // newlines beyond ~250 chars even though limit is 400)
+    const messages = groupWavesIntoMessages(plan, 250);
     
     let msgIdx = window._allianceCopyIdx || 0;
     if (msgIdx >= messages.length) msgIdx = 0;
@@ -4984,7 +4985,7 @@
     }
   }
 
-  function groupWavesIntoMessages(plan, maxCharsPerMsg = 350) {
+  function groupWavesIntoMessages(plan, maxCharsPerMsg = 250) {
     const messages = [];
     let currentMsg = '';
     let currentMsgWaves = [];
@@ -5037,7 +5038,7 @@
       return;
     }
     // Calculate how many messages we'll need
-    const messages = groupWavesIntoMessages(plan, 350);
+    const messages = groupWavesIntoMessages(plan, 250);
     const msgIdx = window._allianceCopyIdx || 0;
     btn.innerHTML = `📋 ${t('copyMsgBtn').replace('{n}', msgIdx + 1).replace('{total}', messages.length)}`;
   }
@@ -5057,7 +5058,7 @@
     if (!window._lastAlliancePlan) generateAlliancePlan();
     const plan = window._lastAlliancePlan;
     if (!plan || !plan.waves || !plan.waves.length) return;
-    const messages = groupWavesIntoMessages(plan, 350);
+    const messages = groupWavesIntoMessages(plan, 250);
     const fullText = messages.map(m => m.text).join('\n\n---\n\n');
     const url = 'https://wa.me/?text=' + encodeURIComponent(fullText);
     window.open(url, '_blank');
