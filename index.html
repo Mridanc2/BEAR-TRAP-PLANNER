@@ -5519,12 +5519,8 @@ Rules:
         );
         const data = await response.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        console.log('Gemini raw response:', rawText);
-        if (!rawText) {
-          console.error('Empty response from API:', data);
-          showAllianceToast('⚠️ API returned empty response. Check console.');
-          continue;
-        }
+        showAllianceToast('📡 Response: ' + (rawText ? rawText.slice(0, 100) : 'EMPTY — ' + JSON.stringify(data).slice(0, 80)));
+        if (!rawText) continue;
         const clean = rawText.replace(/```json|```/g, '').trim();
         let members;
         try {
