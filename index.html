@@ -5540,6 +5540,13 @@ Rules:
         allMembers = allMembers.concat(members);
       } catch (err) {
         console.error(`Error on image ${i + 1}:`, err);
+        const debugEl = document.getElementById('ocr-processing');
+        if (debugEl) {
+          debugEl.innerHTML = `<div style="color:#ff8080;font-size:12px;padding:10px;background:rgba(0,0,0,0.5);border-radius:8px;">
+            ❌ Error: ${err.message}
+          </div>`;
+          debugEl.style.display = 'block';
+        }
       }
     }
 
