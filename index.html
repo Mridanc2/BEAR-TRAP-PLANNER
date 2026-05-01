@@ -1820,50 +1820,77 @@
     margin-bottom: 8px;
     font-weight: 700;
   }
-  .tier-bar {
+  .tier-section-sub {
+    color: rgba(220,210,180,0.55);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  body.light-mode .tier-section-sub { color: rgba(90,72,48,0.65); }
+  .tier-cols {
     display: flex;
-    height: 12px;
-    border-radius: 6px;
-    overflow: hidden;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(201,168,76,0.15);
-    margin-bottom: 8px;
+    gap: 4px;
+    align-items: stretch;
   }
-  .tier-seg {
-    height: 100%;
-    transition: width 0.4s ease-out;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
-  }
-  .tier-legend {
+  .tier-col {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 14px;
-    font-size: 11px;
+    flex-direction: column;
+    min-width: 0;
+    align-items: stretch;
   }
-  .tier-legend-item {
+  .tier-col-bar {
+    height: 14px;
+    border-radius: 4px 4px 0 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(0,0,0,0.3);
+  }
+  .tier-col-info {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 5px 4px 6px;
+    text-align: center;
+    line-height: 1.2;
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--parchment);
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
   }
-  .tier-dot {
-    width: 8px; height: 8px;
-    border-radius: 2px;
-    flex-shrink: 0;
+  .tier-col-label {
+    font-size: 10px;
+    color: rgba(220,210,180,0.85);
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
-  .tier-label { color: rgba(220,210,180,0.85); }
-  .tier-count { color: var(--gold-light); font-weight: 700; }
+  .tier-col-range {
+    font-size: 9px;
+    color: rgba(220,210,180,0.55);
+    margin-top: 1px;
+  }
+  .tier-col-count {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-top: 2px;
+    line-height: 1;
+  }
+  body.light-mode .tier-col-info { background: rgba(255,255,255,0.5); border-color: rgba(122,96,48,0.2); }
+  body.light-mode .tier-col-label { color: #2a1a08; }
+  body.light-mode .tier-col-range { color: rgba(90,72,48,0.7); }
+  body.light-mode .tier-col-count { color: #6b4d18; }
 
   body.light-mode .alliance-stats {
     background: linear-gradient(135deg, rgba(122,96,48,0.08), rgba(122,96,48,0.02));
     border-color: rgba(122,96,48,0.3);
   }
-  body.light-mode .legend-row,
-  body.light-mode .tier-legend-item { color: #2a1a08; }
+  body.light-mode .legend-row { color: #2a1a08; }
   body.light-mode .donut-center-num,
   body.light-mode .stat-num-value,
   body.light-mode .legend-count,
-  body.light-mode .tier-count,
   body.light-mode .tier-section-title { color: #6b4d18; }
   body.light-mode .stat-num-item { background: rgba(255,255,255,0.5); border-color: rgba(122,96,48,0.2); }
   body.light-mode .stat-num-label,
@@ -5478,19 +5505,43 @@
     const avgPower = powers.length > 0 ? totalPower / powers.length : 0;
     const maxPower = powers.length > 0 ? Math.max(...powers) : 0;
 
-    // Power tiers
-    const tiers = [
-      { label: '< 10M',     min: 0,         max: 10e6,      count: 0, color: '#7a8a9a' },
-      { label: '10–30M',    min: 10e6,      max: 30e6,      count: 0, color: '#5ba85b' },
-      { label: '30–60M',    min: 30e6,      max: 60e6,      count: 0, color: '#4a9eca' },
-      { label: '60–100M',   min: 60e6,      max: 100e6,     count: 0, color: '#c47f2a' },
-      { label: '100M+',     min: 100e6,     max: Infinity,  count: 0, color: '#f0d080' }
-    ];
-    allMembers.forEach(m => {
-      const p = m.power || 0;
-      const tier = tiers.find(t => p >= t.min && p < t.max);
-      if (tier) tier.count++;
-    });
+    // Power tiers — QUARTILES (relative to your alliance, not fixed)
+    // Sort members by power and split into 4 equal-sized groups so the bar
+    // always shows real distribution: bottom 25%, lower-mid, upper-mid, top 25%.
+    const tiers = [];
+    const memberCount = allMembers.length;
+    if (memberCount > 0) {
+      // Sort by power ascending (zero-power members count as bottom tier)
+      const sortedByPower = [...allMembers].sort((a,b) => (a.power || 0) - (b.power || 0));
+      const formatPowerShort = (p) => {
+        if (p >= 1e9) return (p / 1e9).toFixed(1).replace('.0','') + 'B';
+        if (p >= 1e6) return (p / 1e6).toFixed(0) + 'M';
+        if (p >= 1e3) return (p / 1e3).toFixed(0) + 'K';
+        return String(Math.round(p));
+      };
+      // Find the cut points: 25%, 50%, 75% indices
+      const q1Idx = Math.floor(memberCount * 0.25);
+      const q2Idx = Math.floor(memberCount * 0.50);
+      const q3Idx = Math.floor(memberCount * 0.75);
+      const tierConfigs = [
+        { label: 'Bottom 25%', members: sortedByPower.slice(0, q1Idx),               color: '#7a8a9a' },
+        { label: 'Lower mid',  members: sortedByPower.slice(q1Idx, q2Idx),           color: '#5ba85b' },
+        { label: 'Upper mid',  members: sortedByPower.slice(q2Idx, q3Idx),           color: '#4a9eca' },
+        { label: 'Top 25%',    members: sortedByPower.slice(q3Idx),                  color: '#f0d080' }
+      ];
+      tierConfigs.forEach(t => {
+        if (t.members.length === 0) return;
+        const lo = t.members[0].power || 0;
+        const hi = t.members[t.members.length - 1].power || 0;
+        const range = lo === hi ? formatPowerShort(lo) : `${formatPowerShort(lo)}–${formatPowerShort(hi)}`;
+        tiers.push({
+          label: t.label,
+          range: range,
+          count: t.members.length,
+          color: t.color
+        });
+      });
+    }
     const tiersWithMembers = tiers.filter(t => t.count > 0);
 
     // Donut: status breakdown
@@ -5522,18 +5573,20 @@
       return String(Math.round(p));
     };
 
-    // Build power tier bar (segmented horizontal bar)
-    const tierBar = tiersWithMembers.map(t => {
+    // Build power tier columns — each tier is a vertical block:
+    // colored bar on top (proportional to count), label/range/count below.
+    const tierColumns = tiersWithMembers.map(t => {
       const pct = (t.count / total) * 100;
-      return `<div class="tier-seg" style="width:${pct}%;background:${t.color};" title="${t.label}: ${t.count}"></div>`;
+      return `
+        <div class="tier-col" style="flex:${t.count};">
+          <div class="tier-col-bar" style="background:${t.color};" title="${t.count} members"></div>
+          <div class="tier-col-info">
+            <div class="tier-col-label">${t.label}</div>
+            <div class="tier-col-range">${t.range}</div>
+            <div class="tier-col-count">${t.count}</div>
+          </div>
+        </div>`;
     }).join('');
-    const tierLegend = tiersWithMembers.map(t =>
-      `<div class="tier-legend-item">
-         <span class="tier-dot" style="background:${t.color};"></span>
-         <span class="tier-label">${t.label}</span>
-         <span class="tier-count">${t.count}</span>
-       </div>`
-    ).join('');
 
     stats.innerHTML = `
       <div class="stats-grid">
@@ -5577,9 +5630,8 @@
 
       ${tiersWithMembers.length > 0 ? `
         <div class="tier-section">
-          <div class="tier-section-title">⚔️ Power distribution</div>
-          <div class="tier-bar">${tierBar}</div>
-          <div class="tier-legend">${tierLegend}</div>
+          <div class="tier-section-title">⚔️ Power tiers <span class="tier-section-sub">(by alliance rank)</span></div>
+          <div class="tier-cols">${tierColumns}</div>
         </div>
       ` : ''}
     `;
