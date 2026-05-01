@@ -4795,7 +4795,7 @@
   function generateAlliancePlan() {
     const valid = allianceMembers.filter(m => m.name.trim());
     if (valid.length === 0) {
-      alert(t('noValidMembers'));
+      showAllianceToast('⚠️ ' + t('noValidMembers')); return;
       return;
     }
     const plan = computeAlliancePlan(valid);
@@ -5350,7 +5350,7 @@
       data = JSON.parse(ta.value);
       if (!Array.isArray(data)) throw new Error('not array');
     } catch (e) {
-      alert(t('importInvalid'));
+      showAllianceToast('⚠️ ' + t('importInvalid')); return;
       return;
     }
     const valid = data
@@ -5362,7 +5362,7 @@
         status: x.status || 'available'
       }));
     if (valid.length === 0) {
-      alert(t('importInvalid'));
+      showAllianceToast('⚠️ ' + t('importInvalid')); return;
       return;
     }
     if (mode === 'replace') {
@@ -5451,7 +5451,7 @@
   }
 
   function loadApiKey() {
-    try { return localStorage.getItem('btApiKey') || 'AIzaSyBQ_-bUjIo46ONDTQrQNkUR3cFh63v3Kgk'; } catch(e) { return 'AIzaSyBQ_-bUjIo46ONDTQrQNkUR3cFh63v3Kgk'; }
+    try { return localStorage.getItem('btApiKey') || ''; } catch(e) { return ''; }
   }
 
   function openScreenshotOCR() {
@@ -5487,8 +5487,7 @@
     if (processingText) processingText.textContent = `Got ${files.length} file(s), sending to API...`;
 
     let allMembers = [];
-    let lastError = '';
-    let debugInfo = '';
+
     const apiKey = loadApiKey();
     if (!apiKey || apiKey.length < 10) {
       document.getElementById('ocr-processing').style.display = 'none';
@@ -5555,22 +5554,18 @@ Rules:
         );
         const data = await response.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        debugInfo = rawText ? rawText.slice(0, 200) : 'EMPTY RESPONSE: ' + JSON.stringify(data).slice(0, 200);
-        
         if (!rawText) continue;
         const clean = rawText.replace(/```json|```/g, '').trim();
         let members;
         try {
           members = JSON.parse(clean);
         } catch(parseErr) {
-          console.error('JSON parse failed. Raw text was:', rawText);
           showAllianceToast('⚠️ Could not parse response: ' + rawText.slice(0, 80));
           continue;
         }
         allMembers = allMembers.concat(members);
       } catch (err) {
-        console.error(`Error on image ${i + 1}:`, err);
-        lastError = err.message;
+
       }
     }
 
@@ -5612,9 +5607,9 @@ Rules:
       // Show debug info in results section
       const resultsSection = document.getElementById('ocr-results-section');
       const resultsList = document.getElementById('ocr-results-list');
-      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:11px;padding:10px;background:rgba(0,0,0,0.5);border-radius:8px;word-break:break-all;max-height:300px;overflow-y:auto;">
-        ${lastError ? '❌ Error: ' + lastError + '<br><br>' : ''}
-        📡 Gemini said: <span style="color:#90e890">${debugInfo || 'no response'}</span>
+      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:center;">
+        ❌ No members detected.<br>
+        <span style="font-size:11px;opacity:0.7">Try unchecking "Online only" or use Bulk Paste.</span>
       </div>`;
       if (resultsSection) resultsSection.style.display = 'block';
     }
