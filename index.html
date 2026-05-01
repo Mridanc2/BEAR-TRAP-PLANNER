@@ -505,7 +505,7 @@
   .ratio-label { font-size: 11px; color: var(--gold-dim); margin-top: 5px; letter-spacing: 0.05em; }
 
   /* TROOP BLOCKS */
-  .march-troops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .march-troops { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   @media (max-width: 600px) {
     .march-troops { gap: 5px; }
     .troop-block { padding: 7px 7px; }
@@ -519,10 +519,13 @@
     padding: 9px 10px;
     border: 1px solid rgba(255,255,255,0.05);
     transition: border-color 0.2s;
+    min-width: 0;
+    overflow: hidden;
   }
   .troop-block:hover { border-color: rgba(201,168,76,0.2); }
-  .troop-block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-dim); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
-  .troop-block-val { font-size: 17px; font-weight: 700; color: var(--text); }
+  .troop-block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-dim); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .troop-block-val { font-size: 17px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .troop-block-tier { font-size: 11px; margin-top: 4px; line-height: 1.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* TIER BADGES */
   .tier-badge {
@@ -536,7 +539,6 @@
   }
   .tier-t10 { background: rgba(240,208,128,0.2); color: var(--t10); border: 1px solid rgba(240,208,128,0.3); }
   .tier-t9  { background: rgba(160,160,176,0.15); color: var(--t9);  border: 1px solid rgba(160,160,176,0.25); }
-  .troop-block-tier { font-size: 11px; margin-top: 4px; line-height: 1.7; }
 
   .march-tip { margin-top: 10px; font-size: 12px; font-style: italic; color: rgba(212,184,150,0.5); }
   .march-hero-tip {
