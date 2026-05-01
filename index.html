@@ -5521,7 +5521,17 @@
               contents: [{
                 parts: [
                   { inline_data: { mime_type: mediaType, data: base64 } },
-                  { text: `Extract all alliance members from this game screenshot. Return ONLY a valid JSON array, no other text, no markdown. Each object must have: "name" (string), "power" (number, e.g. 38500000 for 38.5M), "isOnline" (true if green Online label visible). Return ONLY the JSON array.` }
+                  { text: `This is a screenshot from the mobile game KingShot showing an Alliance Members list. Each member card shows a player name, power (like 38.5M or 58.6M), and sometimes green "Online" text.
+
+Extract ALL visible member cards and return ONLY a JSON array, no explanation, no markdown.
+
+Format: [{"name":"Ranger","power":38500000,"isOnline":true},{"name":"GregoMM","power":58600000,"isOnline":false}]
+
+Rules:
+- Convert power: 38.5M = 38500000, 58.6M = 58600000, 1.2B = 1200000000
+- isOnline = true only if green "Online" label is visible on the card
+- Include every player card visible, even partial ones
+- Return ONLY the JSON array, nothing else` }
                 ]
               }],
               generationConfig: { temperature: 0 }
