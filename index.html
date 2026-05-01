@@ -5774,43 +5774,44 @@
     const messages = [];
     let currentMsg = '';
     let currentMsgWaves = [];
-    
-    // Add header to first message
-    const header = '🐻 BEAR TRAP — WAVE PLAN\n';
-    currentMsg += header;
-    
+
+    // Header for first message — no trailing newline (joiner adds spacing)
+    const header = '🐻 BEAR TRAP — WAVE PLAN';
+    currentMsg = header;
+
     for (let i = 0; i < plan.waves.length; i++) {
       const waveText = buildWaveText(plan, i);
-      const separator = currentMsgWaves.length > 0 ? '\n' : '';
-      
+      // Single newline between header and first wave; double newline between waves for readability
+      const separator = currentMsgWaves.length === 0 ? '\n' : '\n\n';
+
       // Check if adding this wave would exceed limit
       if (currentMsg.length + separator.length + waveText.length > maxCharsPerMsg && currentMsgWaves.length > 0) {
         // Finish current message and start new one
-        messages.push({ text: currentMsg, waves: [...currentMsgWaves] });
+        messages.push({ text: currentMsg.trim(), waves: [...currentMsgWaves] });
         currentMsg = '';
         currentMsgWaves = [];
       }
-      
-      currentMsg += separator + waveText;
+
+      currentMsg += (currentMsg ? separator : '') + waveText;
       currentMsgWaves.push(i);
     }
-    
-    // Push final message (no footer — keeps formatting clean)
+
+    // Push final message (fully trimmed — no leading or trailing whitespace)
     if (currentMsg) {
-      messages.push({ text: currentMsg.trimEnd(), waves: currentMsgWaves });
+      messages.push({ text: currentMsg.trim(), waves: currentMsgWaves });
     }
-    
+
     return messages;
   }
 
   function buildWaveText(plan, waveIdx) {
     const wave = plan.waves[waveIdx];
-    let text = `⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx)}\n`;
+    const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx)}`];
     (wave.leaders || []).forEach(m => {
       const marker = m.isTopRL ? '⭐' : '•';
-      text += `   ${marker} ${m.name}\n`;
+      lines.push(`   ${marker} ${m.name}`);
     });
-    return text;
+    return lines.join('\n');
   }
 
   function updateAllianceCopyButton() {
