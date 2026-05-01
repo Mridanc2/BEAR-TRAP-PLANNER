@@ -5519,8 +5519,21 @@ Rules:
         );
         const data = await response.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        console.log('Gemini raw response:', rawText);
+        if (!rawText) {
+          console.error('Empty response from API:', data);
+          showAllianceToast('⚠️ API returned empty response. Check console.');
+          continue;
+        }
         const clean = rawText.replace(/```json|```/g, '').trim();
-        const members = JSON.parse(clean);
+        let members;
+        try {
+          members = JSON.parse(clean);
+        } catch(parseErr) {
+          console.error('JSON parse failed. Raw text was:', rawText);
+          showAllianceToast('⚠️ Could not parse response: ' + rawText.slice(0, 80));
+          continue;
+        }
         allMembers = allMembers.concat(members);
       } catch (err) {
         console.error(`Error on image ${i + 1}:`, err);
