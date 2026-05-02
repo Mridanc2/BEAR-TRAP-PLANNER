@@ -2562,6 +2562,64 @@
   body.light-mode .wave-cap-hint strong { color: #6b4d18; }
 
   /* Copy button */
+  /* Wave interval selector (Alliance) */
+  .alliance-interval-section {
+    margin: 14px 0 8px;
+    padding: 11px 12px;
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 8px;
+  }
+  .alliance-interval-label {
+    font-size: 11px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .alliance-interval-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .alliance-interval-btn {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 6px;
+    color: var(--parchment);
+    padding: 9px 6px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+    min-width: 0;
+  }
+  .alliance-interval-btn:hover {
+    border-color: rgba(201,168,76,0.5);
+  }
+  .alliance-interval-btn.active {
+    background: linear-gradient(135deg, rgba(201,168,76,0.35), rgba(201,168,76,0.18));
+    border-color: var(--gold-light);
+    color: var(--gold-light);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 8px rgba(201,168,76,0.18);
+  }
+  body.light-mode .alliance-interval-section {
+    background: rgba(122,80,20,0.05);
+    border-color: rgba(122,80,20,0.25);
+  }
+  body.light-mode .alliance-interval-btn {
+    background: #fff8e8;
+    color: #4a3618;
+    border-color: rgba(122,80,20,0.35);
+  }
+  body.light-mode .alliance-interval-btn.active {
+    background: linear-gradient(135deg, rgba(122,80,20,0.3), rgba(122,80,20,0.15));
+    border-color: #6b4818;
+    color: #2a1a08;
+  }
+
   /* Sticky Generate Bar */
   .alliance-sticky-bar {
     position: sticky;
@@ -2939,6 +2997,17 @@
       <div class="alliance-stats" id="alliance-stats"></div>
     </div>
 
+    <!-- Wave interval selector -->
+    <div class="alliance-interval-section">
+      <div class="alliance-interval-label">⏱ <span data-i18n="waveInterval">Time between waves</span></div>
+      <div class="alliance-interval-buttons">
+        <button class="alliance-interval-btn" data-sec="30" onclick="setAllianceWaveInterval(30)">30s</button>
+        <button class="alliance-interval-btn active" data-sec="40" onclick="setAllianceWaveInterval(40)">40s</button>
+        <button class="alliance-interval-btn" data-sec="50" onclick="setAllianceWaveInterval(50)">50s</button>
+        <button class="alliance-interval-btn" data-sec="60" onclick="setAllianceWaveInterval(60)">60s</button>
+      </div>
+    </div>
+
     <!-- Sticky Generate Button -->
     <div class="alliance-sticky-bar">
       <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()">
@@ -3179,7 +3248,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r4</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r5</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -3219,6 +3288,7 @@
       addMember: 'Add Member', memberName: 'Member name', memberPower: 'Power', topRL: 'Top RL',
       reset: 'Reset', members: 'members', topRLs: 'top RLs', waves: 'waves',
       generatePlan: 'Generate Wave Plan', waveAssignments: 'Wave Assignments',
+      waveInterval: 'Time between waves',
       wave: 'Wave', rallyLeaderShort: 'RL', joiner: 'Join',
       copyPlan: 'Copy Wave 1', copied: '✓ Copied to clipboard',
       copyMsgBtn: 'Copy Message {n}/{total}',
@@ -5789,18 +5859,44 @@
     return { waves, totalMembers: N, numWaves: waves.length };
   }
 
-  // Fixed wave times — first 5 minutes of the bear trap event.
-  // Waves 1-7 spaced 40 seconds apart. Wave 8 spaced 30 seconds (last allowed slot).
-  // This ensures all rallies open within the first 5 minutes (last wave at 25:30).
-  const ALLIANCE_WAVE_TIMES = [
-    '30:00', '29:20', '28:40', '28:00',
-    '27:20', '26:40', '26:00', '25:30'
-  ];
-  const ALLIANCE_MAX_WAVES = ALLIANCE_WAVE_TIMES.length; // 8
+  // Wave timing configuration
+  // The bear trap event starts at 30:00 (30 minutes left). Waves begin from there.
+  // User can choose interval (30/40/50/60 sec) — saved per session in localStorage.
+  const ALLIANCE_INTERVAL_KEY = 'btAllianceWaveInterval_v1';
+  let _allianceWaveInterval = (function() {
+    try {
+      const v = parseInt(localStorage.getItem(ALLIANCE_INTERVAL_KEY));
+      return [30, 40, 50, 60].includes(v) ? v : 40;
+    } catch (e) { return 40; }
+  })();
+  const ALLIANCE_MAX_WAVES = 8;
+
+  // Format seconds-from-start as "MM:SS" countdown from 30:00
+  function _formatWaveTime(secondsFromStart) {
+    const totalSecLeft = (30 * 60) - secondsFromStart;
+    if (totalSecLeft < 0) return '--:--';
+    const m = Math.floor(totalSecLeft / 60);
+    const s = totalSecLeft % 60;
+    return String(m) + ':' + String(s).padStart(2, '0');
+  }
 
   function getAllianceWaveTime(idx) {
-    if (idx < ALLIANCE_WAVE_TIMES.length) return ALLIANCE_WAVE_TIMES[idx];
-    return '--:--';
+    if (idx < 0 || idx >= ALLIANCE_MAX_WAVES) return '--:--';
+    return _formatWaveTime(idx * _allianceWaveInterval);
+  }
+
+  function setAllianceWaveInterval(seconds) {
+    if (![30, 40, 50, 60].includes(seconds)) return;
+    _allianceWaveInterval = seconds;
+    try { localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(seconds)); } catch (e) {}
+    // Update active state of buttons
+    document.querySelectorAll('.alliance-interval-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.sec) === seconds);
+    });
+    // Re-render plan if one is currently displayed
+    if (window._lastAlliancePlan) {
+      generateAlliancePlan();
+    }
   }
 
   function generateAlliancePlan() {
@@ -6782,17 +6878,16 @@ Rules:
     renderAllianceMembers();
     updateAllianceStats();
     renderPlanHistory();
-    // Restore last active view
-    try {
-      // Always start on Personal tab
-      // (removed auto-restore to alliance view)
-    } catch (e) {}
+    // Restore saved interval button state
+    document.querySelectorAll('.alliance-interval-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.sec) === _allianceWaveInterval);
+    });
     // Show backup reminder banner after a few seconds (only if 7+ days since manual backup)
     setTimeout(() => { try { checkBackupReminder(); } catch (e) {} }, 3500);
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r4';
+  const BEAR_BUILD = 'v2026.05.01-r5';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
