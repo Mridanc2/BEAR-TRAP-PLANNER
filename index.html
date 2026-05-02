@@ -2709,6 +2709,49 @@
     border-color: #6b4818;
     color: #2a1a08;
   }
+  /* Auto/manual hint line under buttons */
+  .alliance-interval-hint {
+    margin-top: 9px;
+    font-size: 11px;
+    line-height: 1.5;
+    text-align: center;
+    color: rgba(220,210,180,0.65);
+    min-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .alliance-interval-hint .hint-auto {
+    color: rgba(91,168,91,0.85);
+    letter-spacing: 0.04em;
+  }
+  .alliance-interval-hint .hint-manual {
+    color: rgba(240,208,128,0.85);
+    letter-spacing: 0.04em;
+  }
+  .alliance-interval-hint .hint-auto-btn {
+    background: rgba(91,168,91,0.12);
+    border: 1px solid rgba(91,168,91,0.45);
+    color: #6ec06e;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 10.5px;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.18s;
+  }
+  .alliance-interval-hint .hint-auto-btn:hover,
+  .alliance-interval-hint .hint-auto-btn:active {
+    background: rgba(91,168,91,0.22);
+    border-color: rgba(91,168,91,0.7);
+  }
+  body.light-mode .alliance-interval-hint { color: rgba(74,54,24,0.75); }
+  body.light-mode .alliance-interval-hint .hint-auto { color: #2d6e2d; }
+  body.light-mode .alliance-interval-hint .hint-manual { color: #6b4818; }
 
   /* Sticky Generate Bar */
   .alliance-sticky-bar {
@@ -3245,10 +3288,11 @@
       <div class="alliance-interval-label">⏱ <span data-i18n="waveInterval">Time between waves</span></div>
       <div class="alliance-interval-buttons">
         <button class="alliance-interval-btn" data-sec="30" onclick="setAllianceWaveInterval(30)">30s</button>
-        <button class="alliance-interval-btn active" data-sec="40" onclick="setAllianceWaveInterval(40)">40s</button>
+        <button class="alliance-interval-btn" data-sec="40" onclick="setAllianceWaveInterval(40)">40s</button>
         <button class="alliance-interval-btn" data-sec="50" onclick="setAllianceWaveInterval(50)">50s</button>
         <button class="alliance-interval-btn" data-sec="60" onclick="setAllianceWaveInterval(60)">60s</button>
       </div>
+      <div class="alliance-interval-hint" id="alliance-interval-hint"></div>
     </div>
 
     <!-- Sticky Generate Button -->
@@ -3521,7 +3565,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r7</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r8</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -5914,10 +5958,16 @@
   }
 
   function updateAllianceStats() {
+    // Re-evaluate auto-interval whenever member count or status changes
+    try { applyAutoIntervalIfNeeded(); } catch (e) {}
     const stats = document.getElementById('alliance-stats');
     if (!stats) return;
     const allMembers = allianceMembers.filter(m => m.name.trim());
-    if (allMembers.length === 0) { stats.innerHTML = ''; return; }
+    if (allMembers.length === 0) {
+      stats.innerHTML = '';
+      _refreshIntervalButtonState();
+      return;
+    }
 
     // Count by participation status
     const available = allMembers.filter(m => (m.status || 'available') === 'available').length;
@@ -6063,6 +6113,7 @@
         </div>
       ` : ''}
     `;
+    _refreshIntervalButtonState();
   }
 
   // Strategy: each "wave" is a synchronized burst of leaders opening rallies at the same
@@ -6134,15 +6185,75 @@
 
   // Wave timing configuration
   // The bear trap event starts at 30:00 (30 minutes left). Waves begin from there.
-  // User can choose interval (30/40/50/60 sec) — saved per session in localStorage.
+  // ALL waves must complete within the first 4 minutes (last wave ≥ 26:00).
+  // The interval is auto-recommended based on wave count, but user can override.
   const ALLIANCE_INTERVAL_KEY = 'btAllianceWaveInterval_v1';
+  const ALLIANCE_INTERVAL_OVERRIDE_KEY = 'btAllianceWaveIntervalManual_v1';
+  const ALLIANCE_MAX_TIME_SEC = 240; // 4 minutes (30:00 → 26:00)
+  const ALLIANCE_INTERVAL_OPTIONS = [60, 50, 40, 30]; // largest first
+
   let _allianceWaveInterval = (function() {
     try {
       const v = parseInt(localStorage.getItem(ALLIANCE_INTERVAL_KEY));
       return [30, 40, 50, 60].includes(v) ? v : 40;
     } catch (e) { return 40; }
   })();
+  // True only if user explicitly tapped a button (not from auto-recommend)
+  let _allianceIntervalManual = (function() {
+    try { return localStorage.getItem(ALLIANCE_INTERVAL_OVERRIDE_KEY) === '1'; }
+    catch (e) { return false; }
+  })();
   const ALLIANCE_MAX_WAVES = 8;
+
+  // Compute the recommended interval given how many waves we'll have.
+  // Returns the largest interval where (waves-1)*interval <= 240 seconds.
+  function _recommendInterval(waveCount) {
+    if (waveCount <= 1) return 60; // single wave → no spacing constraint
+    for (const sec of ALLIANCE_INTERVAL_OPTIONS) {
+      if ((waveCount - 1) * sec <= ALLIANCE_MAX_TIME_SEC) return sec;
+    }
+    return 30; // fallback (shouldn't be reached for typical wave counts)
+  }
+
+  // Apply the recommended interval if user hasn't manually overridden
+  function applyAutoIntervalIfNeeded() {
+    if (_allianceIntervalManual) return; // user chose explicitly — respect that
+    const valid = allianceMembers.filter(m => m.name.trim());
+    const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
+    const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+    if (waves === 0) return;
+    const recommended = _recommendInterval(waves);
+    if (recommended !== _allianceWaveInterval) {
+      _allianceWaveInterval = recommended;
+      try { localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(recommended)); } catch (e) {}
+    }
+    _refreshIntervalButtonState();
+  }
+
+  function _refreshIntervalButtonState() {
+    document.querySelectorAll('.alliance-interval-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.sec) === _allianceWaveInterval);
+    });
+    // Show "auto" indicator + "reset" link based on override state
+    const hint = document.getElementById('alliance-interval-hint');
+    if (hint) {
+      const valid = allianceMembers.filter(m => m.name.trim());
+      const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
+      const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+      const recommended = waves > 0 ? _recommendInterval(waves) : 40;
+      const lastWaveSec = waves > 0 ? (waves - 1) * _allianceWaveInterval : 0;
+      const lastWaveTime = _formatWaveTime(lastWaveSec);
+      const overflows = lastWaveSec > ALLIANCE_MAX_TIME_SEC;
+
+      if (_allianceIntervalManual) {
+        let html = `<span class="hint-manual">📌 Manual${overflows ? ' · last wave ' + lastWaveTime + ' (past 26:00 ⚠)' : ' · last wave ' + lastWaveTime}</span>`;
+        html += ` <button class="hint-auto-btn" onclick="resetIntervalToAuto()">Use auto (${recommended}s)</button>`;
+        hint.innerHTML = html;
+      } else {
+        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${waves > 0 ? waves + ' waves · last at ' + lastWaveTime : 'add members to plan'}</span>`;
+      }
+    }
+  }
 
   // Format seconds-from-start as "MM:SS" countdown from 30:00
   function _formatWaveTime(secondsFromStart) {
@@ -6161,15 +6272,26 @@
   function setAllianceWaveInterval(seconds) {
     if (![30, 40, 50, 60].includes(seconds)) return;
     _allianceWaveInterval = seconds;
-    try { localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(seconds)); } catch (e) {}
-    // Update active state of buttons
-    document.querySelectorAll('.alliance-interval-btn').forEach(b => {
-      b.classList.toggle('active', parseInt(b.dataset.sec) === seconds);
-    });
+    _allianceIntervalManual = true;
+    try {
+      localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(seconds));
+      localStorage.setItem(ALLIANCE_INTERVAL_OVERRIDE_KEY, '1');
+    } catch (e) {}
+    _refreshIntervalButtonState();
     // Re-render plan if one is currently displayed
     if (window._lastAlliancePlan) {
       generateAlliancePlan();
     }
+  }
+
+  function resetIntervalToAuto() {
+    _allianceIntervalManual = false;
+    try { localStorage.removeItem(ALLIANCE_INTERVAL_OVERRIDE_KEY); } catch (e) {}
+    applyAutoIntervalIfNeeded();
+    if (window._lastAlliancePlan) {
+      generateAlliancePlan();
+    }
+    showAllianceToast(`✨ Auto: ${_allianceWaveInterval}s between waves`);
   }
 
   function generateAlliancePlan() {
@@ -7265,7 +7387,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r7';
+  const BEAR_BUILD = 'v2026.05.01-r8';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
