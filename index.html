@@ -2522,6 +2522,96 @@
   body.light-mode .wave-name { color: #2a1a08; }
   .wave-leader-row .wave-name { font-weight: 700; color: var(--gold-light); }
   body.light-mode .wave-leader-row .wave-name { color: #6b4d18; }
+
+  /* === Manual swap interactivity === */
+  .wave-leader-row {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .wave-leader-row:active { transform: scale(0.985); }
+  /* When swap mode is active, non-selected rows show subtle hint */
+  .alliance-wave-card.swap-mode-active .wave-leader-row.swap-target {
+    border-style: dashed;
+    border-color: rgba(201,168,76,0.45);
+    opacity: 0.92;
+  }
+  .alliance-wave-card.swap-mode-active .wave-leader-row.swap-target::after {
+    content: '↔';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 14px;
+    opacity: 0.55;
+    animation: swapHintPulse 1.3s ease-in-out infinite;
+  }
+  @keyframes swapHintPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.85; }
+  }
+  /* Selected player — strong gold glow */
+  .wave-leader-row.swap-selected {
+    background: linear-gradient(90deg, rgba(255,215,0,0.42), rgba(255,180,0,0.22));
+    border-color: var(--gold-light);
+    border-width: 2px;
+    box-shadow: 0 0 18px rgba(255,215,0,0.55), inset 0 0 0 1px rgba(255,215,0,0.4);
+    animation: selectedPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes selectedPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(255,215,0,0.55), inset 0 0 0 1px rgba(255,215,0,0.4); }
+    50%      { box-shadow: 0 0 28px rgba(255,215,0,0.75), inset 0 0 0 1px rgba(255,215,0,0.6); }
+  }
+  body.light-mode .wave-leader-row.swap-selected {
+    background: linear-gradient(90deg, rgba(255,200,80,0.55), rgba(255,180,40,0.3));
+    border-color: #6b4818;
+    box-shadow: 0 0 14px rgba(180,130,30,0.5);
+  }
+  body.light-mode .alliance-wave-card.swap-mode-active .wave-leader-row.swap-target::after {
+    color: #6b4818;
+  }
+
+  /* Swap-mode hint banner */
+  .alliance-swap-hint {
+    background: linear-gradient(90deg, rgba(201,168,76,0.1), rgba(201,168,76,0.04));
+    border: 1px dashed rgba(201,168,76,0.35);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--parchment);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .alliance-swap-reset {
+    background: rgba(192,57,43,0.18);
+    border: 1px solid rgba(192,57,43,0.5);
+    color: #ff8b7a;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .alliance-swap-reset:hover { background: rgba(192,57,43,0.3); }
+  body.light-mode .alliance-swap-hint {
+    background: linear-gradient(90deg, rgba(138,96,16,0.08), rgba(138,96,16,0.02));
+    border-color: rgba(138,96,16,0.4);
+    color: #4a3618;
+  }
+  body.light-mode .alliance-swap-reset {
+    background: rgba(160,40,24,0.15);
+    border-color: rgba(160,40,24,0.5);
+    color: #a02818;
+  }
   .wave-toprl-badge {
     font-size: 14px;
     color: #ffd700;
@@ -3248,7 +3338,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r5</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r6</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -5918,19 +6008,121 @@
     }, 50);
   }
 
+  // === Manual swap state ===
+  // When a player is tapped, store its location: { waveIdx, leaderIdx }.
+  // Next tap on another player swaps them. Tap same player to cancel.
+  window._allianceSwapSelection = null;
+
+  function _findPlayerLocation(plan, waveIdx, leaderIdx) {
+    if (!plan || !plan.waves[waveIdx]) return null;
+    const leaders = plan.waves[waveIdx].leaders || [];
+    if (leaderIdx < 0 || leaderIdx >= leaders.length) return null;
+    return { waveIdx, leaderIdx, member: leaders[leaderIdx] };
+  }
+
+  function alliancePlayerTap(waveIdx, leaderIdx) {
+    const plan = window._lastAlliancePlan;
+    if (!plan) return;
+
+    const tapped = _findPlayerLocation(plan, waveIdx, leaderIdx);
+    if (!tapped) return;
+
+    const sel = window._allianceSwapSelection;
+
+    // No selection yet → select this player
+    if (!sel) {
+      window._allianceSwapSelection = { waveIdx, leaderIdx };
+      _updateSwapHighlights();
+      return;
+    }
+
+    // Tapping same player again → cancel selection
+    if (sel.waveIdx === waveIdx && sel.leaderIdx === leaderIdx) {
+      window._allianceSwapSelection = null;
+      _updateSwapHighlights();
+      return;
+    }
+
+    // Different player → SWAP
+    const a = plan.waves[sel.waveIdx].leaders[sel.leaderIdx];
+    const b = plan.waves[waveIdx].leaders[leaderIdx];
+    plan.waves[sel.waveIdx].leaders[sel.leaderIdx] = b;
+    plan.waves[waveIdx].leaders[leaderIdx] = a;
+
+    // Recompute hasTopRL flag for both affected waves
+    [sel.waveIdx, waveIdx].forEach(wi => {
+      plan.waves[wi].hasTopRL = (plan.waves[wi].leaders || []).some(m => m.isTopRL);
+    });
+
+    // Mark plan as manually edited
+    plan.manuallyEdited = true;
+    window._allianceSwapSelection = null;
+
+    // Re-render with smooth feedback
+    renderAlliancePlan(plan);
+    updateAllianceCopyButton();
+    showAllianceToast(`🔄 Swapped ${a.name} ↔ ${b.name}`);
+  }
+
+  function _updateSwapHighlights() {
+    const sel = window._allianceSwapSelection;
+    document.querySelectorAll('.wave-leader-row').forEach(el => {
+      el.classList.remove('swap-selected', 'swap-target');
+    });
+    document.querySelectorAll('.alliance-wave-card').forEach(el => {
+      el.classList.remove('swap-mode-active');
+    });
+    if (!sel) return;
+    // Highlight the selected player
+    const selEl = document.querySelector(`[data-wave-idx="${sel.waveIdx}"][data-leader-idx="${sel.leaderIdx}"]`);
+    if (selEl) selEl.classList.add('swap-selected');
+    // Mark all other player rows as potential targets
+    document.querySelectorAll('.wave-leader-row').forEach(el => {
+      const w = parseInt(el.dataset.waveIdx);
+      const l = parseInt(el.dataset.leaderIdx);
+      if (w === sel.waveIdx && l === sel.leaderIdx) return;
+      el.classList.add('swap-target');
+    });
+    // Soft glow on all wave cards to signal swap mode is active
+    document.querySelectorAll('.alliance-wave-card').forEach(el => {
+      el.classList.add('swap-mode-active');
+    });
+  }
+
+  function resetAlliancePlanToAuto() {
+    if (!window._lastAlliancePlan || !window._lastAlliancePlan.manuallyEdited) {
+      showAllianceToast('ℹ️ Plan already at auto-generated state');
+      return;
+    }
+    if (!confirm('Reset all manual swaps and regenerate plan?')) return;
+    generateAlliancePlan();
+    showAllianceToast('↺ Plan reset to auto');
+  }
+
   function renderAlliancePlan(plan) {
     const container = document.getElementById('alliance-waves');
     if (!container) return;
-    container.innerHTML = plan.waves.map((wave, i) => {
+    // Hint banner above waves — shows once a plan exists
+    const visibleWaves = plan.waves.filter(w => (w.leaders || []).length > 0);
+    const hintHtml = visibleWaves.length > 1
+      ? `<div class="alliance-swap-hint">
+           💡 Tap a player to select, tap another to swap them between waves.
+           ${plan.manuallyEdited ? `<button class="alliance-swap-reset" onclick="resetAlliancePlanToAuto()">↺ Reset</button>` : ''}
+         </div>`
+      : '';
+
+    container.innerHTML = hintHtml + plan.waves.map((wave, i) => {
       const leaders = wave.leaders || [];
       if (leaders.length === 0) return '';
       const time = getAllianceWaveTime(i);
       const cls = 'alliance-wave-card' + (wave.hasTopRL ? ' wave-top-rl' : '');
-      const leadersHtml = leaders.map(m => {
+      const leadersHtml = leaders.map((m, leaderIdx) => {
         const safeName = _allianceEscape(m.name || '?');
         const star = m.isTopRL ? '<span class="wave-toprl-badge">⭐</span>' : '';
         return `
-          <div class="wave-leader-row">
+          <div class="wave-leader-row" data-wave-idx="${i}" data-leader-idx="${leaderIdx}"
+               onclick="alliancePlayerTap(${i}, ${leaderIdx})"
+               role="button" tabindex="0">
             <span class="wave-role-label">👑 ${t('rallyLeaderShort')}</span>
             <span class="wave-name">${safeName}</span>
             ${star}
@@ -5946,6 +6138,9 @@
           ${leadersHtml}
         </div>`;
     }).join('');
+
+    // Restore selection highlight if there was one (e.g. after re-render from outside)
+    _updateSwapHighlights();
   }
 
   // Dynamic message grouping for game chat (400 char limit, but game compresses
@@ -6887,7 +7082,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r5';
+  const BEAR_BUILD = 'v2026.05.01-r6';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
