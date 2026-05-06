@@ -104,6 +104,13 @@
   }
 
   .container { max-width: 820px; margin: 0 auto; padding: 24px 16px 60px; position: relative; z-index: 1; }
+  /* Wide screens: allow more horizontal room so 3-march grid doesn't crush troop blocks */
+  @media (min-width: 1100px) {
+    .container { max-width: 1080px; }
+  }
+  @media (min-width: 1400px) {
+    .container { max-width: 1240px; }
+  }
 
   /* HEADER */
   header { text-align: center; padding: 10px 0 8px; position: relative; }
@@ -513,8 +520,8 @@
     .troop-block-tier { font-size: 10px; }
     .troop-block-label { font-size: 9px; }
   }
-  /* Medium screens: 3-up march grid creates narrow columns. Tighten the troop blocks aggressively to prevent number truncation. */
-  @media (min-width: 601px) and (max-width: 999px) {
+  /* Medium screens: 3-up march grid creates narrow columns. Tighten the troop blocks aggressively to prevent number truncation. Applies up to 1099px (where container widens). */
+  @media (min-width: 601px) and (max-width: 1099px) {
     .march-troops { gap: 3px; }
     .troop-block { padding: 6px 4px; }
     .troop-block-val { font-size: 12px; letter-spacing: -0.04em; }
@@ -3616,7 +3623,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r15</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r16</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -5151,7 +5158,7 @@
     if (marchesList.length <= 2) {
       cols = '1fr 1fr';
     } else if (marchesList.length === 3) {
-      cols = w >= 900 ? '1fr 1fr 1fr' : '1fr 1fr';
+      cols = w >= 1100 ? "1fr 1fr 1fr" : "1fr 1fr";
     } else {
       cols = '1fr 1fr';
     }
@@ -7490,7 +7497,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r15';
+  const BEAR_BUILD = 'v2026.05.01-r16';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
@@ -7518,7 +7525,7 @@ Rules:
           const len = window._marchesList.length;
           let cols;
           if (len <= 2) cols = '1fr 1fr';
-          else if (len === 3) cols = w >= 900 ? '1fr 1fr 1fr' : '1fr 1fr';
+          else if (len === 3) cols = w >= 1100 ? "1fr 1fr 1fr" : "1fr 1fr";
           else cols = '1fr 1fr';
           grid.style.gridTemplateColumns = cols;
         }
