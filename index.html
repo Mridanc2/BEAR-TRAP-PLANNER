@@ -513,14 +513,18 @@
     .troop-block-tier { font-size: 10px; }
     .troop-block-label { font-size: 9px; }
   }
-  /* Medium screens: 3-up march grid creates narrow columns. Tighten the troop blocks to prevent number truncation. */
+  /* Medium screens: 3-up march grid creates narrow columns. Tighten the troop blocks aggressively to prevent number truncation. */
   @media (min-width: 601px) and (max-width: 999px) {
-    .march-troops { gap: 4px; }
-    .troop-block { padding: 7px 6px; }
-    .troop-block-val { font-size: 13px; letter-spacing: -0.02em; }
-    .troop-block-tier { font-size: 10px; line-height: 1.5; }
-    .troop-block-label { font-size: 9px; letter-spacing: 0.05em; }
-    .march-card { padding: 14px; }
+    .march-troops { gap: 3px; }
+    .troop-block { padding: 6px 4px; }
+    .troop-block-val { font-size: 12px; letter-spacing: -0.04em; }
+    .troop-block-tier { font-size: 9px; line-height: 1.4; letter-spacing: -0.02em; }
+    .troop-block-label { font-size: 8.5px; letter-spacing: 0.03em; }
+    .march-card { padding: 12px; }
+    .ratio-seg { font-size: 10px; min-width: 22px; }
+    .ratio-seg span { padding: 0 2px; }
+    .ratio-label { font-size: 10px; }
+    .tier-badge { font-size: 9px; padding: 1px 3px; margin-right: 2px; }
   }
   .troop-block {
     background: rgba(0,0,0,0.3);
@@ -3612,7 +3616,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r14</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r15</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -5208,11 +5212,11 @@
         ${m.isLeader || true ? `
         <div class="ratio-bar-wrap">
           <div class="ratio-bar-inner">
-            <div class="ratio-seg ratio-arc" style="width:${m.arcPct}%"><span>🏹 ${m.arcPct}%</span></div>
-            <div class="ratio-seg ratio-cav" style="width:${m.cavPct}%"><span>🐎 ${m.cavPct}%</span></div>
-            <div class="ratio-seg ratio-inf" style="width:${m.infPct}%"><span>🛡 ${m.infPct}%</span></div>
+            <div class="ratio-seg ratio-arc" style="width:${m.arcPct}%"><span>Arc ${m.arcPct}%</span></div>
+            <div class="ratio-seg ratio-cav" style="width:${m.cavPct}%"><span>Cav ${m.cavPct}%</span></div>
+            <div class="ratio-seg ratio-inf" style="width:${m.infPct}%"><span>Inf ${m.infPct}%</span></div>
           </div>
-          <div class="ratio-label">🏹 Archers · 🐎 Cavalry · 🛡 Infantry &nbsp;|&nbsp; ${t('target')}</div>
+          <div class="ratio-label"><span style="color:#5ba85b">●</span> Archers · <span style="color:#c47f2a">●</span> Cavalry · <span style="color:#4a9eca">●</span> Infantry &nbsp;|&nbsp; ${t('target')}</div>
         </div>` : ''}
 
         <div class="march-troops">
@@ -7486,7 +7490,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r14';
+  const BEAR_BUILD = 'v2026.05.01-r15';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
