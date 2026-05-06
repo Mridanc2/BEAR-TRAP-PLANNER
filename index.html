@@ -513,6 +513,15 @@
     .troop-block-tier { font-size: 10px; }
     .troop-block-label { font-size: 9px; }
   }
+  /* Medium screens: 3-up march grid creates narrow columns. Tighten the troop blocks to prevent number truncation. */
+  @media (min-width: 601px) and (max-width: 999px) {
+    .march-troops { gap: 4px; }
+    .troop-block { padding: 7px 6px; }
+    .troop-block-val { font-size: 13px; letter-spacing: -0.02em; }
+    .troop-block-tier { font-size: 10px; line-height: 1.5; }
+    .troop-block-label { font-size: 9px; letter-spacing: 0.05em; }
+    .march-card { padding: 14px; }
+  }
   .troop-block {
     background: rgba(0,0,0,0.3);
     border-radius: 8px;
@@ -3603,7 +3612,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r12</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r14</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4314,12 +4323,12 @@
       t10Wrap.style.display = 'none';
     }
 
-    const MIN_PER_MARCH = 70000;
-    // Archers are the bottleneck: each march needs >= 59,500 archers (85% of 70k)
+    const MIN_PER_MARCH = 50000;
+    // Archers are the bottleneck: each march needs >= 42,500 archers (85% of 50k)
     const recArcTotal = (parseInt(document.getElementById('arc-t10').value)||0)
                       + (parseInt(document.getElementById('arc-t9').value)||0)
                       + getT8Val('arc');
-    const MIN_ARC = Math.floor(70000 * 0.85); // 59,500
+    const MIN_ARC = Math.floor(50000 * 0.85); // 42,500
 
     const errBox = document.getElementById('army-error-box');
     const errTitle = document.getElementById('army-error-title');
@@ -4329,7 +4338,7 @@
       if (errBox) {
         const needed = MIN_ARC;
         errTitle.textContent = 'Not enough archers for even 1 march!';
-        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} (85% of 70K)`;
+        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} (85% of 50K)`;
         errBox.style.display = 'block';
       }
       return;
@@ -4446,7 +4455,7 @@
       const totalMarches = n + (isRL ? 1 : 0);
       const arcEach = Math.floor(arc / totalMarches);
       const totalEach = Math.floor(arcEach / 0.85);
-      const ok = totalEach >= 70000;
+      const ok = totalEach >= 50000;
       const color = ok ? '#5ba85b' : '#c0392b';
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
               `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;" title="${fmt(arcEach)}">${fmtCompact(arcEach)}</div>` +
@@ -4527,7 +4536,7 @@
       const marches = (typeof numMarches !== 'undefined' ? numMarches : 4) + (isRL ? 1 : 0);
       const arcPerMarch = Math.floor(arc / Math.max(marches, 1));
 
-      // Thresholds based on Bear Trap minimum (70K/march × 85% = 59,500 archers/march)
+      // Thresholds based on Bear Trap minimum (50K/march × 85% = 42,500 archers/march)
       const TIER_GREAT = 59500;   // ≥ 70K full march
       const TIER_GOOD  = 42500;   // ≥ 50K reasonable march
       const TIER_OK    = 25500;   // ≥ 30K minimum viable
@@ -5009,8 +5018,8 @@
     const grandTotal = totalInf + totalCav + totalArc; // T8 already included in totals
 
     const MIN = 5000;
-    const MIN_MARCH = 70000;
-    const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 59,500
+    const MIN_MARCH = 50000;
+    const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 42,500
     // Find max marches where each march gets >= 59,500 archers (= 70k total at 85%)
     const totalArchers = arcT10 + arcT9 + (arcT8||0);
     const maxTotal = isRallyLeader ? 7 : 6;
@@ -5131,7 +5140,17 @@
 
     // Render cards
     const grid = document.getElementById('marches-grid');
-    const cols = marchesList.length <= 2 ? '1fr 1fr' : marchesList.length === 3 ? '1fr 1fr 1fr' : '1fr 1fr';
+    // Responsive columns: 3-up only on wide screens (≥900px), otherwise 2-up.
+    // Below 600px the @media rule in CSS forces 1-up.
+    const w = window.innerWidth || 1200;
+    let cols;
+    if (marchesList.length <= 2) {
+      cols = '1fr 1fr';
+    } else if (marchesList.length === 3) {
+      cols = w >= 900 ? '1fr 1fr 1fr' : '1fr 1fr';
+    } else {
+      cols = '1fr 1fr';
+    }
     grid.style.gridTemplateColumns = cols;
     grid.innerHTML = '';
 
@@ -5189,11 +5208,11 @@
         ${m.isLeader || true ? `
         <div class="ratio-bar-wrap">
           <div class="ratio-bar-inner">
-            <div class="ratio-seg ratio-arc" style="width:${m.arcPct}%"><span>${m.arcPct}%</span></div>
-            <div class="ratio-seg ratio-cav" style="width:${m.cavPct}%"><span>${m.cavPct}%</span></div>
-            <div class="ratio-seg ratio-inf" style="width:${m.infPct}%"><span>${m.infPct}%</span></div>
+            <div class="ratio-seg ratio-arc" style="width:${m.arcPct}%"><span>🏹 ${m.arcPct}%</span></div>
+            <div class="ratio-seg ratio-cav" style="width:${m.cavPct}%"><span>🐎 ${m.cavPct}%</span></div>
+            <div class="ratio-seg ratio-inf" style="width:${m.infPct}%"><span>🛡 ${m.infPct}%</span></div>
           </div>
-          <div class="ratio-label">${t('composition')} · ${t('target')}</div>
+          <div class="ratio-label">🏹 Archers · 🐎 Cavalry · 🛡 Infantry &nbsp;|&nbsp; ${t('target')}</div>
         </div>` : ''}
 
         <div class="march-troops">
@@ -7467,7 +7486,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r12';
+  const BEAR_BUILD = 'v2026.05.01-r14';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
@@ -7483,6 +7502,24 @@ Rules:
     updatePromoteTip();
     updateCapacityHint();
     initAlliancePlanner();   // ← Alliance Planner: load saved members + restore last view
+
+    // Re-render march grid columns on viewport resize (responsive 3-up vs 2-up)
+    let _resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(() => {
+        const grid = document.getElementById('marches-grid');
+        if (grid && window._marchesList && window._marchesList.length > 0) {
+          const w = window.innerWidth || 1200;
+          const len = window._marchesList.length;
+          let cols;
+          if (len <= 2) cols = '1fr 1fr';
+          else if (len === 3) cols = w >= 900 ? '1fr 1fr 1fr' : '1fr 1fr';
+          else cols = '1fr 1fr';
+          grid.style.gridTemplateColumns = cols;
+        }
+      }, 150);
+    });
 
     // Auto-select content when focusing a number input with value 0
     document.querySelectorAll('input[type="number"]').forEach(inp => {
