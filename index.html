@@ -3123,6 +3123,43 @@
       <div class="input-group"><div class="input-label">T9</div><input type="number" id="arc-t9" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
       <div class="input-group"><div class="input-label">T8</div><input type="number" id="arc-t8" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
     </div>
+    <!-- LOWER TIERS (collapsible: T7/T6) -->
+    <div id="lower-tiers-toggle" onclick="toggleLowerTiers()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px;padding:8px 12px;background:rgba(0,20,55,0.6);border:1px dashed rgba(201,168,76,0.25);border-radius:6px;user-select:none;">
+      <span style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.1em;">⚙ Lower Tiers (T7 · T6)</span>
+      <span id="lower-tiers-arrow" style="font-size:11px;color:var(--gold-dim);transition:transform 0.2s;">▼</span>
+    </div>
+    <div id="lower-tiers-section" style="display:none; padding-top:4px;">
+      <div style="font-size:10px; color:var(--gold-dim); font-style:italic; margin-bottom:8px; padding: 0 4px;">
+        T7 and T6 troops are sent only after T10/T9/T8 are exhausted (filling leftover capacity).
+      </div>
+      <div class="troop-editor-row">
+        <div class="troop-name">
+          <div class="dot dot-i"></div>
+          <div style="font-size:9px;">INFANTRY</div>
+        </div>
+        <div class="input-group"><div class="input-label">T7</div><input type="number" id="inf-t7" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div class="input-group"><div class="input-label">T6</div><input type="number" id="inf-t6" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div></div>
+      </div>
+      <div class="troop-editor-row">
+        <div class="troop-name">
+          <div class="dot dot-c"></div>
+          <div style="font-size:9px;">CAVALRY</div>
+        </div>
+        <div class="input-group"><div class="input-label">T7</div><input type="number" id="cav-t7" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div class="input-group"><div class="input-label">T6</div><input type="number" id="cav-t6" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div></div>
+      </div>
+      <div class="troop-editor-row">
+        <div class="troop-name">
+          <div class="dot dot-a"></div>
+          <div style="font-size:9px;">ARCHERS</div>
+        </div>
+        <div class="input-group"><div class="input-label">T7</div><input type="number" id="arc-t7" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div class="input-group"><div class="input-label">T6</div><input type="number" id="arc-t6" oninput="window._manualMarchOverride=false; updateMarchRec(); saveArmy(); updateTotals(); updateMarchTooltips(); updatePromoteTip()" value="0" min="0"></div>
+        <div></div>
+      </div>
+    </div>
     <!-- TOTALS ROW -->
     <div id="army-totals" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid rgba(201,168,76,0.15);">
       <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center; margin-bottom:10px;">
@@ -3294,6 +3331,11 @@
         <div class="section-title">🛡 <span data-i18n="alliancePlannerTitle">Alliance Rally Planner</span></div>
         <button class="alliance-reset-btn" onclick="resetAllianceConfirm()">↺ <span data-i18n="reset">Reset</span></button>
       </div>
+      <!-- Bear 1 / Bear 2 preset selector -->
+      <div class="alliance-preset-bar" style="display:flex;gap:6px;margin-bottom:10px;padding:6px;background:rgba(0,20,55,0.6);border:1px solid rgba(201,168,76,0.2);border-radius:8px;">
+        <button class="alliance-preset-btn active" data-bear="1" onclick="switchBearPreset(1)" style="flex:1;padding:8px 12px;border-radius:6px;background:linear-gradient(135deg,#c9a84c,#a08540);border:none;color:#1a1410;font-size:13px;font-weight:700;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;">🐻 Bear 1</button>
+        <button class="alliance-preset-btn" data-bear="2" onclick="switchBearPreset(2)" style="flex:1;padding:8px 12px;border-radius:6px;background:rgba(0,20,55,0.85);border:1.5px solid rgba(100,180,255,0.45);color:#f0f8ff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;">🐻 Bear 2</button>
+      </div>
       <div class="alliance-desc" data-i18n="allianceDesc">
         Add active members with their power. Mark top rally leaders. The planner generates wave assignments evenly distributing top RLs across waves.
       </div>
@@ -3316,6 +3358,9 @@
       <div class="alliance-actions">
         <button class="alliance-add-btn" onclick="addAllianceMember()">
           ➕ <span data-i18n="addMember">Add Member</span>
+        </button>
+        <button class="alliance-tool-btn" onclick="openDamageImport()" style="border-color:rgba(231,140,42,0.5);background:linear-gradient(135deg,rgba(231,140,42,0.18),rgba(231,140,42,0.08));color:#ffc77a;">
+          🐻 <span>Import from Last Bear</span>
         </button>
         <button class="alliance-tool-btn" onclick="openBulkPaste()">
           📋 <span data-i18n="bulkPaste">Bulk Paste</span>
@@ -3414,7 +3459,18 @@
 
     <!-- Plan History Panel -->
     <div class="comments-section" style="margin-top:12px;">
-      <div class="comments-title">🕐 <span>Recent Plans</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+        <div class="comments-title" style="margin:0;">🕐 <span>Recent Plans</span></div>
+        <div style="display:flex; gap:6px;">
+          <button class="alliance-tool-btn" style="padding:5px 10px; font-size:11px;" onclick="exportPlanHistory()" title="Download all recent plans as a JSON file">
+            💾 Export
+          </button>
+          <button class="alliance-tool-btn" style="padding:5px 10px; font-size:11px;" onclick="document.getElementById('plan-history-import-input').click()" title="Restore plans from a previously exported file">
+            📁 Import
+          </button>
+          <input type="file" id="plan-history-import-input" accept=".json,application/json" style="display:none;" onchange="importPlanHistory(this)">
+        </div>
+      </div>
       <div id="plan-history-list">
         <div style="opacity:0.5;font-size:12px;text-align:center;padding:10px;">No plans saved yet</div>
       </div>
@@ -3467,6 +3523,88 @@
           </button>
           <button class="alliance-tool-btn alliance-cancel" onclick="closeImport()">
             ✕ <span data-i18n="cancel">Cancel</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Damage Import Modal (from previous Bear Trap event) -->
+    <div id="alliance-damage-modal" class="alliance-modal" style="display:none;" onclick="if(event.target===this)closeDamageImport()">
+      <div class="alliance-modal-content">
+        <div class="alliance-modal-title">🐻 Import from Last Bear Trap</div>
+        <div class="alliance-modal-hint">
+          Paste the participant list from the previous Bear Trap event (or upload screenshots). Players will be sorted by damage — the top performers are auto-marked as RL candidates.
+        </div>
+
+        <!-- Tab switcher: Paste vs Screenshots -->
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <button id="dmg-tab-paste-btn" class="alliance-tool-btn" onclick="switchDamageTab('paste')" style="flex:1; background:linear-gradient(135deg,#c9a84c,#a08540); color:#1a1410; border-color:#c9a84c;">
+            📋 Paste text
+          </button>
+          <button id="dmg-tab-ocr-btn" class="alliance-tool-btn" onclick="switchDamageTab('ocr')" style="flex:1;">
+            📷 Screenshots (OCR)
+          </button>
+        </div>
+
+        <!-- Paste tab -->
+        <div id="dmg-tab-paste" style="display:block;">
+          <textarea id="damage-import-textarea" class="alliance-modal-textarea"
+                    placeholder="Idan         16,745,753&#10;Sgranfo      8,200,000&#10;Loulou       5.4M&#10;..."></textarea>
+          <div class="alliance-modal-actions">
+            <button class="alliance-tool-btn" onclick="previewDamageImport()">
+              🔍 Preview
+            </button>
+          </div>
+        </div>
+
+        <!-- OCR tab -->
+        <div id="dmg-tab-ocr" style="display:none;">
+          <div class="ocr-upload-area" onclick="document.getElementById('damage-ocr-file-input').click()">
+            <div class="ocr-upload-icon">📷</div>
+            <div class="ocr-upload-text">
+              <div>Click to upload Bear Trap result screenshots</div>
+              <div class="ocr-upload-sub">Up to 10 images · JPG, PNG, WebP</div>
+            </div>
+          </div>
+          <input type="file" id="damage-ocr-file-input" accept="image/*" multiple style="display:none;" onchange="processDamageOCR(this)">
+          <!-- API key entry (shared with main OCR) -->
+          <div style="margin-top:10px;">
+            <input type="password" id="damage-ocr-apikey" class="alliance-search-input"
+              placeholder="🔑 Gemini API key (AIza...)" style="width:100%;">
+            <div style="font-size:10px; color:var(--gold-dim); margin-top:4px; font-style:italic;">Get a free key at aistudio.google.com/apikey · Saved in your browser only</div>
+          </div>
+          <div id="damage-ocr-status" style="display:none; text-align:center; padding:14px; color:#c9a84c; font-style:italic;"></div>
+        </div>
+
+        <!-- Auto-mark top N as RL toggle -->
+        <div style="margin-top:14px; padding:10px; background:rgba(0,20,55,0.5); border:1px dashed rgba(201,168,76,0.25); border-radius:6px;">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="damage-auto-mark-rl" checked style="width:16px; height:16px; cursor:pointer;">
+            <span style="font-size:12px; color:#e0d4a8;">Auto-mark top RL candidates by damage</span>
+          </label>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:6px; font-size:11px; color:var(--gold-dim);">
+            <span>How many top performers?</span>
+            <input type="number" id="damage-top-rl-count" value="6" min="1" max="20"
+                   style="width:60px; padding:4px 6px; background:rgba(0,30,60,0.85); border:1px solid rgba(100,180,255,0.3); border-radius:4px; color:#e0d4a8; font-size:12px;">
+          </div>
+        </div>
+
+        <!-- Preview area -->
+        <div id="damage-preview-area" class="alliance-bulk-preview" style="margin-top:10px;"></div>
+
+        <!-- Commit area (shown after preview) -->
+        <div id="damage-commit-area" class="alliance-modal-actions" style="display:none; margin-top:10px;">
+          <button class="alliance-add-btn" style="margin-bottom:0;" onclick="commitDamageImport('replace')">
+            ↺ Replace All
+          </button>
+          <button class="alliance-tool-btn" onclick="commitDamageImport('merge_update')">
+            🔄 Update damage only
+          </button>
+          <button class="alliance-tool-btn" onclick="commitDamageImport('merge_add')">
+            ➕ Add new only
+          </button>
+          <button class="alliance-tool-btn alliance-cancel" onclick="closeDamageImport()">
+            ✕ Cancel
           </button>
         </div>
       </div>
@@ -3623,7 +3761,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r16</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r19</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4316,6 +4454,12 @@
     const t10Total = (parseInt(document.getElementById('inf-t10').value)||0)
                    + (parseInt(document.getElementById('cav-t10').value)||0)
                    + (parseInt(document.getElementById('arc-t10').value)||0);
+    const t9Total = (parseInt(document.getElementById('inf-t9').value)||0)
+                  + (parseInt(document.getElementById('cav-t9').value)||0)
+                  + (parseInt(document.getElementById('arc-t9').value)||0);
+    const t8Total = getT8Val('inf') + getT8Val('cav') + getT8Val('arc');
+    const t7Total = getT7Val('inf') + getT7Val('cav') + getT7Val('arc');
+    const t6Total = getT6Val('inf') + getT6Val('cav') + getT6Val('arc');
     const t10Wrap = document.getElementById('t10-bar-wrap');
     const t10Bar = document.getElementById('t10-bar');
     const t10Label = document.getElementById('t10-pct-label');
@@ -4327,8 +4471,16 @@
       t10Bar.style.background = `linear-gradient(90deg, ${barColor}88, ${barColor})`;
       if(t10Label) t10Label.textContent = t10pct + '% T10';
       if(t10Label) t10Label.style.color = barColor;
-      if(t10Breakdown) t10Breakdown.textContent =
-        `T10: ${fmt(t10Total)} · T9: ${fmt(total - t10Total)} · Total: ${fmt(total)}`;
+      if(t10Breakdown) {
+        let parts = [];
+        if (t10Total > 0) parts.push('T10: ' + fmt(t10Total));
+        if (t9Total > 0)  parts.push('T9: '  + fmt(t9Total));
+        if (t8Total > 0)  parts.push('T8: '  + fmt(t8Total));
+        if (t7Total > 0)  parts.push('T7: '  + fmt(t7Total));
+        if (t6Total > 0)  parts.push('T6: '  + fmt(t6Total));
+        parts.push('Total: ' + fmt(total));
+        t10Breakdown.textContent = parts.join(' · ');
+      }
       t10Wrap.style.display = 'block';
     } else if(t10Wrap) {
       t10Wrap.style.display = 'none';
@@ -4338,7 +4490,7 @@
     // Archers are the bottleneck: each march needs >= 42,500 archers (85% of 50k)
     const recArcTotal = (parseInt(document.getElementById('arc-t10').value)||0)
                       + (parseInt(document.getElementById('arc-t9').value)||0)
-                      + getT8Val('arc');
+                      + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
     const MIN_ARC = Math.floor(50000 * 0.85); // 42,500
 
     const errBox = document.getElementById('army-error-box');
@@ -4366,10 +4518,10 @@
     // Helper: compute actual per-march total for given N (mirrors _doCalculate logic)
     const recCavTotal = (parseInt(document.getElementById('cav-t10').value)||0)
                       + (parseInt(document.getElementById('cav-t9').value)||0)
-                      + getT8Val('cav');
+                      + getT8Val('cav') + getT7Val('cav') + getT6Val('cav');
     const recInfTotal = (parseInt(document.getElementById('inf-t10').value)||0)
                       + (parseInt(document.getElementById('inf-t9').value)||0)
-                      + getT8Val('inf');
+                      + getT8Val('inf') + getT7Val('inf') + getT6Val('inf');
     const grandTot = recArcTotal + recCavTotal + recInfTotal;
     function actualPerMarch(N) {
       if (N <= 0) return 0;
@@ -4448,7 +4600,7 @@
   function updateMarchTooltips() {
     const arc = (parseInt(document.getElementById('arc-t10').value)||0)
               + (parseInt(document.getElementById('arc-t9').value)||0)
-              + getT8Val('arc');
+              + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
     const tooltipDiv = document.getElementById('march-tooltips');
     if (!tooltipDiv || arc < 1000) { if(tooltipDiv) tooltipDiv.style.display='none'; return; }
     tooltipDiv.style.display = 'grid';
@@ -4522,9 +4674,9 @@
   }
 
   function updateTotals() {
-    const inf = (parseInt(document.getElementById('inf-t10').value)||0) + (parseInt(document.getElementById('inf-t9').value)||0) + getT8Val('inf');
-    const cav = (parseInt(document.getElementById('cav-t10').value)||0) + (parseInt(document.getElementById('cav-t9').value)||0) + getT8Val('cav');
-    const arc = (parseInt(document.getElementById('arc-t10').value)||0) + (parseInt(document.getElementById('arc-t9').value)||0) + getT8Val('arc');
+    const inf = (parseInt(document.getElementById('inf-t10').value)||0) + (parseInt(document.getElementById('inf-t9').value)||0) + getT8Val('inf') + getT7Val('inf') + getT6Val('inf');
+    const cav = (parseInt(document.getElementById('cav-t10').value)||0) + (parseInt(document.getElementById('cav-t9').value)||0) + getT8Val('cav') + getT7Val('cav') + getT6Val('cav');
+    const arc = (parseInt(document.getElementById('arc-t10').value)||0) + (parseInt(document.getElementById('arc-t9').value)||0) + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
     const el_inf = document.getElementById('total-inf');
     const el_cav = document.getElementById('total-cav');
     const el_arc = document.getElementById('total-arc');
@@ -4698,8 +4850,9 @@
 
   function saveArmy() {
     const data = {};
-    ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
-      data[id] = document.getElementById(id).value;
+    ['inf-t10','inf-t9','inf-t8','inf-t7','inf-t6','cav-t10','cav-t9','cav-t8','cav-t7','cav-t6','arc-t10','arc-t9','arc-t8','arc-t7','arc-t6','march-capacity'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
     });
     // Save additional per-preset state
     data._numMarches = numMarches;
@@ -4716,12 +4869,21 @@
       const data = raw ? JSON.parse(raw) : null;
 
       // Load troop counts (or reset to 0 if no saved data)
-      ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8','march-capacity'].forEach(id => {
+      ['inf-t10','inf-t9','inf-t8','inf-t7','inf-t6','cav-t10','cav-t9','cav-t8','cav-t7','cav-t6','arc-t10','arc-t9','arc-t8','arc-t7','arc-t6','march-capacity'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         if (data && data[id] !== undefined) el.value = data[id];
         else el.value = (id === 'march-capacity') ? '' : '0';
       });
+
+      // Restore Lower Tiers section open/closed state
+      try {
+        const open = localStorage.getItem('btLowerTiersOpen') === '1';
+        const section = document.getElementById('lower-tiers-section');
+        const arrow = document.getElementById('lower-tiers-arrow');
+        if (section) section.style.display = open ? 'block' : 'none';
+        if (arrow) arrow.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+      } catch(e) {}
 
       // Load extended state — fall back to defaults if not present (older saves or new preset)
       numMarches = (data && typeof data._numMarches === 'number') ? data._numMarches : 4;
@@ -4764,18 +4926,24 @@
     if (!m) return;
     const lines = [
       m.isLeader ? '👑 RALLY LEADER' : ('⚔️ ' + m.label),
-      '🏹 Archers: ' + fmt(m.arcT10 + m.arcT9 + (m.arcT8||0))
+      '🏹 Archers: ' + fmt(m.arcT10 + m.arcT9 + (m.arcT8||0) + (m.arcT7||0) + (m.arcT6||0))
         + (m.arcT10 ? ' · T10: ' + fmt(m.arcT10) : '')
         + (m.arcT9  ? ' · T9: '  + fmt(m.arcT9)  : '')
-        + ((m.arcT8||0) > 0 ? ' · T8: ' + fmt(m.arcT8) : ''),
-      '🐴 Cavalry: ' + fmt(m.cavT10 + m.cavT9 + (m.cavT8||0))
+        + ((m.arcT8||0) > 0 ? ' · T8: ' + fmt(m.arcT8) : '')
+        + ((m.arcT7||0) > 0 ? ' · T7: ' + fmt(m.arcT7) : '')
+        + ((m.arcT6||0) > 0 ? ' · T6: ' + fmt(m.arcT6) : ''),
+      '🐴 Cavalry: ' + fmt(m.cavT10 + m.cavT9 + (m.cavT8||0) + (m.cavT7||0) + (m.cavT6||0))
         + (m.cavT10 ? ' · T10: ' + fmt(m.cavT10) : '')
         + (m.cavT9  ? ' · T9: '  + fmt(m.cavT9)  : '')
-        + ((m.cavT8||0) > 0 ? ' · T8: ' + fmt(m.cavT8) : ''),
-      '🛡 Infantry: ' + fmt(m.infT10 + m.infT9 + (m.infT8||0))
+        + ((m.cavT8||0) > 0 ? ' · T8: ' + fmt(m.cavT8) : '')
+        + ((m.cavT7||0) > 0 ? ' · T7: ' + fmt(m.cavT7) : '')
+        + ((m.cavT6||0) > 0 ? ' · T6: ' + fmt(m.cavT6) : ''),
+      '🛡 Infantry: ' + fmt(m.infT10 + m.infT9 + (m.infT8||0) + (m.infT7||0) + (m.infT6||0))
         + (m.infT10 ? ' · T10: ' + fmt(m.infT10) : '')
         + (m.infT9  ? ' · T9: '  + fmt(m.infT9)  : '')
-        + ((m.infT8||0) > 0 ? ' · T8: ' + fmt(m.infT8) : ''),
+        + ((m.infT8||0) > 0 ? ' · T8: ' + fmt(m.infT8) : '')
+        + ((m.infT7||0) > 0 ? ' · T7: ' + fmt(m.infT7) : '')
+        + ((m.infT6||0) > 0 ? ' · T6: ' + fmt(m.infT6) : ''),
       'Total: ' + fmt(m.total),
     ];
     const text = lines.join('\n');
@@ -4939,6 +5107,23 @@
   function getT8Val(troop) {
     return parseInt(document.getElementById(troop + '-t8')?.value) || 0;
   }
+  function getT7Val(troop) {
+    return parseInt(document.getElementById(troop + '-t7')?.value) || 0;
+  }
+  function getT6Val(troop) {
+    return parseInt(document.getElementById(troop + '-t6')?.value) || 0;
+  }
+  // Toggle the collapsible Lower Tiers (T7/T6) section
+  function toggleLowerTiers() {
+    const section = document.getElementById('lower-tiers-section');
+    const arrow = document.getElementById('lower-tiers-arrow');
+    if (!section) return;
+    const isOpen = section.style.display !== 'none';
+    section.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    // Save state
+    try { localStorage.setItem('btLowerTiersOpen', isOpen ? '0' : '1'); } catch(e) {}
+  }
   function updateCapacityHint() {
     const input = document.getElementById('march-capacity');
     const warn  = document.getElementById('capacity-warn');
@@ -4956,7 +5141,7 @@
   }
   function resetArmy() {
     // Reset troop inputs to 0 (and dispatch input event so listeners fire)
-    ['inf-t10','inf-t9','inf-t8','cav-t10','cav-t9','cav-t8','arc-t10','arc-t9','arc-t8'].forEach(id => {
+    ['inf-t10','inf-t9','inf-t8','inf-t7','inf-t6','cav-t10','cav-t9','cav-t8','cav-t7','cav-t6','arc-t10','arc-t9','arc-t8','arc-t7','arc-t6'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.value = 0;
@@ -5017,22 +5202,28 @@
     const infT10 = parseInt(document.getElementById('inf-t10').value) || 0;
     const infT9  = parseInt(document.getElementById('inf-t9').value)  || 0;
     const infT8  = getT8Val('inf');
+    const infT7  = getT7Val('inf');
+    const infT6  = getT6Val('inf');
     const cavT10 = parseInt(document.getElementById('cav-t10').value) || 0;
     const cavT9  = parseInt(document.getElementById('cav-t9').value)  || 0;
     const cavT8  = getT8Val('cav');
+    const cavT7  = getT7Val('cav');
+    const cavT6  = getT6Val('cav');
     const arcT10 = parseInt(document.getElementById('arc-t10').value) || 0;
     const arcT9  = parseInt(document.getElementById('arc-t9').value)  || 0;
     const arcT8  = getT8Val('arc');
-    const totalInf = infT10 + infT9 + infT8;
-    const totalCav = cavT10 + cavT9 + cavT8;
-    const totalArc = arcT10 + arcT9 + arcT8;
-    const grandTotal = totalInf + totalCav + totalArc; // T8 already included in totals
+    const arcT7  = getT7Val('arc');
+    const arcT6  = getT6Val('arc');
+    const totalInf = infT10 + infT9 + infT8 + infT7 + infT6;
+    const totalCav = cavT10 + cavT9 + cavT8 + cavT7 + cavT6;
+    const totalArc = arcT10 + arcT9 + arcT8 + arcT7 + arcT6;
+    const grandTotal = totalInf + totalCav + totalArc;
 
     const MIN = 5000;
     const MIN_MARCH = 50000;
     const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 42,500
     // Find max marches where each march gets >= 59,500 archers (= 70k total at 85%)
-    const totalArchers = arcT10 + arcT9 + (arcT8||0);
+    const totalArchers = arcT10 + arcT9 + (arcT8||0) + (arcT7||0) + (arcT6||0);
     const maxTotal = isRallyLeader ? 7 : 6;
     const marchCapacityRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
     // Safety: capacity below 50,000 is unrealistic — use default
@@ -5098,33 +5289,42 @@
       arcTarget += surplus;
     }
 
-    // Helper: split a type into T10/T9 for march index i
-    function tierSplit(t10total, t9total, t8total, perMarch, i) {
+    // Helper: split a type across tiers T10→T9→T8→T7→T6 for march index i.
+    // T6 is used last (only when higher tiers run out for that march).
+    function tierSplit(t10total, t9total, t8total, t7total, t6total, perMarch, i) {
       t8total = t8total || 0;
+      t7total = t7total || 0;
+      t6total = t6total || 0;
       const isLast = i === N - 1;
       const t10each = Math.min(Math.floor(t10total / N), perMarch);
       const t9each  = Math.min(Math.floor(t9total  / N), Math.max(0, perMarch - t10each));
       const t8each  = Math.min(Math.floor(t8total  / N), Math.max(0, perMarch - t10each - t9each));
+      const t7each  = Math.min(Math.floor(t7total  / N), Math.max(0, perMarch - t10each - t9each - t8each));
+      const t6each  = Math.min(Math.floor(t6total  / N), Math.max(0, perMarch - t10each - t9each - t8each - t7each));
       if (isLast) {
         const t10used = t10each * (N - 1);
         const t9used  = t9each  * (N - 1);
         const t8used  = t8each  * (N - 1);
+        const t7used  = t7each  * (N - 1);
+        const t6used  = t6each  * (N - 1);
         const t10r = Math.min(t10total - t10used, perMarch);
         const t9r  = Math.min(t9total  - t9used,  Math.max(0, perMarch - t10r));
         const t8r  = Math.min(t8total  - t8used,  Math.max(0, perMarch - t10r - t9r));
-        return { t10: t10r, t9: t9r, t8: t8r };
+        const t7r  = Math.min(t7total  - t7used,  Math.max(0, perMarch - t10r - t9r - t8r));
+        const t6r  = Math.min(t6total  - t6used,  Math.max(0, perMarch - t10r - t9r - t8r - t7r));
+        return { t10: t10r, t9: t9r, t8: t8r, t7: t7r, t6: t6r };
       }
-      return { t10: t10each, t9: t9each, t8: t8each };
+      return { t10: t10each, t9: t9each, t8: t8each, t7: t7each, t6: t6each };
     }
 
     for (let i = 0; i < N; i++) {
-      const aS = tierSplit(arcT10, arcT9, arcT8, arcTarget, i);
-      const cS = tierSplit(cavT10, cavT9, cavT8, cavTarget, i);
-      const iS = tierSplit(infT10, infT9, infT8, infTarget, i);
+      const aS = tierSplit(arcT10, arcT9, arcT8, arcT7, arcT6, arcTarget, i);
+      const cS = tierSplit(cavT10, cavT9, cavT8, cavT7, cavT6, cavTarget, i);
+      const iS = tierSplit(infT10, infT9, infT8, infT7, infT6, infTarget, i);
 
-      const arcAmt = aS.t10 + aS.t9 + (aS.t8||0);
-      const cavAmt = cS.t10 + cS.t9 + (cS.t8||0);
-      const infAmt = iS.t10 + iS.t9 + (iS.t8||0);
+      const arcAmt = aS.t10 + aS.t9 + (aS.t8||0) + (aS.t7||0) + (aS.t6||0);
+      const cavAmt = cS.t10 + cS.t9 + (cS.t8||0) + (cS.t7||0) + (cS.t6||0);
+      const infAmt = iS.t10 + iS.t9 + (iS.t8||0) + (iS.t7||0) + (iS.t6||0);
       const tot    = arcAmt + cavAmt + infAmt;
 
       const arcPct = tot > 0 ? Math.round(arcAmt / tot * 100) : 0;
@@ -5141,9 +5341,9 @@
         tip: `${arcPct}% Archers · ${cavPct}% Cavalry · ${infPct}% Infantry`,
         isLeader,
         joinerIdx,
-        arcT10: aS.t10, arcT9: aS.t9, arcT8: aS.t8,
-        cavT10: cS.t10, cavT9: cS.t9, cavT8: cS.t8,
-        infT10: iS.t10, infT9: iS.t9, infT8: iS.t8,
+        arcT10: aS.t10, arcT9: aS.t9, arcT8: aS.t8, arcT7: aS.t7, arcT6: aS.t6,
+        cavT10: cS.t10, cavT9: cS.t9, cavT8: cS.t8, cavT7: cS.t7, cavT6: cS.t6,
+        infT10: iS.t10, infT9: iS.t9, infT8: iS.t8, infT7: iS.t7, infT6: iS.t6,
         total: tot,
         arcPct, cavPct, infPct
       });
@@ -5170,16 +5370,18 @@
       card.className = 'march-card' + (m.isLeader ? ' rally-leader-card' : '');
       card.style.animationDelay = `${idx * 0.1}s`;
 
-      const arcTotal = m.arcT10 + m.arcT9 + (m.arcT8||0);
-      const cavTotal = m.cavT10 + m.cavT9 + (m.cavT8||0);
-      const infTotal = m.infT10 + m.infT9 + (m.infT8||0);
+      const arcTotal = m.arcT10 + m.arcT9 + (m.arcT8||0) + (m.arcT7||0) + (m.arcT6||0);
+      const cavTotal = m.cavT10 + m.cavT9 + (m.cavT8||0) + (m.cavT7||0) + (m.cavT6||0);
+      const infTotal = m.infT10 + m.infT9 + (m.infT8||0) + (m.infT7||0) + (m.infT6||0);
 
-      function tierText(t10, t9, t8) {
-        t8 = t8 || 0;
+      function tierText(t10, t9, t8, t7, t6) {
+        t8 = t8 || 0; t7 = t7 || 0; t6 = t6 || 0;
         let h = '';
-        if (t10 > 0) h += `<span class="tier-badge tier-t10">T10</span>${fmt(t10)}<br>`;
-        if (t9  > 0) h += `<span class="tier-badge tier-t9">T9</span>${fmt(t9)}`;
-        if (t8  > 0) h += `<br><span class="tier-badge" style="background:rgba(140,140,140,0.15);color:#b0b0b8;border:1px solid rgba(160,160,160,0.25);">T8</span>${fmt(t8)}`;
+        if (t10 > 0) h += `<span class="tier-badge tier-t10">T10</span>${fmt(t10)}`;
+        if (t9  > 0) h += `${h ? '<br>' : ''}<span class="tier-badge tier-t9">T9</span>${fmt(t9)}`;
+        if (t8  > 0) h += `${h ? '<br>' : ''}<span class="tier-badge" style="background:rgba(140,140,140,0.15);color:#b0b0b8;border:1px solid rgba(160,160,160,0.25);">T8</span>${fmt(t8)}`;
+        if (t7  > 0) h += `${h ? '<br>' : ''}<span class="tier-badge" style="background:rgba(110,80,140,0.18);color:#bca0d0;border:1px solid rgba(140,110,170,0.25);">T7</span>${fmt(t7)}`;
+        if (t6  > 0) h += `${h ? '<br>' : ''}<span class="tier-badge" style="background:rgba(80,80,80,0.18);color:#909090;border:1px solid rgba(100,100,100,0.25);">T6</span>${fmt(t6)}`;
         return h || '—';
       }
 
@@ -5230,17 +5432,17 @@
           <div class="troop-block">
             <div class="troop-block-label"><div class="dot dot-a"></div>Archers</div>
             <div class="troop-block-val">${fmt(arcTotal)}</div>
-            <div class="troop-block-tier">${tierText(m.arcT10, m.arcT9, m.arcT8||0)}</div>
+            <div class="troop-block-tier">${tierText(m.arcT10, m.arcT9, m.arcT8||0, m.arcT7||0, m.arcT6||0)}</div>
           </div>
           <div class="troop-block">
             <div class="troop-block-label"><div class="dot dot-c"></div>Cavalry</div>
             <div class="troop-block-val">${fmt(cavTotal)}</div>
-            <div class="troop-block-tier">${tierText(m.cavT10, m.cavT9, m.cavT8||0)}</div>
+            <div class="troop-block-tier">${tierText(m.cavT10, m.cavT9, m.cavT8||0, m.cavT7||0, m.cavT6||0)}</div>
           </div>
           <div class="troop-block">
             <div class="troop-block-label"><div class="dot dot-i"></div>Infantry</div>
             <div class="troop-block-val">${fmt(infTotal)}</div>
-            <div class="troop-block-tier">${tierText(m.infT10, m.infT9, m.infT8||0)}</div>
+            <div class="troop-block-tier">${tierText(m.infT10, m.infT9, m.infT8||0, m.infT7||0, m.infT6||0)}</div>
           </div>
         </div>
         <div class="march-tip">${m.tip}</div>
@@ -5259,9 +5461,9 @@
     }, 100);
 
     // Summary
-    const sentArc = marchesList.reduce((s, m) => s + m.arcT10 + m.arcT9 + (m.arcT8||0), 0);
-    const sentCav = marchesList.reduce((s, m) => s + m.cavT10 + m.cavT9 + (m.cavT8||0), 0);
-    const sentInf = marchesList.reduce((s, m) => s + m.infT10 + m.infT9 + (m.infT8||0), 0);
+    const sentArc = marchesList.reduce((s, m) => s + m.arcT10 + m.arcT9 + (m.arcT8||0) + (m.arcT7||0) + (m.arcT6||0), 0);
+    const sentCav = marchesList.reduce((s, m) => s + m.cavT10 + m.cavT9 + (m.cavT8||0) + (m.cavT7||0) + (m.cavT6||0), 0);
+    const sentInf = marchesList.reduce((s, m) => s + m.infT10 + m.infT9 + (m.infT8||0) + (m.infT7||0) + (m.infT6||0), 0);
     const sentTotal = sentArc + sentCav + sentInf;
 
     document.getElementById('summary-table').innerHTML = `
@@ -5619,11 +5821,22 @@
   // ============================================================
   let allianceMembers = []; // [{ id, name, power, isTopRL }]
   let allianceNextId = 1;
+  let _currentBearPreset = 1; // 1 or 2 — active Bear event
   window._lastAlliancePlan = null;
 
+  // Storage keys (per-preset). Use _bearKey() helper to pick by current preset.
+  const ALLIANCE_LS_VIEW    = 'btCurrentView_v1';
+  const ALLIANCE_LS_BEAR_PRESET = 'btAllianceBearPreset_v1';
+  function _bearKey(suffix) {
+    // Preset 1 keeps original key for backward compat, preset 2 uses _b2 suffix
+    if (_currentBearPreset === 1) {
+      return suffix === 'members' ? 'btAllianceMembers_v1' : 'btAllianceNextId_v1';
+    }
+    return suffix === 'members' ? 'btAllianceMembers_v1_b2' : 'btAllianceNextId_v1_b2';
+  }
+  // Legacy aliases (only used in error messages, not for IO)
   const ALLIANCE_LS_MEMBERS = 'btAllianceMembers_v1';
   const ALLIANCE_LS_NEXTID  = 'btAllianceNextId_v1';
-  const ALLIANCE_LS_VIEW    = 'btCurrentView_v1';
 
   function _allianceEscape(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -5633,8 +5846,8 @@
 
   function saveAlliance() {
     try {
-      localStorage.setItem(ALLIANCE_LS_MEMBERS, JSON.stringify(allianceMembers));
-      localStorage.setItem(ALLIANCE_LS_NEXTID, String(allianceNextId));
+      localStorage.setItem(_bearKey('members'), JSON.stringify(allianceMembers));
+      localStorage.setItem(_bearKey('nextid'), String(allianceNextId));
       // Auto-backup: keep rolling snapshots so users can recover from accidents
       _autoBackupSnapshot();
     } catch (e) {}
@@ -5809,7 +6022,7 @@
 
   function loadAlliance() {
     try {
-      const raw = localStorage.getItem(ALLIANCE_LS_MEMBERS);
+      const raw = localStorage.getItem(_bearKey('members'));
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
@@ -5821,7 +6034,7 @@
           }));
         }
       }
-      const idRaw = localStorage.getItem(ALLIANCE_LS_NEXTID);
+      const idRaw = localStorage.getItem(_bearKey('nextid'));
       const idNum = parseInt(idRaw);
       if (!isNaN(idNum) && idNum > 0) allianceNextId = idNum;
       // Safety: if any member id >= nextId, bump nextId
@@ -6733,6 +6946,104 @@
     }).join('');
   }
 
+  // Export all recent plans to a downloadable JSON file
+  function exportPlanHistory() {
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) {}
+    if (!history || history.length === 0) {
+      showAllianceToast('⚠ No plans to export yet');
+      return;
+    }
+    const payload = {
+      type: 'BearTrapPlanHistory',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      bearPreset: _currentBearPreset,
+      plans: history
+    };
+    try {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const dateStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      a.download = `bear-trap-plans-bear${_currentBearPreset}-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      showAllianceToast(`💾 Exported ${history.length} plan${history.length === 1 ? '' : 's'}`);
+    } catch (e) {
+      showAllianceToast('❌ Export failed');
+    }
+  }
+
+  // Import recent plans from a previously exported JSON file
+  function importPlanHistory(input) {
+    const file = input?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = String(ev.target?.result || '');
+        const data = JSON.parse(text);
+        let plans;
+        // Accept both our wrapped format and a bare array of plans
+        if (Array.isArray(data)) plans = data;
+        else if (data && Array.isArray(data.plans)) plans = data.plans;
+        else throw new Error('Invalid file format');
+        // Validate basic shape — each entry needs ts and waves
+        const valid = plans.filter(p => p && typeof p.ts !== 'undefined' && Array.isArray(p.waves));
+        if (valid.length === 0) {
+          showAllianceToast('⚠ No valid plans found in file');
+          return;
+        }
+        // Ask user: replace or merge?
+        let mode = 'replace';
+        let existing = [];
+        try { existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) {}
+        if (existing.length > 0) {
+          const choice = confirm(
+            `Import ${valid.length} plan${valid.length === 1 ? '' : 's'}?\n\n` +
+            `OK = Merge with existing ${existing.length} plan${existing.length === 1 ? '' : 's'} (keep newest 5)\n` +
+            `Cancel = Replace all existing plans`
+          );
+          mode = choice ? 'merge' : 'replace';
+        }
+        let merged;
+        if (mode === 'merge') {
+          // Combine, dedupe by ts, keep 5 newest
+          const seen = new Set();
+          merged = [...valid, ...existing]
+            .filter(p => {
+              if (seen.has(p.ts)) return false;
+              seen.add(p.ts);
+              return true;
+            })
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+            .slice(0, 5);
+        } else {
+          merged = valid.sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 5);
+        }
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(merged));
+        renderPlanHistory();
+        showAllianceToast(`✅ Imported ${valid.length} plan${valid.length === 1 ? '' : 's'}`);
+      } catch (err) {
+        console.error('Plan history import failed:', err);
+        showAllianceToast('❌ Failed to read file: ' + (err.message || 'unknown'));
+      } finally {
+        if (input) input.value = '';
+      }
+    };
+    reader.onerror = () => {
+      showAllianceToast('❌ Could not read file');
+      if (input) input.value = '';
+    };
+    reader.readAsText(file);
+  }
+
   function restoreHistoryPlan(index) {
     let history = [];
     try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) {}
@@ -7046,7 +7357,240 @@
     } catch (e) { /* download is best-effort */ }
   }
 
-  // === Import ===
+  // === Damage Import (from previous Bear Trap event) ===
+  // Reuses parseBulkPaste under the hood — players + damage numbers,
+  // sorts by damage desc, and optionally auto-marks top N as RL candidates.
+  let _damagePreview = []; // [{name, power, isTopRL, status}]
+
+  function openDamageImport() {
+    const modal = document.getElementById('alliance-damage-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    // Reset
+    const ta = document.getElementById('damage-import-textarea');
+    if (ta) { ta.value = ''; setTimeout(() => ta.focus(), 30); }
+    const previewEl = document.getElementById('damage-preview-area');
+    if (previewEl) previewEl.innerHTML = '';
+    const commitEl = document.getElementById('damage-commit-area');
+    if (commitEl) commitEl.style.display = 'none';
+    _damagePreview = [];
+    // Load saved API key (shared with main OCR)
+    try {
+      const k = localStorage.getItem('btGeminiApiKey');
+      const ki = document.getElementById('damage-ocr-apikey');
+      if (ki && k) ki.value = k;
+    } catch(e) {}
+    // Default to paste tab
+    switchDamageTab('paste');
+  }
+
+  function closeDamageImport() {
+    const modal = document.getElementById('alliance-damage-modal');
+    if (modal) modal.style.display = 'none';
+    _damagePreview = [];
+  }
+
+  function switchDamageTab(which) {
+    const pasteEl = document.getElementById('dmg-tab-paste');
+    const ocrEl   = document.getElementById('dmg-tab-ocr');
+    const pasteBtn = document.getElementById('dmg-tab-paste-btn');
+    const ocrBtn   = document.getElementById('dmg-tab-ocr-btn');
+    const isPaste = which === 'paste';
+    if (pasteEl) pasteEl.style.display = isPaste ? 'block' : 'none';
+    if (ocrEl)   ocrEl.style.display   = isPaste ? 'none' : 'block';
+    // Active styling
+    if (pasteBtn) {
+      pasteBtn.style.background = isPaste ? 'linear-gradient(135deg,#c9a84c,#a08540)' : '';
+      pasteBtn.style.color = isPaste ? '#1a1410' : '';
+      pasteBtn.style.borderColor = isPaste ? '#c9a84c' : '';
+    }
+    if (ocrBtn) {
+      ocrBtn.style.background = !isPaste ? 'linear-gradient(135deg,#c9a84c,#a08540)' : '';
+      ocrBtn.style.color = !isPaste ? '#1a1410' : '';
+      ocrBtn.style.borderColor = !isPaste ? '#c9a84c' : '';
+    }
+  }
+
+  function previewDamageImport() {
+    const ta = document.getElementById('damage-import-textarea');
+    if (!ta) return;
+    const parsed = parseBulkPaste(ta.value); // reuse existing parser
+    _setDamagePreview(parsed);
+  }
+
+  // Apply sort + auto-mark RL flags to a parsed list, then render the preview
+  function _setDamagePreview(parsed) {
+    if (!Array.isArray(parsed)) parsed = [];
+    // Sort by damage (power) descending
+    parsed.sort((a, b) => (b.power || 0) - (a.power || 0));
+    // Auto-mark top N as RL candidates if checkbox is on
+    const autoMark = !!document.getElementById('damage-auto-mark-rl')?.checked;
+    const topN = parseInt(document.getElementById('damage-top-rl-count')?.value) || 6;
+    parsed.forEach((p, i) => {
+      // The parser may set isTopRL by keyword too; we override only if autoMark is enabled.
+      if (autoMark) p.isTopRL = i < topN;
+    });
+    _damagePreview = parsed;
+    _renderDamagePreview();
+  }
+
+  function _renderDamagePreview() {
+    const previewEl = document.getElementById('damage-preview-area');
+    const commitEl = document.getElementById('damage-commit-area');
+    if (!previewEl || !commitEl) return;
+    if (_damagePreview.length === 0) {
+      previewEl.innerHTML = `<div class="alliance-empty">Nothing to import yet. Paste a list or upload a screenshot.</div>`;
+      commitEl.style.display = 'none';
+      return;
+    }
+    const rows = _damagePreview.map((p, i) => {
+      const safeName = _allianceEscape(p.name);
+      const rlBadge = p.isTopRL ? `<span class="preview-rl">👑 RL</span>` : '';
+      const dmgStr = p.power > 0 ? formatPower(p.power) : '–';
+      return `<div class="preview-row">
+        <span class="preview-num">${i + 1}.</span>
+        <span class="preview-name">${safeName}</span>
+        <span class="preview-power">${dmgStr}</span>
+        ${rlBadge}
+        <button class="preview-remove" onclick="removeDamagePreviewRow(${i})" aria-label="Remove">✕</button>
+      </div>`;
+    }).join('');
+    const header = `<div class="preview-header">${_damagePreview.length} participants · sorted by damage</div>`;
+    previewEl.innerHTML = header + rows;
+    commitEl.style.display = '';
+  }
+
+  function removeDamagePreviewRow(idx) {
+    if (idx < 0 || idx >= _damagePreview.length) return;
+    _damagePreview.splice(idx, 1);
+    // Re-apply auto-mark since indexes shifted
+    const autoMark = !!document.getElementById('damage-auto-mark-rl')?.checked;
+    const topN = parseInt(document.getElementById('damage-top-rl-count')?.value) || 6;
+    if (autoMark) _damagePreview.forEach((p, i) => { p.isTopRL = i < topN; });
+    _renderDamagePreview();
+  }
+
+  // Re-apply RL flags when user changes the checkbox or top-N input
+  document.addEventListener('input', (e) => {
+    if (!e.target) return;
+    if (e.target.id === 'damage-auto-mark-rl' || e.target.id === 'damage-top-rl-count') {
+      const autoMark = !!document.getElementById('damage-auto-mark-rl')?.checked;
+      const topN = parseInt(document.getElementById('damage-top-rl-count')?.value) || 6;
+      _damagePreview.forEach((p, i) => { p.isTopRL = autoMark && i < topN; });
+      _renderDamagePreview();
+    }
+  });
+
+  function commitDamageImport(mode) {
+    if (!_damagePreview || _damagePreview.length === 0) {
+      showAllianceToast('Nothing to import. Paste data first.');
+      return;
+    }
+    if (mode === 'replace') {
+      if (!confirm(`Replace all ${allianceMembers.length} current Bear ${_currentBearPreset} members with ${_damagePreview.length} imported?`)) return;
+      allianceMembers = _damagePreview.map(p => ({
+        id: allianceNextId++,
+        name: p.name,
+        power: p.power,
+        isTopRL: !!p.isTopRL,
+        status: 'available'
+      }));
+    } else if (mode === 'merge_update') {
+      // Update damage of existing names; do NOT add new
+      let updated = 0;
+      for (const incoming of _damagePreview) {
+        const existing = allianceMembers.find(m => m.name.toLowerCase() === incoming.name.toLowerCase());
+        if (existing) {
+          existing.power = incoming.power;
+          if (incoming.isTopRL !== undefined) existing.isTopRL = !!incoming.isTopRL;
+          updated++;
+        }
+      }
+      showAllianceToast(`Updated damage for ${updated} existing members`);
+    } else if (mode === 'merge_add') {
+      // Add only new names (skip duplicates by name, case-insensitive)
+      let added = 0;
+      for (const incoming of _damagePreview) {
+        const exists = allianceMembers.some(m => m.name.toLowerCase() === incoming.name.toLowerCase());
+        if (!exists) {
+          allianceMembers.push({
+            id: allianceNextId++,
+            name: incoming.name,
+            power: incoming.power,
+            isTopRL: !!incoming.isTopRL,
+            status: 'available'
+          });
+          added++;
+        }
+      }
+      showAllianceToast(`Added ${added} new members`);
+    }
+    saveAlliance();
+    renderAllianceMembers();
+    updateAllianceStats();
+    closeDamageImport();
+  }
+
+  // OCR processor for Damage Import (reuses Gemini API). Accepts file input element.
+  async function processDamageOCR(input) {
+    const files = input?.files;
+    if (!files || files.length === 0) return;
+    const status = document.getElementById('damage-ocr-status');
+    if (status) { status.style.display = 'block'; status.textContent = '🔍 Reading screenshots...'; }
+    // Get API key (saved in localStorage as 'btGeminiApiKey' shared with main OCR)
+    const apiKey = (document.getElementById('damage-ocr-apikey')?.value || '').trim();
+    if (!apiKey) {
+      if (status) status.textContent = '❌ Please enter your Gemini API key first.';
+      showAllianceToast('Enter Gemini API key to use OCR.');
+      return;
+    }
+    try { localStorage.setItem('btGeminiApiKey', apiKey); } catch(e) {}
+
+    const allParsed = [];
+    let processed = 0;
+    for (const file of files) {
+      processed++;
+      if (status) status.textContent = `🔍 Processing image ${processed}/${files.length}...`;
+      try {
+        // Convert file → base64
+        const base64 = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result).split(',')[1]);
+          r.onerror = () => reject(new Error('read failed'));
+          r.readAsDataURL(file);
+        });
+        const mediaType = file.type || 'image/jpeg';
+        // Reuse existing helper that calls Gemini with retries
+        const data = await callGeminiWithRetry(apiKey, base64, mediaType, (msg) => {
+          if (status) status.textContent = `🔍 Image ${processed}/${files.length}: ${msg}`;
+        });
+        // Extract text response
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        // Parse with same parser used for paste
+        const parsed = parseBulkPaste(text);
+        allParsed.push(...parsed);
+      } catch (err) {
+        console.error('Damage OCR error:', err);
+        if (status) status.textContent = `⚠ Image ${processed} failed: ${err.message || 'unknown'}`;
+      }
+    }
+    // Deduplicate by name (case-insensitive), keeping highest damage
+    const byName = new Map();
+    for (const p of allParsed) {
+      const k = p.name.toLowerCase();
+      const existing = byName.get(k);
+      if (!existing || (p.power || 0) > (existing.power || 0)) {
+        byName.set(k, p);
+      }
+    }
+    const merged = Array.from(byName.values());
+    if (status) status.textContent = `✅ Extracted ${merged.length} unique participants from ${files.length} image(s)`;
+    _setDamagePreview(merged);
+    // Reset file input so user can re-upload same files if needed
+    if (input) input.value = '';
+  }
+
+  // === Import (legacy JSON) ===
   function openImport() {
     const modal = document.getElementById('alliance-import-modal');
     if (!modal) return;
@@ -7484,6 +8028,12 @@ Rules:
   }
 
   function initAlliancePlanner() {
+    // Restore last-used Bear preset (1 or 2)
+    try {
+      const saved = parseInt(localStorage.getItem(ALLIANCE_LS_BEAR_PRESET));
+      if (saved === 1 || saved === 2) _currentBearPreset = saved;
+    } catch (e) {}
+    _updateBearPresetUI();
     loadAlliance();
     renderAllianceMembers();
     updateAllianceStats();
@@ -7496,8 +8046,41 @@ Rules:
     setTimeout(() => { try { checkBackupReminder(); } catch (e) {} }, 3500);
   }
 
+  // Switch between Bear 1 / Bear 2 presets. Each has its own member list + plan.
+  function switchBearPreset(n) {
+    if (n !== 1 && n !== 2) return;
+    if (_currentBearPreset === n) return;
+    _currentBearPreset = n;
+    try { localStorage.setItem(ALLIANCE_LS_BEAR_PRESET, String(n)); } catch (e) {}
+    _updateBearPresetUI();
+    // Reload data for the new preset
+    allianceMembers = [];
+    allianceNextId = 1;
+    loadAlliance();
+    renderAllianceMembers();
+    updateAllianceStats();
+    renderPlanHistory();
+  }
+
+  function _updateBearPresetUI() {
+    document.querySelectorAll('.alliance-preset-btn').forEach(b => {
+      const n = parseInt(b.dataset.bear);
+      const active = n === _currentBearPreset;
+      b.classList.toggle('active', active);
+      if (active) {
+        b.style.background = 'linear-gradient(135deg,#c9a84c,#a08540)';
+        b.style.borderColor = '#c9a84c';
+        b.style.color = '#1a1410';
+      } else {
+        b.style.background = 'rgba(0,20,55,0.85)';
+        b.style.borderColor = 'rgba(100,180,255,0.45)';
+        b.style.color = '#f0f8ff';
+      }
+    });
+  }
+
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r16';
+  const BEAR_BUILD = 'v2026.05.01-r19';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
