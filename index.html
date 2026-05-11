@@ -3563,15 +3563,32 @@
             <div class="ocr-upload-icon">📷</div>
             <div class="ocr-upload-text">
               <div>Click to upload Bear Trap result screenshots</div>
-              <div class="ocr-upload-sub">Up to 10 images · JPG, PNG, WebP</div>
+              <div class="ocr-upload-sub" id="damage-upload-sub">Up to 10 images · JPG, PNG, WebP</div>
             </div>
           </div>
           <input type="file" id="damage-ocr-file-input" accept="image/*" multiple style="display:none;" onchange="processDamageOCR(this)">
-          <!-- API key entry (shared with main OCR) -->
+
+          <!-- Provider selector (r26) — shared global state with main OCR -->
+          <div class="ocr-provider-row" style="margin-top:10px;">
+            <div style="font-size:11px;color:rgba(220,210,180,0.55);margin-bottom:4px;letter-spacing:0.04em;">🤖 AI Provider</div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" id="damage-provider-groq-btn" onclick="setOcrProvider('groq')"
+                style="flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                ⚡ Groq<br><span style="font-size:9px;opacity:0.75;font-weight:400;">1,000/day · recommended</span>
+              </button>
+              <button type="button" id="damage-provider-gemini-btn" onclick="setOcrProvider('gemini')"
+                style="flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                🤖 Gemini<br><span style="font-size:9px;opacity:0.75;font-weight:400;">~20/day</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- API key entry (shared with main OCR; provider-aware) -->
           <div style="margin-top:10px;">
             <input type="password" id="damage-ocr-apikey" class="alliance-search-input"
-              placeholder="🔑 Gemini API key (AIza...)" style="width:100%;">
-            <div style="font-size:10px; color:var(--gold-dim); margin-top:4px; font-style:italic;">Get a free key at aistudio.google.com/apikey · Saved in your browser only</div>
+              placeholder="🔑 Groq API key (gsk_...)" style="width:100%;"
+              oninput="saveApiKey(this.value)">
+            <div id="damage-ocr-apikey-help" style="font-size:10px; color:var(--gold-dim); margin-top:4px; font-style:italic;">Get a free key at console.groq.com/keys · Saved in your browser only</div>
           </div>
           <div id="damage-ocr-status" style="display:none; text-align:center; padding:14px; color:#c9a84c; font-style:italic;"></div>
         </div>
@@ -3615,7 +3632,7 @@
       <div class="alliance-modal-content">
         <div class="alliance-modal-title">📷 <span data-i18n="importScreenshotTitle">Import from Screenshot</span></div>
         <div class="alliance-modal-hint" data-i18n="importScreenshotHint">
-          Upload a screenshot of your Alliance Members list — names and power will be extracted automatically.
+          Upload a screenshot of your Alliance Members list <em>or</em> a Bear Trap Damage Rewards / Rankings screen — names will be extracted from either. Power/damage values are extracted when visible (set to 0 otherwise; you can fill them in by hand).
         </div>
 
         <!-- Upload area -->
@@ -3625,48 +3642,67 @@
             <div class="ocr-upload-icon">📷</div>
             <div class="ocr-upload-text">
               <div data-i18n="viewUploadMain">Click to upload screenshot(s)</div>
-              <div class="ocr-upload-sub">Up to 10 images at once · JPG, PNG, WebP</div>
+              <div class="ocr-upload-sub" id="ocr-upload-sub">Up to 5 images at once · JPG, PNG, WebP</div>
             </div>
           </div>
 
-          <!-- Online only toggle -->
+          <!-- Online only toggle — legacy filter, only useful for live Members list screenshots
+               (NOT Damage Rewards / Rankings). Default OFF for the standard workflow. -->
           <div class="ocr-online-toggle">
             <label class="ocr-toggle-label">
-              <input type="checkbox" id="ocr-online-only" checked>
-              <span class="ocr-toggle-text">🟢 <span data-i18n="onlineOnly">Import Online members only</span></span>
+              <input type="checkbox" id="ocr-online-only">
+              <span class="ocr-toggle-text">🟢 <span data-i18n="onlineOnly">Import Online members only (legacy)</span></span>
             </label>
           </div>
 
-          <!-- First-time info (shown only when no API key saved) -->
+          <!-- First-time info (shown only when no API key saved). Provider-aware
+               copy is populated by refreshProviderUI() based on the active provider. -->
           <div id="ocr-first-time-info" class="ocr-first-time-info" style="display:none;">
             <div class="ocr-fti-title">⚔️ First time? Read this</div>
-            <div class="ocr-fti-intro">
-              To read your screenshot, BEAR uses Google's free AI.<br>
-              You need a <strong>free key from Google</strong> — takes 30 seconds, no credit card.
+            <div class="ocr-fti-intro" id="ocr-fti-intro">
+              To read your screenshot, BEAR uses a free AI.<br>
+              You need a <strong>free API key</strong> — takes 30 seconds, no credit card.
             </div>
-            <a href="https://aistudio.google.com/apikey" target="_blank" class="ocr-fti-cta">
-              🔑 Get my free Google key →
+            <a href="https://console.groq.com/keys" target="_blank" id="ocr-fti-cta-link" class="ocr-fti-cta">
+              🔑 <span id="ocr-fti-cta-label">Get my free Groq key →</span>
             </a>
             <div class="ocr-fti-steps-title">Then come back here and:</div>
             <ol>
-              <li>Copy your key (it starts with <code>AIza...</code>)</li>
+              <li id="ocr-fti-step1">Copy your key (it starts with <code>gsk_...</code>)</li>
               <li>Paste it in the box below ↓</li>
               <li>Upload your screenshots — done!</li>
             </ol>
-            <div class="ocr-fti-footnote">
+            <div class="ocr-fti-footnote" id="ocr-fti-footnote">
               🔒 Your key stays on your phone — only used to read your screenshots.<br>
-              ✨ 250 free screenshots per day.
+              ✨ 1,000 free screenshots per day.
             </div>
           </div>
 
-          <!-- API Key input -->
+          <!-- Provider selector (r26): Groq (default, generous free tier) vs Gemini.
+               Saved in localStorage as 'btOcrProvider'. Each provider has its own
+               API key slot, so users can switch back and forth without re-pasting. -->
+          <div class="ocr-provider-row" style="margin-top:10px;">
+            <div style="font-size:11px;color:rgba(220,210,180,0.55);margin-bottom:4px;letter-spacing:0.04em;">🤖 AI Provider</div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" id="ocr-provider-groq-btn" onclick="setOcrProvider('groq')"
+                style="flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                ⚡ Groq<br><span style="font-size:9px;opacity:0.75;font-weight:400;">1,000/day · recommended</span>
+              </button>
+              <button type="button" id="ocr-provider-gemini-btn" onclick="setOcrProvider('gemini')"
+                style="flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                🤖 Gemini<br><span style="font-size:9px;opacity:0.75;font-weight:400;">~20/day</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- API Key input (placeholder + helper link are updated by refreshProviderUI) -->
           <div class="ocr-apikey-row" style="margin-top:10px;">
             <input type="password" id="ocr-apikey-input" class="alliance-search-input"
-              placeholder="🔑 Gemini API key (AIza...)"
+              placeholder="🔑 Groq API key (gsk_...)"
               style="font-size:12px;"
               oninput="saveApiKey(this.value); var f=document.getElementById('ocr-first-time-info'); if(f && this.value.length>=10) f.style.display='none';">
-            <div style="font-size:10px;color:rgba(220,210,180,0.45);margin-top:4px;">
-              ✨ Free · <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--gold-dim);">Get free key at aistudio.google.com/apikey →</a>
+            <div style="font-size:10px;color:rgba(220,210,180,0.45);margin-top:4px;" id="ocr-apikey-help">
+              ✨ Free · <a href="https://console.groq.com/keys" target="_blank" id="ocr-apikey-help-link" style="color:var(--gold-dim);">Get free key at console.groq.com/keys →</a>
             </div>
           </div>
         </div>
@@ -3761,7 +3797,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r19</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r27</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -7374,12 +7410,8 @@
     const commitEl = document.getElementById('damage-commit-area');
     if (commitEl) commitEl.style.display = 'none';
     _damagePreview = [];
-    // Load saved API key (shared with main OCR)
-    try {
-      const k = localStorage.getItem('btGeminiApiKey');
-      const ki = document.getElementById('damage-ocr-apikey');
-      if (ki && k) ki.value = k;
-    } catch(e) {}
+    // Sync provider toggle + key input to the active provider (shared with main OCR)
+    refreshProviderUI();
     // Default to paste tab
     switchDamageTab('paste');
   }
@@ -7537,20 +7569,40 @@
     if (!files || files.length === 0) return;
     const status = document.getElementById('damage-ocr-status');
     if (status) { status.style.display = 'block'; status.textContent = '🔍 Reading screenshots...'; }
-    // Get API key (saved in localStorage as 'btGeminiApiKey' shared with main OCR)
+    // Get API key (shared with main OCR — provider-aware)
     const apiKey = (document.getElementById('damage-ocr-apikey')?.value || '').trim();
     if (!apiKey) {
-      if (status) status.textContent = '❌ Please enter your Gemini API key first.';
-      showAllianceToast('Enter Gemini API key to use OCR.');
+      const provLabel = getProvider() === 'groq' ? 'Groq' : 'Gemini';
+      if (status) status.textContent = `❌ Please enter your ${provLabel} API key first.`;
+      showAllianceToast(`Enter ${provLabel} API key to use OCR.`);
       return;
     }
-    try { localStorage.setItem('btGeminiApiKey', apiKey); } catch(e) {}
+    saveApiKey(apiKey); // writes to whichever provider slot is active
+
+    // Cap per batch (same logic as Members OCR — scales with provider)
+    let fileList = Array.from(files);
+    const MAX_FILES = maxFilesForProvider();
+    if (fileList.length > MAX_FILES) {
+      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${fileList.length}.`);
+      fileList = fileList.slice(0, MAX_FILES);
+    }
+    // Throttle between calls so we stay under the per-minute rate
+    const THROTTLE_MS = 6500;
+    let lastCallAt = 0;
 
     const allParsed = [];
     let processed = 0;
-    for (const file of files) {
+    for (const file of fileList) {
       processed++;
-      if (status) status.textContent = `🔍 Processing image ${processed}/${files.length}...`;
+      if (processed > 1) {
+        const elapsed = Date.now() - lastCallAt;
+        const wait = Math.max(0, THROTTLE_MS - elapsed);
+        if (wait > 0) {
+          if (status) status.textContent = `⏳ Waiting ${Math.ceil(wait/1000)}s before image ${processed}/${fileList.length}…`;
+          await new Promise(r => setTimeout(r, wait));
+        }
+      }
+      if (status) status.textContent = `🔍 Processing image ${processed}/${fileList.length}...`;
       try {
         // Convert file → base64
         const base64 = await new Promise((resolve, reject) => {
@@ -7560,11 +7612,12 @@
           r.readAsDataURL(file);
         });
         const mediaType = file.type || 'image/jpeg';
-        // Reuse existing helper that calls Gemini with retries
-        const data = await callGeminiWithRetry(apiKey, base64, mediaType, (msg) => {
-          if (status) status.textContent = `🔍 Image ${processed}/${files.length}: ${msg}`;
+        lastCallAt = Date.now();
+        // Provider-aware vision call (Gemini or Groq)
+        const data = await callVisionAPI(apiKey, base64, mediaType, OCR_PROMPT_DAMAGE, (msg) => {
+          if (status) status.textContent = `🔍 Image ${processed}/${fileList.length}: ${msg}`;
         });
-        // Extract text response
+        // Extract text response (normalized to Gemini shape regardless of provider)
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         // Parse with same parser used for paste
         const parsed = parseBulkPaste(text);
@@ -7572,6 +7625,13 @@
       } catch (err) {
         console.error('Damage OCR error:', err);
         if (status) status.textContent = `⚠ Image ${processed} failed: ${err.message || 'unknown'}`;
+        // On quota errors, stop hammering the rest of the batch
+        if (err.status === 429) {
+          if (processed < fileList.length) {
+            showAllianceToast(`⏹ Skipping remaining ${fileList.length - processed} file(s) — quota hit.`);
+          }
+          break;
+        }
       }
     }
     // Deduplicate by name (case-insensitive), keeping highest damage
@@ -7584,7 +7644,7 @@
       }
     }
     const merged = Array.from(byName.values());
-    if (status) status.textContent = `✅ Extracted ${merged.length} unique participants from ${files.length} image(s)`;
+    if (status) status.textContent = `✅ Extracted ${merged.length} unique participants from ${fileList.length} image(s)`;
     _setDamagePreview(merged);
     // Reset file input so user can re-upload same files if needed
     if (input) input.value = '';
@@ -7708,12 +7768,117 @@
   // === Screenshot Import via Claude API ===
   let _ocrData = [];
 
+  // -----------------------------------------------------------------------
+  // OCR provider abstraction (r26): supports Gemini (Google) and Groq.
+  // Each provider has its own API key, stored separately so users can switch
+  // back and forth without re-pasting. Provider choice is also persisted.
+  // Migration: any old key stored under 'btApiKey' is moved to 'btGeminiApiKey'.
+  // -----------------------------------------------------------------------
+  const OCR_PROVIDER_DEFAULT = 'groq'; // Groq has a 50× larger free-tier daily quota
+
+  function getProvider() {
+    try {
+      // One-time migration: legacy 'btApiKey' → 'btGeminiApiKey'
+      const legacy = localStorage.getItem('btApiKey');
+      if (legacy && !localStorage.getItem('btGeminiApiKey')) {
+        localStorage.setItem('btGeminiApiKey', legacy);
+      }
+      return localStorage.getItem('btOcrProvider') || OCR_PROVIDER_DEFAULT;
+    } catch(e) { return OCR_PROVIDER_DEFAULT; }
+  }
+  function setProvider(p) {
+    if (p !== 'gemini' && p !== 'groq') return;
+    try { localStorage.setItem('btOcrProvider', p); } catch(e) {}
+  }
+  function _providerKeyName(p) {
+    return p === 'groq' ? 'btGroqApiKey' : 'btGeminiApiKey';
+  }
+
+  // Max screenshots per batch — Groq's generous limits (30 RPM, 1,000 RPD) allow
+  // larger batches; Gemini's 20-RPD free tier doesn't.
+  function maxFilesForProvider() {
+    return getProvider() === 'groq' ? 10 : 5;
+  }
+
   function saveApiKey(val) {
-    try { localStorage.setItem('btApiKey', val.trim()); } catch(e) {}
+    // Writes to the key slot for the CURRENT provider
+    try { localStorage.setItem(_providerKeyName(getProvider()), String(val || '').trim()); } catch(e) {}
   }
 
   function loadApiKey() {
-    try { return localStorage.getItem('btApiKey') || ''; } catch(e) { return ''; }
+    // Reads from the key slot for the CURRENT provider
+    try { return localStorage.getItem(_providerKeyName(getProvider())) || ''; } catch(e) { return ''; }
+  }
+
+  // ProviderUI: per-provider strings used to populate the dialogs.
+  const _PROVIDER_UI = {
+    groq: {
+      label: 'Groq', keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys',
+      keyDomain: 'console.groq.com/keys', freeDaily: '1,000 free screenshots per day'
+    },
+    gemini: {
+      label: 'Gemini', keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/apikey',
+      keyDomain: 'aistudio.google.com/apikey', freeDaily: '~20 free screenshots per day'
+    }
+  };
+
+  // Set provider, persist, and refresh both dialogs' UI in case either is open.
+  function setOcrProvider(p) {
+    if (p !== 'gemini' && p !== 'groq') return;
+    setProvider(p);
+    refreshProviderUI();
+  }
+
+  // Sync every provider-aware UI element (toggle buttons, placeholders, labels,
+  // helper links, key input values) to the current provider. Safe to call when
+  // either dialog isn't mounted yet — missing elements are skipped.
+  function refreshProviderUI() {
+    const p = getProvider();
+    const ui = _PROVIDER_UI[p] || _PROVIDER_UI.groq;
+    const savedKey = loadApiKey();
+    // Active/inactive style for each pair of toggle buttons
+    const activeStyle = 'flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;';
+    const inactiveStyle = 'flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;';
+    ['ocr', 'damage'].forEach(prefix => {
+      const groqBtn = document.getElementById(prefix + '-provider-groq-btn');
+      const geminiBtn = document.getElementById(prefix + '-provider-gemini-btn');
+      if (groqBtn) groqBtn.style.cssText = (p === 'groq') ? activeStyle : inactiveStyle;
+      if (geminiBtn) geminiBtn.style.cssText = (p === 'gemini') ? activeStyle : inactiveStyle;
+    });
+    // Members OCR key input + helper text
+    const mainInput = document.getElementById('ocr-apikey-input');
+    if (mainInput) {
+      mainInput.placeholder = `🔑 ${ui.label} API key (${ui.keyPrefix}...)`;
+      mainInput.value = savedKey;
+    }
+    const mainHelpLink = document.getElementById('ocr-apikey-help-link');
+    if (mainHelpLink) {
+      mainHelpLink.href = ui.keyUrl;
+      mainHelpLink.textContent = `Get free key at ${ui.keyDomain} →`;
+    }
+    // First-time info block — only relevant text bits
+    const ftiCtaLink = document.getElementById('ocr-fti-cta-link');
+    if (ftiCtaLink) ftiCtaLink.href = ui.keyUrl;
+    const ftiCtaLabel = document.getElementById('ocr-fti-cta-label');
+    if (ftiCtaLabel) ftiCtaLabel.textContent = `Get my free ${ui.label} key →`;
+    const ftiStep1 = document.getElementById('ocr-fti-step1');
+    if (ftiStep1) ftiStep1.innerHTML = `Copy your key (it starts with <code>${ui.keyPrefix}...</code>)`;
+    const ftiFootnote = document.getElementById('ocr-fti-footnote');
+    if (ftiFootnote) ftiFootnote.innerHTML = `🔒 Your key stays on your phone — only used to read your screenshots.<br>✨ ${ui.freeDaily}.`;
+    // Damage OCR key input + help line
+    const damageInput = document.getElementById('damage-ocr-apikey');
+    if (damageInput) {
+      damageInput.placeholder = `🔑 ${ui.label} API key (${ui.keyPrefix}...)`;
+      damageInput.value = savedKey;
+    }
+    const damageHelp = document.getElementById('damage-ocr-apikey-help');
+    if (damageHelp) damageHelp.textContent = `Get a free key at ${ui.keyDomain} · Saved in your browser only`;
+    // Upload subtitles reflect the per-provider batch cap
+    const cap = maxFilesForProvider();
+    const mainSub = document.getElementById('ocr-upload-sub');
+    if (mainSub) mainSub.textContent = `Up to ${cap} images at once · JPG, PNG, WebP`;
+    const damageSub = document.getElementById('damage-upload-sub');
+    if (damageSub) damageSub.textContent = `Up to ${cap} images · JPG, PNG, WebP`;
   }
 
   function openScreenshotOCR() {
@@ -7725,10 +7890,9 @@
     document.getElementById('ocr-results-section').style.display = 'none';
     document.getElementById('ocr-initial-actions').style.display = 'flex';
     document.getElementById('ocr-file-input').value = '';
-    // Load saved API key
-    const keyInput = document.getElementById('ocr-apikey-input');
+    // Sync provider toggle + key input to the active provider
+    refreshProviderUI();
     const savedKey = loadApiKey();
-    if (keyInput) keyInput.value = savedKey;
     // Show first-time info only if no key is saved yet
     const ftiBox = document.getElementById('ocr-first-time-info');
     if (ftiBox) ftiBox.style.display = (savedKey && savedKey.length >= 10) ? 'none' : 'block';
@@ -7744,11 +7908,107 @@
   // Helper: sleep for ms milliseconds
   function _ocrSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Helper: call Gemini API with auto-retry on transient errors (503, 429, 500, network)
-  async function callGeminiWithRetry(apiKey, base64, mediaType, onProgress) {
+  // Prompt used by Members OCR — accepts BOTH Alliance Members list AND Damage Rewards/Rankings screens.
+  // Goal: always extract names; numeric value (power or damage) when present, else 0.
+  const OCR_PROMPT_MEMBERS = `This is a screenshot from the mobile game KingShot. It shows a list of players from an alliance. The list can be one of these formats:
+1. Alliance Members list — each row has a player name and a Power value (e.g. "38.5M", "58.6M", "1.2B"), sometimes with a green "Online" label.
+2. Damage Rewards / Bear Trap Rankings — each row has a rank number, a player name (often prefixed by an alliance tag in brackets like "[xXx]"), and "Damage Points:" followed by a comma-separated number (e.g. "760,040,003").
+3. Any other KingShot list showing player names.
+
+Extract EVERY visible player row and return ONLY a JSON array — no explanation, no markdown fences.
+
+Format: [{"name":"PlayerOne","power":760040003,"isOnline":false},{"name":"PlayerTwo","power":38500000,"isOnline":true}]
+
+Rules:
+- "name": the player name only. Strip leading alliance tags in brackets like "[xXx]" or "[ABC]". Keep the name itself exactly as shown (including special characters and unicode).
+- "power": numeric value as a plain integer. If the row shows Power with suffix, convert: 38.5M=38500000, 58.6M=58600000, 1.2B=1200000000. If the row shows "Damage Points: 760,040,003", strip commas → 760040003. If no numeric value is visible for the row, use 0.
+- "isOnline": true only if a green "Online" label is visible on that specific row, otherwise false. (Damage Rewards screens never show Online — always false there.)
+- Include EVERY visible player row, even partial or cut-off ones at the edges.
+- Return ONLY the JSON array. No prose, no comments, no markdown.`;
+
+  // Prompt used by Damage OCR — strictly extracts damage from Bear Trap reward/ranking screens.
+  // Output format matches parseBulkPaste expectations: one "Name <number>" per line.
+  const OCR_PROMPT_DAMAGE = `This is a screenshot from the mobile game KingShot showing a Bear Trap Damage Rewards / Rankings list. Each row has a rank number, a player name (often with an alliance tag in brackets like "[xXx]"), and "Damage Points:" followed by a comma-separated number (e.g. "760,040,003").
+
+Extract every player and their damage. Return ONLY plain text — one player per line, no explanation, no markdown, no JSON.
+
+Format (one per line):
+PlayerName 760040003
+AnotherPlayer 586837307
+
+Rules:
+- Strip leading alliance tags in brackets (like "[xXx]") from names.
+- Strip commas from the damage number.
+- One line per player, name then a space then the damage as a plain integer.
+- Include every visible row.
+- No headers, no commentary, no markdown.`;
+
+  // Build the per-provider HTTP request for a vision call. Both providers
+  // accept a base64 image + a text prompt; the body shape differs.
+  function _buildVisionRequest(provider, apiKey, base64, mediaType, prompt) {
+    if (provider === 'groq') {
+      // Groq uses an OpenAI-compatible /chat/completions endpoint.
+      // Llama 4 Scout is on the free tier (1,000 RPD vs Gemini's 20).
+      const dataUrl = `data:${mediaType};base64,${base64}`;
+      return {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        init: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            temperature: 0,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image_url', image_url: { url: dataUrl } }
+              ]
+            }]
+          })
+        }
+      };
+    }
+    // Default: Gemini
+    return {
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inline_data: { mime_type: mediaType, data: base64 } },
+              { text: prompt }
+            ]
+          }],
+          generationConfig: { temperature: 0, thinkingConfig: { thinkingBudget: 0 } }
+        })
+      }
+    };
+  }
+
+  // Normalize provider response → Gemini-style shape so all callers can
+  // read `data.candidates[0].content.parts[0].text` regardless of provider.
+  function _normalizeVisionResponse(provider, data) {
+    if (provider === 'groq') {
+      const text = data?.choices?.[0]?.message?.content || '';
+      return { candidates: [{ content: { parts: [{ text }] } }] };
+    }
+    return data; // Gemini already in the right shape
+  }
+
+  // Helper: call the configured vision API (Gemini or Groq) with auto-retry on transient errors.
+  // 429 (rate limit / quota) is NOT retried — retrying just hammers the limit harder.
+  // `prompt` is required — each caller passes its own task-specific prompt.
+  async function callVisionAPI(apiKey, base64, mediaType, prompt, onProgress) {
+    const provider = getProvider();
     const MAX_ATTEMPTS = 3;
     const BACKOFF_MS = [1000, 2500, 5000]; // wait 1s, 2.5s, 5s before retries
-    const RETRYABLE_STATUS = [429, 500, 502, 503, 504];
+    const RETRYABLE_STATUS = [500, 502, 503, 504]; // 429 excluded on purpose
 
     let lastErr;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -7756,37 +8016,20 @@
         if (onProgress && attempt > 1) {
           onProgress(`Retry ${attempt}/${MAX_ATTEMPTS} (server busy)...`);
         }
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { inline_data: { mime_type: mediaType, data: base64 } },
-                  { text: `This is a screenshot from the mobile game KingShot showing an Alliance Members list. Each member card shows a player name, power (like 38.5M or 58.6M), and sometimes green "Online" text.
-
-Extract ALL visible member cards and return ONLY a JSON array, no explanation, no markdown.
-
-Format: [{"name":"PlayerOne","power":38500000,"isOnline":true},{"name":"PlayerTwo","power":58600000,"isOnline":false}]
-
-Rules:
-- Convert power: 38.5M = 38500000, 58.6M = 58600000, 1.2B = 1200000000
-- isOnline = true only if green "Online" label is visible on the card
-- Include every player card visible, even partial ones
-- Return ONLY the JSON array, nothing else` }
-                ]
-              }],
-              generationConfig: { temperature: 0, thinkingConfig: { thinkingBudget: 0 } }
-            })
-          }
-        );
-        if (response.ok) return await response.json();
+        const { url, init } = _buildVisionRequest(provider, apiKey, base64, mediaType, prompt);
+        const response = await fetch(url, init);
+        if (response.ok) {
+          const raw = await response.json();
+          return _normalizeVisionResponse(provider, raw);
+        }
 
         const errText = await response.text().catch(() => '');
-        const err = new Error(`API ${response.status}: ${errText.slice(0, 200)}`);
+        // Log FULL body to console so 400/etc reasons are debuggable
+        console.error(`[${provider} API ${response.status}] full response body:`, errText);
+        const err = new Error(`API ${response.status}: ${errText.slice(0, 800)}`);
         err.status = response.status;
+        err.bodyText = errText;
+        err.provider = provider;
 
         // Don't retry on permanent errors (bad key, bad request, etc.)
         if (!RETRYABLE_STATUS.includes(response.status)) throw err;
@@ -7809,10 +8052,11 @@ Rules:
     if (!input.files || !input.files.length) return;
     let files = Array.from(input.files);
 
-    // Cap at 10 files to keep things responsive and protect free-tier quota
-    const MAX_FILES = 10;
+    // Cap per batch — scales with the active provider's free tier
+    const MAX_FILES = maxFilesForProvider();
     if (files.length > MAX_FILES) {
-      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${files.length}.`);
+      const limitNote = getProvider() === 'groq' ? "Groq free tier handles more if you re-run later." : "Gemini free tier is tight (~20/day) — re-run for the rest after a minute.";
+      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${files.length}. ${limitNote}`);
       files = files.slice(0, MAX_FILES);
     }
 
@@ -7839,6 +8083,8 @@ Rules:
     // Throttle: free tier allows 10 req/min — wait ~6.5s between calls (skip wait on first)
     const THROTTLE_MS = 6500;
     let lastCallAt = 0;
+    let lastError = null; // capture last API error for diagnostics
+    const rawResponses = []; // capture all raw Gemini responses for diagnostic
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -7878,10 +8124,11 @@ Rules:
         if (processingText) processingText.textContent = `File ${i+1}/${files.length}: calling AI (${Math.round(base64.length/1024)}KB)...`;
         const mediaType = 'image/jpeg';
         lastCallAt = Date.now();
-        const data = await callGeminiWithRetry(apiKey, base64, mediaType,
+        const data = await callVisionAPI(apiKey, base64, mediaType, OCR_PROMPT_MEMBERS,
           (msg) => { if (processingText) processingText.textContent = `File ${i+1}/${files.length}: ${msg}`; }
         );
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        rawResponses.push({ file: i+1, text: rawText, parsed: data });
         if (!rawText) continue;
         const clean = rawText.replace(/```json|```/g, '').trim();
         let members;
@@ -7901,13 +8148,24 @@ Rules:
         allMembers = allMembers.concat(members);
       } catch (err) {
         console.error('Screenshot OCR error:', err);
+        lastError = err; // remember for empty-state diagnostic
         // Friendly error messages
         let msg = err.message || String(err);
-        if (err.status === 429) msg = 'Rate limit reached — wait a minute and try again';
-        else if (err.status === 503) msg = 'AI server busy after 3 retries — try again in a minute';
-        else if (err.status === 400 && /API key/i.test(msg)) msg = 'API key invalid or expired — get a new one';
-        else if (err.status === 403) msg = 'API key not authorized — check it on aistudio.google.com';
-        showAllianceToast(`❌ File ${i+1}: ${msg.slice(0, 100)}`);
+        const _p = err.provider || getProvider();
+        const _pName = _p === 'groq' ? 'Groq' : 'Gemini';
+        const _pUrl = _p === 'groq' ? 'console.groq.com/keys' : 'aistudio.google.com/apikey';
+        if (err.status === 429) msg = `Quota / rate limit hit on ${_pName} — wait ~60s, then try 1-2 images at a time. (${_p === 'groq' ? 'Groq free tier: 30/min, 1,000/day' : 'Gemini free tier: ~20/day'}.)`;
+        else if (err.status === 503) msg = `${_pName} server busy after 3 retries — try again in a minute`;
+        else if (err.status === 401 || (err.status === 400 && /API key|api[ _]?key|unauthor/i.test(msg))) msg = `${_pName} API key invalid or expired — get a new one at ${_pUrl}`;
+        else if (err.status === 403) msg = `${_pName} API key not authorized — check it at ${_pUrl}`;
+        showAllianceToast(`❌ File ${i+1}: ${msg.slice(0, 300)}`);
+        // Don't keep trying further files if quota is exhausted — that just makes things worse
+        if (err.status === 429) {
+          if (i + 1 < files.length) {
+            showAllianceToast(`⏹ Skipping remaining ${files.length - i - 1} file(s) — quota exhausted.`);
+          }
+          break;
+        }
       }
     }
 
@@ -7921,6 +8179,10 @@ Rules:
     });
 
     const totalFound = allMembers.length;
+    // Keep a copy of the full list BEFORE the onlineOnly filter, so we can offer
+    // to import them anyway when the filter strips everything (e.g. Damage Rewards
+    // screenshots don't have an "Online" badge — everyone shows as offline).
+    const allMembersUnfiltered = allMembers.slice();
     if (onlineOnly) allMembers = allMembers.filter(m => m.isOnline);
 
     _ocrData = allMembers.map(m => {
@@ -7940,19 +8202,87 @@ Rules:
       }
       return { name: String(m.name).slice(0, 24), power: Math.round(power), isTopRL: false, status: 'available' };
     });
+    // Sort by power/damage descending — top players first (most useful for RL selection)
+    _ocrData.sort((a, b) => (b.power || 0) - (a.power || 0));
+
+    // Also build an unfiltered version (used when the onlineOnly filter strips everything,
+    // e.g. when importing Damage Rewards screenshots that have no Online label)
+    const _ocrDataUnfiltered = allMembersUnfiltered.map(m => {
+      let power = 0;
+      const raw = m.power;
+      if (typeof raw === 'number') { power = raw; }
+      else if (typeof raw === 'string') {
+        const match = raw.match(/([\d.]+)\s*([MKBmkb])?/);
+        if (match) {
+          const val = parseFloat(match[1]);
+          const suffix = (match[2] || '').toUpperCase();
+          if (suffix === 'B') power = val * 1e9;
+          else if (suffix === 'M') power = val * 1e6;
+          else if (suffix === 'K') power = val * 1e3;
+          else power = val;
+        }
+      }
+      return { name: String(m.name).slice(0, 24), power: Math.round(power), isTopRL: false, status: 'available' };
+    });
+    // Sort by power/damage descending — top players first
+    _ocrDataUnfiltered.sort((a, b) => (b.power || 0) - (a.power || 0));
 
     document.getElementById('ocr-processing').style.display = 'none';
     if (_ocrData.length > 0) {
       renderOCRResults(onlineOnly, totalFound, files.length);
       document.getElementById('ocr-results-section').style.display = 'block';
+    } else if (onlineOnly && _ocrDataUnfiltered.length > 0) {
+      // Special case: filter (Online only) stripped everyone — offer to import them all.
+      // Expose a one-shot handler so the inline button can flip _ocrData and re-render.
+      window._ocrImportAnyway = () => {
+        _ocrData = _ocrDataUnfiltered;
+        renderOCRResults(false, totalFound, files.length);
+        document.getElementById('ocr-results-section').style.display = 'block';
+        delete window._ocrImportAnyway;
+      };
+      const resultsSection = document.getElementById('ocr-results-section');
+      const resultsList = document.getElementById('ocr-results-list');
+      if (resultsList) {
+        resultsList.innerHTML = `<div style="color:#ffb060;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+          ✅ <b>Found ${_ocrDataUnfiltered.length} players</b>, but all are marked offline.<br>
+          <span style="font-size:11px;opacity:0.85;display:block;margin-top:4px;">Damage Rewards / Ranking screenshots don't show an "Online" badge — so the <b>Online only</b> filter strips them all. You can import them anyway:</span>
+          <button style="margin-top:10px;padding:8px 14px;background:#5fb85f;color:#0a1228;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px;" onclick="window._ocrImportAnyway && window._ocrImportAnyway()">📥 Import all ${_ocrDataUnfiltered.length} anyway</button>
+        </div>`;
+      }
+      if (resultsSection) resultsSection.style.display = 'block';
     } else if (allMembers.length === 0) {
       // Show debug info in results section
       const resultsSection = document.getElementById('ocr-results-section');
       const resultsList = document.getElementById('ocr-results-list');
-      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:center;">
-        ❌ No members detected.<br>
-        <span style="font-size:11px;opacity:0.7">Try unchecking "Online only" or use Bulk Paste.</span>
-      </div>`;
+      if (resultsList) {
+        if (lastError) {
+          // An API call actually failed — show the full body so user can debug
+          const bodyText = lastError.bodyText || lastError.message || String(lastError);
+          const status = lastError.status || '???';
+          const safeBody = String(bodyText).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+            ❌ <b>API error ${status}</b> — Gemini rejected the request.<br>
+            <span style="font-size:11px;opacity:0.8;display:block;margin-top:6px;">Full response body (for debugging):</span>
+            <textarea readonly style="width:100%;height:120px;margin-top:6px;background:#0a1228;color:#ffb0b0;border:1px solid #ff8080;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;resize:vertical;" onclick="this.select()">${safeBody}</textarea>
+            <button style="margin-top:6px;padding:6px 12px;background:#c9a84c;color:#0a1228;border:none;border-radius:6px;font-weight:600;cursor:pointer;" onclick="navigator.clipboard.writeText(this.previousElementSibling.value).then(()=>{this.textContent='✅ Copied';setTimeout(()=>this.textContent='📋 Copy error',1500);})">📋 Copy error</button>
+          </div>`;
+        } else if (rawResponses.length > 0) {
+          // API succeeded but extracted nothing — show what Gemini actually said
+          const debugDump = rawResponses.map(r => `--- File ${r.file} ---\n${r.text || '(empty response)'}`).join('\n\n');
+          const safeDump = String(debugDump).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          resultsList.innerHTML = `<div style="color:#ffb060;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+            ⚠️ <b>No members extracted</b> — Gemini answered but no player rows were found.<br>
+            <span style="font-size:11px;opacity:0.8;display:block;margin-top:6px;">Gemini's raw answer (paste this if asking for help):</span>
+            <textarea readonly style="width:100%;height:140px;margin-top:6px;background:#0a1228;color:#ffd080;border:1px solid #ffb060;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;resize:vertical;" onclick="this.select()">${safeDump}</textarea>
+            <button style="margin-top:6px;padding:6px 12px;background:#c9a84c;color:#0a1228;border:none;border-radius:6px;font-weight:600;cursor:pointer;" onclick="navigator.clipboard.writeText(this.previousElementSibling.value).then(()=>{this.textContent='✅ Copied';setTimeout(()=>this.textContent='📋 Copy raw',1500);})">📋 Copy raw</button>
+          </div>`;
+        } else {
+          resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:center;">
+            ❌ No members detected.<br>
+            <span style="font-size:11px;opacity:0.7">Try unchecking "Online only", use a clearer screenshot, or paste names with Bulk Paste.</span>
+          </div>`;
+        }
+      }
       if (resultsSection) resultsSection.style.display = 'block';
     }
   }
@@ -8080,7 +8410,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r19';
+  const BEAR_BUILD = 'v2026.05.01-r27';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
