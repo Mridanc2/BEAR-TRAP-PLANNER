@@ -1607,8 +1607,10 @@
     .member-row-bottom { gap: 6px; }
     .member-power { flex: 1 1 100%; min-width: 0; }
     .member-toprl-label { flex: 1; justify-content: center; }
+    .member-nearbear-label { flex: 1; justify-content: center; }
   }
-  .member-toprl-label {
+  .member-toprl-label,
+  .member-nearbear-label {
     display: flex;
     align-items: center;
     gap: 3px;
@@ -1624,13 +1626,22 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .member-nearbear-label {
+    /* Distinct brown/bear accent so it's visually separable from the gold (RL) marker */
+    border-color: rgba(150,90,40,0.35);
+  }
   .member-toprl-label:hover { border-color: rgba(201,168,76,0.5); }
-  .member-toprl-label input[type="checkbox"] {
+  .member-nearbear-label:hover { border-color: rgba(180,110,50,0.65); }
+  .member-toprl-label input[type="checkbox"],
+  .member-nearbear-label input[type="checkbox"] {
     margin: 0;
     accent-color: var(--gold);
     width: 12px;
     height: 12px;
     cursor: pointer;
+  }
+  .member-nearbear-label input[type="checkbox"] {
+    accent-color: #b46e32;
   }
   body.light-mode .member-toprl-label {
     background: #fff8e8;
@@ -1638,6 +1649,12 @@
     border-color: rgba(122,80,20,0.45);
   }
   body.light-mode .member-toprl-label:hover { border-color: #8a6010; }
+  body.light-mode .member-nearbear-label {
+    background: #fff8e8;
+    color: #4a3618;
+    border-color: rgba(150,80,30,0.45);
+  }
+  body.light-mode .member-nearbear-label:hover { border-color: #8a4d10; }
   .member-delete {
     background: rgba(192,57,43,0.15);
     border: 1px solid rgba(192,57,43,0.4);
@@ -3797,7 +3814,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r27</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r30</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6033,19 +6050,23 @@
     document.body.appendChild(overlay);
   }
 
-  function restoreAutoBackup(idx) {
+  async function restoreAutoBackup(idx) {
     const backups = getAutoBackups();
     const b = backups[idx];
     if (!b || !Array.isArray(b.members)) {
       showAllianceToast('❌ Backup not found');
       return;
     }
-    if (!confirm(`Restore ${b.count} members from this snapshot?\n\nYour current ${allianceMembers.length} members will be REPLACED.`)) return;
+    // Native confirm() is blocked in iframes and some mobile browsers (PWA, in-app),
+    // which silently kills this whole flow. Use the custom DOM-based confirm instead.
+    const ok = await allianceConfirm(`Restore ${b.count} members from this snapshot?\n\nYour current ${allianceMembers.length} members will be REPLACED.`);
+    if (!ok) return;
     allianceMembers = b.members.map(m => ({
       id: parseInt(m.id) || 0,
       name: String(m.name || ''),
       power: parseInt(m.power) || 0,
-      isTopRL: !!m.isTopRL
+      isTopRL: !!m.isTopRL,
+      nearBear: !!m.nearBear
     }));
     const maxId = allianceMembers.reduce((m,x) => Math.max(m, x.id || 0), 0);
     allianceNextId = maxId + 1;
@@ -6066,7 +6087,8 @@
             id: parseInt(m.id) || 0,
             name: String(m.name || ''),
             power: parseInt(m.power) || 0,
-            isTopRL: !!m.isTopRL
+            isTopRL: !!m.isTopRL,
+            nearBear: !!m.nearBear
           }));
         }
       }
@@ -6122,7 +6144,7 @@
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       let backup;
       try {
         backup = JSON.parse(e.target.result);
@@ -6147,7 +6169,8 @@
           id: 0, // assign new IDs after merge
           name: String(m.name).slice(0, 24).trim(),
           power: parseInt(m.power) || 0,
-          isTopRL: !!m.isTopRL
+          isTopRL: !!m.isTopRL,
+          nearBear: !!m.nearBear
         }));
       if (cleaned.length === 0) {
         showAllianceToast('❌ Backup file has no valid members');
@@ -6157,7 +6180,7 @@
 
       const existingCount = allianceMembers.length;
       const choice = existingCount > 0
-        ? confirm(`Restore ${cleaned.length} members from backup?\n\nClick OK to REPLACE your current ${existingCount} members.\nClick Cancel to keep current and ADD new members.`)
+        ? await allianceConfirm(`Restore ${cleaned.length} members from backup?\n\nClick OK to REPLACE your current ${existingCount} members.\nClick Cancel to keep current and ADD new members.`)
         : true;
 
       if (choice) {
@@ -6199,6 +6222,7 @@
       name: '',
       power: 0,
       isTopRL: false,
+      nearBear: false,
       status: 'available'
     });
     saveAlliance();
@@ -6227,8 +6251,8 @@
     m[field] = value;
     saveAlliance();
     updateAllianceStats();
-    // Re-render when visual indicators change (TopRL or status)
-    if (field === 'isTopRL' || field === 'status') renderAllianceMembers();
+    // Re-render when visual indicators change
+    if (field === 'isTopRL' || field === 'status' || field === 'nearBear') renderAllianceMembers();
   }
 
   let _allianceFilter = 'all';
@@ -6289,6 +6313,11 @@
             <input type="checkbox" ${m.isTopRL ? 'checked' : ''}
                    onchange="updateAllianceMember(${m.id}, 'isTopRL', this.checked)">
             <span class="toprl-text">👑 ${t('topRL')}</span>
+          </label>
+          <label class="member-nearbear-label" title="Player is close enough to the Bear that their rally will land in the last wave before it dies">
+            <input type="checkbox" ${m.nearBear ? 'checked' : ''}
+                   onchange="updateAllianceMember(${m.id}, 'nearBear', this.checked)">
+            <span class="nearbear-text">🐻 <span data-i18n="nearBear">Near</span></span>
           </label>
           <div class="member-status-group">
             <label class="status-option ${status === 'available' ? 'active' : ''}" title="${t('statusAvailable')}">
@@ -6490,13 +6519,9 @@
       const status = m.status || 'available';
       return status === 'available' || status === 'leader';
     });
-    
+
     const N = participating.length;
     if (N === 0) return { waves: [], totalMembers: 0, numWaves: 0 };
-
-    // Separate Top RLs and regular members, each sorted by power desc
-    const topRLs = participating.filter(m => m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
-    const regulars = participating.filter(m => !m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
 
     // Compute number of waves
     const numWaves = Math.min(ALLIANCE_MAX_WAVES, Math.ceil(N / TARGET_LEADERS_PER_WAVE));
@@ -6504,30 +6529,86 @@
     // Initialize empty waves
     const waves = Array.from({ length: numWaves }, () => ({ leaders: [], hasTopRL: false }));
 
-    // Distribute Top RLs evenly across waves (round-robin)
-    topRLs.forEach((m, i) => {
-      const waveIdx = i % numWaves;
-      waves[waveIdx].leaders.push(m);
-      waves[waveIdx].hasTopRL = true;
-    });
+    // r28: "Near bear" flag. Members marked as near can hit the last wave before
+    // the bear dies. Far members assigned to late waves often MISS, so we steer
+    // near members toward the END of the wave list, and far members toward the
+    // START (longer march time available).
+    const anyNearBear = participating.some(m => m.nearBear);
 
-    // Fill remaining slots with regulars, keeping waves as equal as possible
-    // Sort waves by current size ascending so we fill smallest waves first
-    let regIdx = 0;
-    while (regIdx < regulars.length) {
-      // Find wave with fewest members that still has room (target ~4 per wave)
+    if (anyNearBear && numWaves > 1) {
+      // r29: Near-bear players are treated as the "strong rally leaders" who
+      // ROTATE across waves from the END backward — strongest in the last wave
+      // (the "bear leader"), 2nd strongest in 2nd-to-last, etc. If there are
+      // more near members than waves, the rotation wraps so the extra near
+      // members stack into the late waves first.
+      //
+      // Far members fill the remaining slots in EARLY waves only — keeping their
+      // rallies out of late waves where they'd miss the bear before it dies.
+      //
+      // This replaces r28's "concentrate near in last wave" approach, which
+      // bunched all strong players into one wave instead of using them as
+      // wave-by-wave rally leaders.
+      const byPower = (a, b) => (b.power || 0) - (a.power || 0);
+      const near    = participating.filter(m =>  m.nearBear).sort(byPower);
+      const farRLs  = participating.filter(m => !m.nearBear &&  m.isTopRL).sort(byPower);
+      const farRegs = participating.filter(m => !m.nearBear && !m.isTopRL).sort(byPower);
       const target = Math.ceil(N / numWaves);
-      let placed = false;
-      for (let w = 0; w < numWaves && regIdx < regulars.length; w++) {
-        if (waves[w].leaders.length < target) {
-          waves[w].leaders.push(regulars[regIdx++]);
-          placed = true;
+
+      // Step 1: distribute near members in REVERSE rotation (last wave first)
+      near.forEach((m, i) => {
+        const waveIdx = numWaves - 1 - (i % numWaves);
+        waves[waveIdx].leaders.push(m);
+        if (m.isTopRL) waves[waveIdx].hasTopRL = true;
+      });
+
+      // Step 2: distribute far Top RLs round-robin from FIRST wave forward.
+      // These are early-wave anchors (someone has to lead the early rallies).
+      farRLs.forEach((m, i) => {
+        const waveIdx = i % numWaves;
+        waves[waveIdx].leaders.push(m);
+        waves[waveIdx].hasTopRL = true;
+      });
+
+      // Step 3: far regulars fill EARLY waves first; never into the last wave
+      // (their rally would miss the bear). They can fill into 2nd-to-last etc.
+      let fi = 0;
+      for (let w = 0; w < numWaves - 1 && fi < farRegs.length; w++) {
+        while (waves[w].leaders.length < target && fi < farRegs.length) {
+          waves[w].leaders.push(farRegs[fi++]);
         }
       }
-      // Safety: if no wave accepted, just append to smallest wave
-      if (!placed && regIdx < regulars.length) {
-        const smallest = waves.reduce((min, w, i) => w.leaders.length < waves[min].leaders.length ? i : min, 0);
-        waves[smallest].leaders.push(regulars[regIdx++]);
+      // True overflow only: if every earlier wave is at target and we still have
+      // far members, dump them into the last wave (better than dropping them).
+      while (fi < farRegs.length) {
+        waves[numWaves - 1].leaders.push(farRegs[fi++]);
+      }
+    } else {
+      // Original algorithm: no nearBear marks → balance evenly across all waves.
+      const topRLs = participating.filter(m => m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
+      const regulars = participating.filter(m => !m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
+
+      // Distribute Top RLs evenly across waves (round-robin)
+      topRLs.forEach((m, i) => {
+        const waveIdx = i % numWaves;
+        waves[waveIdx].leaders.push(m);
+        waves[waveIdx].hasTopRL = true;
+      });
+
+      // Fill remaining slots with regulars, keeping waves as equal as possible
+      let regIdx = 0;
+      while (regIdx < regulars.length) {
+        const target = Math.ceil(N / numWaves);
+        let placed = false;
+        for (let w = 0; w < numWaves && regIdx < regulars.length; w++) {
+          if (waves[w].leaders.length < target) {
+            waves[w].leaders.push(regulars[regIdx++]);
+            placed = true;
+          }
+        }
+        if (!placed && regIdx < regulars.length) {
+          const smallest = waves.reduce((min, w, i) => w.leaders.length < waves[min].leaders.length ? i : min, 0);
+          waves[smallest].leaders.push(regulars[regIdx++]);
+        }
       }
     }
 
@@ -6753,12 +6834,12 @@
     });
   }
 
-  function resetAlliancePlanToAuto() {
+  async function resetAlliancePlanToAuto() {
     if (!window._lastAlliancePlan || !window._lastAlliancePlan.manuallyEdited) {
       showAllianceToast('ℹ️ Plan already at auto-generated state');
       return;
     }
-    if (!confirm('Reset all manual swaps and regenerate plan?')) return;
+    if (!await allianceConfirm('Reset all manual swaps and regenerate plan?')) return;
     generateAlliancePlan();
     showAllianceToast('↺ Plan reset to auto');
   }
@@ -6783,13 +6864,14 @@
       const leadersHtml = leaders.map((m, leaderIdx) => {
         const safeName = _allianceEscape(m.name || '?');
         const star = m.isTopRL ? '<span class="wave-toprl-badge">⭐</span>' : '';
+        const nearBadge = m.nearBear ? '<span class="wave-toprl-badge" title="Near bear" style="background:rgba(180,110,50,0.25);border-color:rgba(180,110,50,0.55);color:#e0a070;">🐻</span>' : '';
         return `
           <div class="wave-leader-row" data-wave-idx="${i}" data-leader-idx="${leaderIdx}"
                onclick="alliancePlayerTap(${i}, ${leaderIdx})"
                role="button" tabindex="0">
             <span class="wave-role-label">👑 ${t('rallyLeaderShort')}</span>
             <span class="wave-name">${safeName}</span>
-            ${star}
+            ${star}${nearBadge}
           </div>`;
       }).join('');
       return `
@@ -6954,7 +7036,7 @@
       waveCount: plan.waves.length,
       waves: plan.waves.map(w => ({
         time: w.time,
-        leaders: (w.leaders || []).map(l => ({ name: l.name, isTopRL: l.isTopRL }))
+        leaders: (w.leaders || []).map(l => ({ name: l.name, isTopRL: !!l.isTopRL, nearBear: !!l.nearBear }))
       }))
     };
     history.unshift(entry);
@@ -7021,7 +7103,7 @@
     const file = input?.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const text = String(ev.target?.result || '');
         const data = JSON.parse(text);
@@ -7041,7 +7123,7 @@
         let existing = [];
         try { existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) {}
         if (existing.length > 0) {
-          const choice = confirm(
+          const choice = await allianceConfirm(
             `Import ${valid.length} plan${valid.length === 1 ? '' : 's'}?\n\n` +
             `OK = Merge with existing ${existing.length} plan${existing.length === 1 ? '' : 's'} (keep newest 5)\n` +
             `Cancel = Replace all existing plans`
@@ -7088,7 +7170,7 @@
     // Reconstruct plan object and display it
     const plan = {
       waves: entry.waves.map((w, i) => ({
-        leaders: w.leaders.map(l => ({ name: l.name, isTopRL: l.isTopRL })),
+        leaders: w.leaders.map(l => ({ name: l.name, isTopRL: !!l.isTopRL, nearBear: !!l.nearBear })),
         hasTopRL: w.leaders.some(l => l.isTopRL),
         time: getAllianceWaveTime(i)
       }))
@@ -7190,6 +7272,23 @@
       }
     }
 
+    // r28: Detect & strip "near bear" marker. Accepts: (near), [near], "near"
+    // as its own word, 🐻 emoji. Same idea as RL detection above.
+    let nearBear = false;
+    const nearPatterns = [
+      /\s*\(\s*near(?:\s*bear)?\s*\)\s*/i,
+      /\s*\[\s*near(?:\s*bear)?\s*\]\s*/i,
+      /(^|\s)near(?:\s*bear)?(\s|$)/i,
+      /\s*🐻\s*/
+    ];
+    for (const p of nearPatterns) {
+      if (p.test(s)) {
+        nearBear = true;
+        s = s.replace(p, ' ');
+        break;
+      }
+    }
+
     // Strip leading list-numbering: "1.", "1)", "1:", "#1"
     s = s.replace(/^\s*#?\d+[.)\]:]\s+/, '');
 
@@ -7226,7 +7325,7 @@
     name = name.replace(/^[\s,;|\-–—:]+|[\s,;|\-–—:]+$/g, '').trim();
     if (!name) return null;
     if (name.length > 24) name = name.slice(0, 24);
-    return { name, power: powerVal, isTopRL, status: 'available' };
+    return { name, power: powerVal, isTopRL, nearBear, status: 'available' };
   }
 
   function parseBulkPaste(text) {
@@ -7273,12 +7372,14 @@
     const rows = _bulkPreview.map((p, i) => {
       const safeName = _allianceEscape(p.name);
       const rlBadge = p.isTopRL ? `<span class="preview-rl">👑 ${_allianceEscape(t('topRL'))}</span>` : '';
+      const nearBadge = p.nearBear ? `<span class="preview-rl" style="color:#d49158;border-color:rgba(180,110,50,0.5);">🐻 Near</span>` : '';
       const powerStr = p.power > 0 ? formatPower(p.power) : '–';
       return `<div class="preview-row">
         <span class="preview-num">${i + 1}.</span>
         <span class="preview-name">${safeName}</span>
         <span class="preview-power">${powerStr}</span>
         ${rlBadge}
+        ${nearBadge}
         <button class="preview-remove" onclick="removeBulkPreviewRow(${i})" aria-label="Remove">✕</button>
       </div>`;
     }).join('');
@@ -7311,7 +7412,8 @@
         id: allianceNextId++,
         name: p.name,
         power: p.power,
-        isTopRL: p.isTopRL,
+        isTopRL: !!p.isTopRL,
+        nearBear: !!p.nearBear,
         status: p.status || 'available'
       });
     }
@@ -7350,7 +7452,8 @@
     const data = allianceMembers.map(m => ({
       name: m.name,
       power: m.power,
-      isTopRL: !!m.isTopRL
+      isTopRL: !!m.isTopRL,
+      nearBear: !!m.nearBear
     }));
     const json = JSON.stringify(data, null, 2);
 
@@ -7513,28 +7616,31 @@
     }
   });
 
-  function commitDamageImport(mode) {
+  async function commitDamageImport(mode) {
     if (!_damagePreview || _damagePreview.length === 0) {
       showAllianceToast('Nothing to import. Paste data first.');
       return;
     }
     if (mode === 'replace') {
-      if (!confirm(`Replace all ${allianceMembers.length} current Bear ${_currentBearPreset} members with ${_damagePreview.length} imported?`)) return;
+      if (!await allianceConfirm(`Replace all ${allianceMembers.length} current Bear ${_currentBearPreset} members with ${_damagePreview.length} imported?`)) return;
       allianceMembers = _damagePreview.map(p => ({
         id: allianceNextId++,
         name: p.name,
         power: p.power,
         isTopRL: !!p.isTopRL,
+        nearBear: !!p.nearBear,
         status: 'available'
       }));
     } else if (mode === 'merge_update') {
-      // Update damage of existing names; do NOT add new
+      // Update damage of existing names; do NOT add new, and do NOT clobber nearBear
+      // (damage screenshots have no proximity info — preserve manual marks).
       let updated = 0;
       for (const incoming of _damagePreview) {
         const existing = allianceMembers.find(m => m.name.toLowerCase() === incoming.name.toLowerCase());
         if (existing) {
           existing.power = incoming.power;
           if (incoming.isTopRL !== undefined) existing.isTopRL = !!incoming.isTopRL;
+          if (incoming.nearBear) existing.nearBear = true; // only OR-in, never clear
           updated++;
         }
       }
@@ -7550,6 +7656,7 @@
             name: incoming.name,
             power: incoming.power,
             isTopRL: !!incoming.isTopRL,
+            nearBear: !!incoming.nearBear,
             status: 'available'
           });
           added++;
@@ -8410,7 +8517,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r27';
+  const BEAR_BUILD = 'v2026.05.01-r30';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
