@@ -3830,7 +3830,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r32</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r33</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6683,13 +6683,15 @@
   }
 
   // Compute the recommended interval given how many waves we'll have.
-  // Returns the largest interval where (waves-1)*interval <= 240 seconds.
+  // r33: optimize for MAX RALLIES per player — pick the smallest available spacing
+  // (30s). This fires the last wave as early as possible, leaving each player room
+  // for ~5 personal rallies before the 5:00-LEFT rally-call cutoff.
+  // The old behavior (largest spacing that fits) maximized inter-wave buffer at
+  // the cost of total rally throughput. Users who actually need more setup time
+  // between waves can manually pick 40s / 50s / 60s.
   function _recommendInterval(waveCount) {
-    if (waveCount <= 1) return 60; // single wave → no spacing constraint
-    for (const sec of ALLIANCE_INTERVAL_OPTIONS) {
-      if ((waveCount - 1) * sec <= ALLIANCE_MAX_TIME_SEC) return sec;
-    }
-    return 30; // fallback (shouldn't be reached for typical wave counts)
+    if (waveCount <= 1) return 60;
+    return 30;
   }
 
   // Apply the recommended interval if user hasn't manually overridden
@@ -8589,7 +8591,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r32';
+  const BEAR_BUILD = 'v2026.05.01-r33';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
