@@ -3415,6 +3415,22 @@
       <div class="alliance-interval-hint" id="alliance-interval-hint"></div>
     </div>
 
+    <!-- Wave count override (r31) — default Auto = computed from member count -->
+    <div class="alliance-interval-section">
+      <div class="alliance-interval-label">🌊 <span data-i18n="waveCount">Number of waves</span></div>
+      <div class="alliance-interval-buttons" id="alliance-wavecount-buttons">
+        <button class="alliance-interval-btn" data-waves="0" onclick="setForceWaveCount(0)">Auto</button>
+        <button class="alliance-interval-btn" data-waves="2" onclick="setForceWaveCount(2)">2</button>
+        <button class="alliance-interval-btn" data-waves="3" onclick="setForceWaveCount(3)">3</button>
+        <button class="alliance-interval-btn" data-waves="4" onclick="setForceWaveCount(4)">4</button>
+        <button class="alliance-interval-btn" data-waves="5" onclick="setForceWaveCount(5)">5</button>
+        <button class="alliance-interval-btn" data-waves="6" onclick="setForceWaveCount(6)">6</button>
+        <button class="alliance-interval-btn" data-waves="7" onclick="setForceWaveCount(7)">7</button>
+        <button class="alliance-interval-btn" data-waves="8" onclick="setForceWaveCount(8)">8</button>
+      </div>
+      <div class="alliance-interval-hint" id="alliance-wavecount-hint"></div>
+    </div>
+
     <!-- Sticky Generate Button -->
     <div class="alliance-sticky-bar">
       <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()">
@@ -3814,7 +3830,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r30</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r31</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6353,7 +6369,7 @@
     const allMembers = allianceMembers.filter(m => m.name.trim());
     if (allMembers.length === 0) {
       stats.innerHTML = '';
-      _refreshIntervalButtonState();
+      _refreshIntervalButtonState(); _refreshWaveCountButtonState();
       return;
     }
 
@@ -6363,7 +6379,7 @@
     const unavailable = allMembers.filter(m => (m.status || 'available') === 'unavailable').length;
     const participating = available + leaders;
     const topRLCount = allMembers.filter(m => m.isTopRL).length;
-    const numWaves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+    const numWaves = getEffectiveWaveCount(participating);
 
     // Power stats
     const powers = allMembers.map(m => m.power || 0).filter(p => p > 0);
@@ -6501,7 +6517,7 @@
         </div>
       ` : ''}
     `;
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
   }
 
   // Strategy: each "wave" is a synchronized burst of leaders opening rallies at the same
@@ -6523,8 +6539,8 @@
     const N = participating.length;
     if (N === 0) return { waves: [], totalMembers: 0, numWaves: 0 };
 
-    // Compute number of waves
-    const numWaves = Math.min(ALLIANCE_MAX_WAVES, Math.ceil(N / TARGET_LEADERS_PER_WAVE));
+    // Compute number of waves — respects manual override from settings (Auto vs 2-8)
+    const numWaves = getEffectiveWaveCount(N);
 
     // Initialize empty waves
     const waves = Array.from({ length: numWaves }, () => ({ leaders: [], hasTopRL: false }));
@@ -6645,6 +6661,25 @@
   })();
   const ALLIANCE_MAX_WAVES = 8;
 
+  // r31: optional manual wave-count override. 0 = Auto (compute from member count).
+  // 2-8 = forced count. Per-Bear-preset so Bear 1 and Bear 2 can have different settings.
+  function _loadForceWaveCount() {
+    try {
+      const v = parseInt(localStorage.getItem(_bearKey('forceWaves')));
+      if (v >= 2 && v <= ALLIANCE_MAX_WAVES) return v;
+      return 0;
+    } catch (e) { return 0; }
+  }
+  function _saveForceWaveCount(n) {
+    try { localStorage.setItem(_bearKey('forceWaves'), String(n)); } catch (e) {}
+  }
+  // Returns the effective number of waves for the current member count, respecting any override
+  function getEffectiveWaveCount(memberCount) {
+    const forced = _loadForceWaveCount();
+    if (forced >= 2) return Math.min(forced, ALLIANCE_MAX_WAVES);
+    return memberCount > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(memberCount / 4)) : 0;
+  }
+
   // Compute the recommended interval given how many waves we'll have.
   // Returns the largest interval where (waves-1)*interval <= 240 seconds.
   function _recommendInterval(waveCount) {
@@ -6660,14 +6695,14 @@
     if (_allianceIntervalManual) return; // user chose explicitly — respect that
     const valid = allianceMembers.filter(m => m.name.trim());
     const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
-    const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+    const waves = getEffectiveWaveCount(participating);
     if (waves === 0) return;
     const recommended = _recommendInterval(waves);
     if (recommended !== _allianceWaveInterval) {
       _allianceWaveInterval = recommended;
       try { localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(recommended)); } catch (e) {}
     }
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
   }
 
   function _refreshIntervalButtonState() {
@@ -6679,7 +6714,7 @@
     if (hint) {
       const valid = allianceMembers.filter(m => m.name.trim());
       const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
-      const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+      const waves = getEffectiveWaveCount(participating);
       const recommended = waves > 0 ? _recommendInterval(waves) : 40;
       const lastWaveSec = waves > 0 ? (waves - 1) * _allianceWaveInterval : 0;
       const lastWaveTime = _formatWaveTime(lastWaveSec);
@@ -6717,7 +6752,7 @@
       localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(seconds));
       localStorage.setItem(ALLIANCE_INTERVAL_OVERRIDE_KEY, '1');
     } catch (e) {}
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
     // Re-render plan if one is currently displayed
     if (window._lastAlliancePlan) {
       generateAlliancePlan();
@@ -6732,6 +6767,41 @@
       generateAlliancePlan();
     }
     showAllianceToast(`✨ Auto: ${_allianceWaveInterval}s between waves`);
+  }
+
+  // r31: wave-count override
+  function setForceWaveCount(n) {
+    const v = parseInt(n);
+    if (isNaN(v) || v < 0 || v > ALLIANCE_MAX_WAVES) return;
+    _saveForceWaveCount(v);
+    _refreshWaveCountButtonState();
+    // Re-recommend interval (different wave count → different optimal interval)
+    try { applyAutoIntervalIfNeeded(); } catch (e) {}
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
+    // Re-render plan if one is currently displayed
+    if (window._lastAlliancePlan) {
+      generateAlliancePlan();
+    }
+  }
+
+  function _refreshWaveCountButtonState() {
+    const forced = _loadForceWaveCount(); // 0 = Auto
+    document.querySelectorAll('#alliance-wavecount-buttons .alliance-interval-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.waves) === forced);
+    });
+    const hint = document.getElementById('alliance-wavecount-hint');
+    if (hint) {
+      const valid = allianceMembers.filter(m => m.name.trim());
+      const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
+      const auto = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+      if (forced >= 2) {
+        const effective = Math.min(forced, ALLIANCE_MAX_WAVES);
+        const target = participating > 0 ? Math.ceil(participating / effective) : 0;
+        hint.innerHTML = `<span class="hint-manual">📌 Manual · ${effective} waves · ~${target} RL${target === 1 ? '' : 's'} per wave</span> <button class="hint-auto-btn" onclick="setForceWaveCount(0)">Use auto (${auto})</button>`;
+      } else {
+        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${auto > 0 ? auto + ' waves (from ' + participating + ' members)' : 'add members to plan'}</span>`;
+      }
+    }
   }
 
   function generateAlliancePlan() {
@@ -8517,7 +8587,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r30';
+  const BEAR_BUILD = 'v2026.05.01-r31';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
