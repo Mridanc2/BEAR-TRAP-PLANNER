@@ -3830,7 +3830,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r31</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r32</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6645,7 +6645,9 @@
   // The interval is auto-recommended based on wave count, but user can override.
   const ALLIANCE_INTERVAL_KEY = 'btAllianceWaveInterval_v1';
   const ALLIANCE_INTERVAL_OVERRIDE_KEY = 'btAllianceWaveIntervalManual_v1';
-  const ALLIANCE_MAX_TIME_SEC = 240; // 4 minutes (30:00 → 26:00)
+  const ALLIANCE_MAX_TIME_SEC = 300; // 5 min — matches the game's rally-call cutoff (30:00 → 25:00).
+                                     // r32: raised from 240 to allow 6 waves × 50s and similar slower cadences
+                                     // that give borderline players (joining + leading) more recovery time.
   const ALLIANCE_INTERVAL_OPTIONS = [60, 50, 40, 30]; // largest first
 
   let _allianceWaveInterval = (function() {
@@ -6721,7 +6723,7 @@
       const overflows = lastWaveSec > ALLIANCE_MAX_TIME_SEC;
 
       if (_allianceIntervalManual) {
-        let html = `<span class="hint-manual">📌 Manual${overflows ? ' · last wave ' + lastWaveTime + ' (past 26:00 ⚠)' : ' · last wave ' + lastWaveTime}</span>`;
+        let html = `<span class="hint-manual">📌 Manual${overflows ? ' · last wave ' + lastWaveTime + ' (past 25:00 ⚠)' : ' · last wave ' + lastWaveTime}</span>`;
         html += ` <button class="hint-auto-btn" onclick="resetIntervalToAuto()">Use auto (${recommended}s)</button>`;
         hint.innerHTML = html;
       } else {
@@ -8587,7 +8589,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r31';
+  const BEAR_BUILD = 'v2026.05.01-r32';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
