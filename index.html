@@ -2555,6 +2555,22 @@
   }
   body.light-mode .wave-time { color: #2a1a08; background: rgba(138,96,16,0.08); }
 
+  .wave-rally-schedule {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    color: rgba(224,160,112,0.85);
+    background: rgba(180,110,50,0.1);
+    border: 1px solid rgba(180,110,50,0.25);
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin: 6px 0 8px;
+    letter-spacing: 0.02em;
+  }
+  body.light-mode .wave-rally-schedule {
+    color: #6b3d18;
+    background: rgba(180,110,50,0.08);
+  }
+
   .wave-leader-row, .wave-joiner-row {
     display: flex;
     align-items: center;
@@ -3407,6 +3423,8 @@
     <div class="alliance-interval-section">
       <div class="alliance-interval-label">⏱ <span data-i18n="waveInterval">Time between waves</span></div>
       <div class="alliance-interval-buttons">
+        <button class="alliance-interval-btn" data-sec="15" onclick="setAllianceWaveInterval(15)">15s</button>
+        <button class="alliance-interval-btn" data-sec="20" onclick="setAllianceWaveInterval(20)">20s</button>
         <button class="alliance-interval-btn" data-sec="30" onclick="setAllianceWaveInterval(30)">30s</button>
         <button class="alliance-interval-btn" data-sec="40" onclick="setAllianceWaveInterval(40)">40s</button>
         <button class="alliance-interval-btn" data-sec="50" onclick="setAllianceWaveInterval(50)">50s</button>
@@ -3830,7 +3848,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r33</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r40</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6679,16 +6697,17 @@
   function getEffectiveWaveCount(memberCount) {
     const forced = _loadForceWaveCount();
     if (forced >= 2) return Math.min(forced, ALLIANCE_MAX_WAVES);
-    return memberCount > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(memberCount / 4)) : 0;
+    // r35: cap the auto count so every wave still fires inside the 2-minute window,
+    // i.e. the last-wave player can still land 5 rallies before the event ends.
+    if (memberCount <= 0) return 0;
+    const byMembers = Math.ceil(memberCount / 4);
+    return Math.min(byMembers, ALLIANCE_MAX_WAVES, maxWavesInWindow());
   }
 
   // Compute the recommended interval given how many waves we'll have.
-  // r33: optimize for MAX RALLIES per player — pick the smallest available spacing
-  // (30s). This fires the last wave as early as possible, leaving each player room
-  // for ~5 personal rallies before the 5:00-LEFT rally-call cutoff.
-  // The old behavior (largest spacing that fits) maximized inter-wave buffer at
-  // the cost of total rally throughput. Users who actually need more setup time
-  // between waves can manually pick 40s / 50s / 60s.
+  // r38: default to 30s — the tightest spacing a clan can reliably hit by hand.
+  // (15-20s fits more waves but is too tight for human coordination.) At 30s the
+  // safe window holds 3 waves; that's the practical sweet spot for this event.
   function _recommendInterval(waveCount) {
     if (waveCount <= 1) return 60;
     return 30;
@@ -6722,14 +6741,15 @@
       const recommended = waves > 0 ? _recommendInterval(waves) : 40;
       const lastWaveSec = waves > 0 ? (waves - 1) * _allianceWaveInterval : 0;
       const lastWaveTime = _formatWaveTime(lastWaveSec);
-      const overflows = lastWaveSec > ALLIANCE_MAX_TIME_SEC;
-
+      // r35: late waves can't fit 5 rallies if they fire past the 2-minute window
+      const tooLate = lastWaveSec > MAX_WAVE_SPAN_SEC;
+      const warn = tooLate ? ' (last wave past 27:00 ⚠)' : '';
       if (_allianceIntervalManual) {
-        let html = `<span class="hint-manual">📌 Manual${overflows ? ' · last wave ' + lastWaveTime + ' (past 25:00 ⚠)' : ' · last wave ' + lastWaveTime}</span>`;
+        let html = `<span class="hint-manual">📌 Manual · last wave ${lastWaveTime}${warn}</span>`;
         html += ` <button class="hint-auto-btn" onclick="resetIntervalToAuto()">Use auto (${recommended}s)</button>`;
         hint.innerHTML = html;
       } else {
-        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${waves > 0 ? waves + ' waves · last at ' + lastWaveTime : 'add members to plan'}</span>`;
+        hint.innerHTML = `<span class="${tooLate ? 'hint-manual' : 'hint-auto'}">${tooLate ? '⚠' : '✨'} Auto · ${waves > 0 ? waves + ' waves · last at ' + lastWaveTime + warn : 'add members to plan'}</span>`;
       }
     }
   }
@@ -6743,13 +6763,25 @@
     return String(m) + ':' + String(s).padStart(2, '0');
   }
 
-  function getAllianceWaveTime(idx) {
+  // r39: wave-opening window — set directly from how the clan actually runs the event.
+  // First wave opens at 30:00, last wave opens by 27:00 left. A 3-minute window;
+  // at 30s spacing that's 7 waves. After opening, players cycle on their own —
+  // the planner only coordinates the staggered opening of the first round.
+  const MAX_WAVE_SPAN_SEC = 180;        // 30:00 → 27:00 left
+
+  // Largest wave count whose last wave still opens by 27:00 left, at the current interval.
+  function maxWavesInWindow() {
+    return Math.max(1, Math.floor(MAX_WAVE_SPAN_SEC / _allianceWaveInterval) + 1);
+  }
+
+  // Returns the displayed "MM:SS left" for wave `idx`. Start-anchored: wave 1 at 30:00.
+  function getAllianceWaveTime(idx, totalWaves) {
     if (idx < 0 || idx >= ALLIANCE_MAX_WAVES) return '--:--';
     return _formatWaveTime(idx * _allianceWaveInterval);
   }
 
   function setAllianceWaveInterval(seconds) {
-    if (![30, 40, 50, 60].includes(seconds)) return;
+    if (![15, 20, 30, 40, 50, 60].includes(seconds)) return;
     _allianceWaveInterval = seconds;
     _allianceIntervalManual = true;
     try {
@@ -6797,13 +6829,15 @@
     if (hint) {
       const valid = allianceMembers.filter(m => m.name.trim());
       const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
-      const auto = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+      const auto = getEffectiveWaveCount(participating);
+      const maxWin = maxWavesInWindow();
       if (forced >= 2) {
         const effective = Math.min(forced, ALLIANCE_MAX_WAVES);
         const target = participating > 0 ? Math.ceil(participating / effective) : 0;
-        hint.innerHTML = `<span class="hint-manual">📌 Manual · ${effective} waves · ~${target} RL${target === 1 ? '' : 's'} per wave</span> <button class="hint-auto-btn" onclick="setForceWaveCount(0)">Use auto (${auto})</button>`;
+        const tooMany = effective > maxWin;
+        hint.innerHTML = `<span class="${tooMany ? 'hint-manual' : 'hint-manual'}">📌 Manual · ${effective} waves · ~${target} RL${target === 1 ? '' : 's'} per wave${tooMany ? ' · ⚠ waves past #' + maxWin + ' open after 27:00' : ''}</span> <button class="hint-auto-btn" onclick="setForceWaveCount(0)">Use auto (${auto})</button>`;
       } else {
-        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${auto > 0 ? auto + ' waves (from ' + participating + ' members)' : 'add members to plan'}</span>`;
+        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${auto > 0 ? auto + ' waves · last wave by 27:00' : 'add members to plan'}</span>`;
       }
     }
   }
@@ -6933,7 +6967,7 @@
     container.innerHTML = hintHtml + plan.waves.map((wave, i) => {
       const leaders = wave.leaders || [];
       if (leaders.length === 0) return '';
-      const time = getAllianceWaveTime(i);
+      const time = getAllianceWaveTime(i, plan.waves.length);
       const cls = 'alliance-wave-card' + (wave.hasTopRL ? ' wave-top-rl' : '');
       const leadersHtml = leaders.map((m, leaderIdx) => {
         const safeName = _allianceEscape(m.name || '?');
@@ -7054,7 +7088,7 @@
 
   function buildWaveText(plan, waveIdx) {
     const wave = plan.waves[waveIdx];
-    const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx)}`];
+    const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx, plan.waves.length)}`];
     (wave.leaders || []).forEach(m => {
       const marker = m.isTopRL ? '⭐' : '•';
       lines.push(`   ${marker} ${m.name}`);
@@ -7246,7 +7280,7 @@
       waves: entry.waves.map((w, i) => ({
         leaders: w.leaders.map(l => ({ name: l.name, isTopRL: !!l.isTopRL, nearBear: !!l.nearBear })),
         hasTopRL: w.leaders.some(l => l.isTopRL),
-        time: getAllianceWaveTime(i)
+        time: getAllianceWaveTime(i, entry.waves.length)
       }))
     };
     window._lastAlliancePlan = plan;
@@ -8591,7 +8625,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r33';
+  const BEAR_BUILD = 'v2026.05.01-r40';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
