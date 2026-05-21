@@ -3764,7 +3764,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r21</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r23</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4711,12 +4711,12 @@
       t10Wrap.style.display = 'none';
     }
 
-    const MIN_PER_MARCH = 30000;
-    // Archers are the bottleneck: each march needs >= 25,500 archers (85% of 30k)
+    const MIN_PER_MARCH = 47059; // 40K archers / 0.85 = ~47K total
+    // Archers are the bottleneck: each march needs >= 30,000 archers (floor)
     const recArcTotal = (parseInt(document.getElementById('arc-t10').value)||0)
                       + (parseInt(document.getElementById('arc-t9').value)||0)
                       + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
-    const MIN_ARC = Math.floor(30000 * 0.85); // 25,500
+    const MIN_ARC = 40000; // 40K archers per march minimum
 
     const errBox = document.getElementById('army-error-box');
     const errTitle = document.getElementById('army-error-title');
@@ -4726,7 +4726,7 @@
       if (errBox) {
         const needed = MIN_ARC;
         errTitle.textContent = 'Not enough archers for even 1 march!';
-        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} (85% of 30K)`;
+        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} per march`;
         errBox.style.display = 'block';
       }
       return;
@@ -4843,7 +4843,7 @@
       const totalMarches = n + (isRL ? 1 : 0);
       const arcEach = Math.floor(arc / totalMarches);
       const totalEach = Math.floor(arcEach / 0.85);
-      const ok = totalEach >= 30000;
+      const ok = arcEach >= 40000;
       const color = ok ? '#5ba85b' : '#c0392b';
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
               `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;" title="${fmt(arcEach)}">${fmtCompact(arcEach)}</div>` +
@@ -4924,7 +4924,7 @@
       const marches = (typeof numMarches !== 'undefined' ? numMarches : 4) + (isRL ? 1 : 0);
       const arcPerMarch = Math.floor(arc / Math.max(marches, 1));
 
-      // Thresholds based on Bear Trap minimum (30K/march × 85% = 25,500 archers/march)
+      // Threshold: 40K archers per march (floor)
       const TIER_GREAT = 59500;   // ≥ 70K full march
       const TIER_GOOD  = 42500;   // ≥ 50K reasonable march
       const TIER_OK    = 25500;   // ≥ 30K minimum viable
@@ -5445,9 +5445,9 @@
     const grandTotal = totalInf + totalCav + totalArc;
 
     const MIN = 5000;
-    const MIN_MARCH = 30000;
-    const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 25,500
-    // Find max marches where each march gets >= 25,500 archers (= 30k total at 85%)
+    const MIN_MARCH = 47059; // 40K archers / 0.85
+    const MIN_ARC_PER_MARCH = 40000; // 40K archers per march minimum
+    // Find max marches where each march gets >= 40,000 archers
     const totalArchers = arcT10 + arcT9 + (arcT8||0) + (arcT7||0) + (arcT6||0);
     const maxTotal = isRallyLeader ? 7 : 6;
     const marchCapacityRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
@@ -8305,7 +8305,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r21';
+  const BEAR_BUILD = 'v2026.05.01-r23';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
