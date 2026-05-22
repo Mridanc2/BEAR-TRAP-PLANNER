@@ -3764,7 +3764,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r23</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r25</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4493,6 +4493,7 @@
     });
     updateMarchRec();
     updateTotals(); // refresh archer rating bar (depends on marches count)
+    updateMarchTooltips(); // refresh the "X joiners + 1 RL = Y total" label
     saveArmy(); // persist marches selection to current preset
   }
 
@@ -4768,12 +4769,39 @@
       return arcT + cavT + infT;
     }
 
+    // Auto-recommendation: prefer max marches where each gets EXCELLENT rating (70K+ archers).
+    // If army can't support any Excellent marches, fall back gracefully:
+    //   - Try GOOD (55K), then OK (40K floor).
+    const TARGET_EXCELLENT = 70000;
+    const TARGET_GOOD = 55000;
     let recTotal = 1;
+    // Try Excellent first
     for (let n = maxTotal; n >= 1; n--) {
       const arcPerMarch = Math.floor(recArcTotal / n);
-      // Use ACTUAL per-march total (not theoretical 85%) for capacity check
       const totalPerMarch = actualPerMarch(n);
-      if (arcPerMarch >= MIN_ARC && totalPerMarch <= capacity) { recTotal = n; break; }
+      if (arcPerMarch >= TARGET_EXCELLENT && totalPerMarch <= capacity) { recTotal = n; break; }
+    }
+    // If not even 1 march at Excellent, try Good
+    if (recTotal === 1) {
+      const arcPerMarch1 = Math.floor(recArcTotal / 1);
+      if (arcPerMarch1 < TARGET_EXCELLENT) {
+        for (let n = maxTotal; n >= 1; n--) {
+          const arcPerMarch = Math.floor(recArcTotal / n);
+          const totalPerMarch = actualPerMarch(n);
+          if (arcPerMarch >= TARGET_GOOD && totalPerMarch <= capacity) { recTotal = n; break; }
+        }
+      }
+    }
+    // Final fallback to floor (40K)
+    if (recTotal === 1) {
+      const arcPerMarch1 = Math.floor(recArcTotal / 1);
+      if (arcPerMarch1 < TARGET_GOOD) {
+        for (let n = maxTotal; n >= 1; n--) {
+          const arcPerMarch = Math.floor(recArcTotal / n);
+          const totalPerMarch = actualPerMarch(n);
+          if (arcPerMarch >= MIN_ARC && totalPerMarch <= capacity) { recTotal = n; break; }
+        }
+      }
     }
     // Convert to joiner count (what the toggle shows)
     const recJoiners = isRallyLeader ? Math.max(1, recTotal - 1) : recTotal;
@@ -4843,8 +4871,12 @@
       const totalMarches = n + (isRL ? 1 : 0);
       const arcEach = Math.floor(arc / totalMarches);
       const totalEach = Math.floor(arcEach / 0.85);
-      const ok = arcEach >= 40000;
-      const color = ok ? '#5ba85b' : '#c0392b';
+      // 4-tier color: Excellent (bright green) / Good (teal) / OK (yellow) / Below floor (red)
+      let color;
+      if (arcEach >= 70000) color = '#5ba85b';      // Excellent
+      else if (arcEach >= 55000) color = '#3da870'; // Good
+      else if (arcEach >= 40000) color = '#c9a84c'; // OK (yellow)
+      else color = '#c0392b';                       // Below floor (red)
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
               `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;" title="${fmt(arcEach)}">${fmtCompact(arcEach)}</div>` +
               `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
@@ -4924,10 +4956,10 @@
       const marches = (typeof numMarches !== 'undefined' ? numMarches : 4) + (isRL ? 1 : 0);
       const arcPerMarch = Math.floor(arc / Math.max(marches, 1));
 
-      // Threshold: 40K archers per march (floor)
-      const TIER_GREAT = 59500;   // ≥ 70K full march
-      const TIER_GOOD  = 42500;   // ≥ 50K reasonable march
-      const TIER_OK    = 25500;   // ≥ 30K minimum viable
+      // Tiers based on 40K archer floor
+      const TIER_GREAT = 70000;   // ≥ 70K = Excellent (strong full march)
+      const TIER_GOOD  = 55000;   // ≥ 55K = Good (well above floor)
+      const TIER_OK    = 40000;   // ≥ 40K = OK (at floor, viable)
 
       let color, note, pctForBar, msg, msgColor;
       if (arcPerMarch >= TIER_GREAT) {
@@ -4936,20 +4968,35 @@
         msg = `✅ Strong archer count — ${fmt(arcPerMarch)} archers per march (max damage output)`;
         msgColor = '#5ba85b';
       } else if (arcPerMarch >= TIER_GOOD) {
-        color = '#8bbb40'; note = '✅ Good';
+        // Good tier: a clearly different green (teal-green) — good but not best
+        color = '#3da870'; note = '✅ Good';
         pctForBar = 80;
         msg = `✅ Good archer count — ${fmt(arcPerMarch)} archers per march`;
-        msgColor = '#8bbb40';
+        msgColor = '#3da870';
       } else if (arcPerMarch >= TIER_OK) {
-        color = '#c9a84c'; note = '⚠️ Reduce marches';
-        pctForBar = 55;
-        const needed = (TIER_GREAT * marches) - arc;
-        msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — try ${Math.max(1, marches - 1)} marches, or train ${fmt(needed)} more archers`;
+        // OK tier: yellow (above floor, viable but not optimal)
+        color = '#c9a84c'; note = '⚠️ Try fewer marches';
+        pctForBar = 60;
+        // Find the actual number of TOTAL marches that yields Excellent (≥ TIER_GREAT)
+        let suggestedTotal = 0;
+        for (let n = marches - 1; n >= 1; n--) {
+          if (Math.floor(arc / n) >= TIER_GREAT) { suggestedTotal = n; break; }
+        }
+        if (suggestedTotal > 0) {
+          // Convert total marches → joiners (for consistency with the toggle UI)
+          const suggestedJoiners = isRL ? Math.max(1, suggestedTotal - 1) : suggestedTotal;
+          const arcAtSuggested = Math.floor(arc / suggestedTotal);
+          msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — try ${suggestedJoiners} ${isRL ? 'joiners' : 'marches'} (${fmt(arcAtSuggested)} archers each = Excellent)`;
+        } else {
+          // No reduction in marches reaches Excellent (e.g., only 1 march and still not enough)
+          const needed = (TIER_GREAT * marches) - arc;
+          msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — train ${fmt(needed)} more archers to reach Excellent`;
+        }
         msgColor = '#c9a84c';
       } else {
-        color = '#c0392b'; note = '❌ Too few';
+        color = '#c0392b'; note = '❌ Below floor';
         pctForBar = 25;
-        msg = `❌ Only ${fmt(arcPerMarch)} archers per march — too low for Bear Trap. Reduce marches or train more archers`;
+        msg = `❌ Only ${fmt(arcPerMarch)} archers per march — below 40K floor. Reduce marches or train more archers`;
         msgColor = '#c0392b';
       }
 
@@ -8305,7 +8352,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r23';
+  const BEAR_BUILD = 'v2026.05.01-r25';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
