@@ -3848,7 +3848,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r42</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r43</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -6742,11 +6742,14 @@
   // at 30s spacing that's 7 waves. After opening, players cycle on their own —
   // the planner only coordinates the staggered opening of the first round.
   const MAX_WAVE_SPAN_SEC = 180;        // 30:00 → 27:00 left
-  // r41: rally cadence — 5:00 gather + 0:40 round-trip travel. A rally opened later
-  // than 5:20 left can't gather-and-land before the event ends, so the schedule
-  // stops there (late waves naturally show 4 rallies instead of an impossible 5th).
-  const RALLY_CYCLE_SEC = 340;          // 5:40 between consecutive rally opens
-  const RALLY_LAND_CUTOFF_SEC = 320;    // 5:20 — latest a rally can open and still land
+  // r41/r43: rally cadence. Far players: 5:00 gather + 0:40 round-trip march = 5:40.
+  // Near-bear players sit right next to the bear, so their march is tiny (~10s each way)
+  // → 5:00 + 0:20 = 5:20 cycle, and they can open as late as 5:10 left and still land.
+  // The shorter cycle is exactly why a near-led last wave fits 5 rallies, not 4.
+  const RALLY_CYCLE_SEC = 340;          // 5:40 — far
+  const RALLY_LAND_CUTOFF_SEC = 320;    // 5:20 — far: latest open that still lands
+  const RALLY_CYCLE_NEAR_SEC = 320;     // 5:20 — near-bear
+  const RALLY_LAND_CUTOFF_NEAR_SEC = 310; // 5:10 — near-bear: latest open that still lands
 
   // Largest wave count whose last wave still opens by 27:00 left, at the current interval.
   function maxWavesInWindow() {
@@ -6759,17 +6762,19 @@
     return _formatWaveTime(idx * _allianceWaveInterval);
   }
 
-  // r41: rally schedule for a wave. Rallies open every RALLY_CYCLE_SEC (5:40) starting
-  // at the wave's open time. The list stops once the next rally would open later than
-  // 5:20 left (it couldn't land in time) — so late waves return 4 entries, not a fake 5.
-  function getWaveRallySchedule(idx) {
+  // r41/r43: rally schedule for a wave. A near-led wave (its bear leader is 🐻 near)
+  // uses the shorter near cadence/cutoff, so it fits 5 rallies even when it opens late —
+  // which is the whole point of putting the close-to-bear players in the last waves.
+  function getWaveRallySchedule(idx, isNearLed) {
+    const cycle  = isNearLed ? RALLY_CYCLE_NEAR_SEC        : RALLY_CYCLE_SEC;
+    const cutoff = isNearLed ? RALLY_LAND_CUTOFF_NEAR_SEC  : RALLY_LAND_CUTOFF_SEC;
     const r1Left = (30 * 60) - idx * _allianceWaveInterval;
     const times = [];
     let t = r1Left;
-    while (t >= RALLY_LAND_CUTOFF_SEC && times.length < 8) {
+    while (t >= cutoff && times.length < 8) {
       const m = Math.floor(t / 60), s = t % 60;
       times.push(m + ':' + String(s).padStart(2, '0'));
-      t -= RALLY_CYCLE_SEC;
+      t -= cycle;
     }
     return times;
   }
@@ -6983,7 +6988,7 @@
             <span class="wave-time">⏱ ${time}</span>
             <span class="wave-sent-badge" id="wave-sent-${i}" style="display:none;">✅ Sent</span>
           </div>
-          <div class="wave-rally-schedule">🏹 ${getWaveRallySchedule(i).length} rallies · ${getWaveRallySchedule(i).join('  ·  ')}</div>
+          <div class="wave-rally-schedule">🏹 ${getWaveRallySchedule(i, !!(leaders[0] && leaders[0].nearBear)).length} rallies · ${getWaveRallySchedule(i, !!(leaders[0] && leaders[0].nearBear)).join('  ·  ')}</div>
           ${leadersHtml}
         </div>`;
     }).join('');
@@ -7084,7 +7089,8 @@
   function buildWaveText(plan, waveIdx) {
     const wave = plan.waves[waveIdx];
     const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx, plan.waves.length)}`];
-    const _sched = getWaveRallySchedule(waveIdx);
+    const _nearLed = !!(wave.leaders && wave.leaders[0] && wave.leaders[0].nearBear);
+    const _sched = getWaveRallySchedule(waveIdx, _nearLed);
     lines.push(`🏹 ${_sched.length} rallies: ${_sched.join(' · ')}`);
     (wave.leaders || []).forEach(m => {
       const marker = m.isTopRL ? '⭐' : '•';
@@ -8622,7 +8628,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r42';
+  const BEAR_BUILD = 'v2026.05.01-r43';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
