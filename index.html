@@ -1607,8 +1607,10 @@
     .member-row-bottom { gap: 6px; }
     .member-power { flex: 1 1 100%; min-width: 0; }
     .member-toprl-label { flex: 1; justify-content: center; }
+    .member-nearbear-label { flex: 1; justify-content: center; }
   }
-  .member-toprl-label {
+  .member-toprl-label,
+  .member-nearbear-label {
     display: flex;
     align-items: center;
     gap: 3px;
@@ -1624,13 +1626,22 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+  .member-nearbear-label {
+    /* Distinct brown/bear accent so it's visually separable from the gold (RL) marker */
+    border-color: rgba(150,90,40,0.35);
+  }
   .member-toprl-label:hover { border-color: rgba(201,168,76,0.5); }
-  .member-toprl-label input[type="checkbox"] {
+  .member-nearbear-label:hover { border-color: rgba(180,110,50,0.65); }
+  .member-toprl-label input[type="checkbox"],
+  .member-nearbear-label input[type="checkbox"] {
     margin: 0;
     accent-color: var(--gold);
     width: 12px;
     height: 12px;
     cursor: pointer;
+  }
+  .member-nearbear-label input[type="checkbox"] {
+    accent-color: #b46e32;
   }
   body.light-mode .member-toprl-label {
     background: #fff8e8;
@@ -1638,6 +1649,12 @@
     border-color: rgba(122,80,20,0.45);
   }
   body.light-mode .member-toprl-label:hover { border-color: #8a6010; }
+  body.light-mode .member-nearbear-label {
+    background: #fff8e8;
+    color: #4a3618;
+    border-color: rgba(150,80,30,0.45);
+  }
+  body.light-mode .member-nearbear-label:hover { border-color: #8a4d10; }
   .member-delete {
     background: rgba(192,57,43,0.15);
     border: 1px solid rgba(192,57,43,0.4);
@@ -2538,6 +2555,22 @@
   }
   body.light-mode .wave-time { color: #2a1a08; background: rgba(138,96,16,0.08); }
 
+  .wave-rally-schedule {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    color: rgba(224,160,112,0.85);
+    background: rgba(180,110,50,0.1);
+    border: 1px solid rgba(180,110,50,0.25);
+    border-radius: 8px;
+    padding: 5px 10px;
+    margin: 6px 0 8px;
+    letter-spacing: 0.02em;
+  }
+  body.light-mode .wave-rally-schedule {
+    color: #6b3d18;
+    background: rgba(180,110,50,0.08);
+  }
+
   .wave-leader-row, .wave-joiner-row {
     display: flex;
     align-items: center;
@@ -3039,9 +3072,6 @@
       <button class="lang-btn" onclick="setLang('ar')">🇸🇦 AR</button>
       <button class="lang-btn" onclick="setLang('es')">🇪🇸 ES</button>
       <button class="lang-btn" onclick="setLang('pt')">🇧🇷 PT</button>
-      <button class="lang-btn" onclick="setLang('de')">🇩🇪 DE</button>
-      <button class="lang-btn" onclick="setLang('sv')">🇸🇪 SV</button>
-      <button class="lang-btn" onclick="setLang('ko')">🇰🇷 KO</button>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">🌙</button>
       <button class="font-size-btn" id="font-size-btn" onclick="cycleFontSize()" title="Change font size" aria-label="Change font size">A</button>
       <button class="share-floating-btn" id="share-floating-btn" onclick="shareBearApp()" title="Share BEAR with friends" aria-label="Share">
@@ -3393,12 +3423,30 @@
     <div class="alliance-interval-section">
       <div class="alliance-interval-label">⏱ <span data-i18n="waveInterval">Time between waves</span></div>
       <div class="alliance-interval-buttons">
+        <button class="alliance-interval-btn" data-sec="15" onclick="setAllianceWaveInterval(15)">15s</button>
+        <button class="alliance-interval-btn" data-sec="20" onclick="setAllianceWaveInterval(20)">20s</button>
         <button class="alliance-interval-btn" data-sec="30" onclick="setAllianceWaveInterval(30)">30s</button>
         <button class="alliance-interval-btn" data-sec="40" onclick="setAllianceWaveInterval(40)">40s</button>
         <button class="alliance-interval-btn" data-sec="50" onclick="setAllianceWaveInterval(50)">50s</button>
         <button class="alliance-interval-btn" data-sec="60" onclick="setAllianceWaveInterval(60)">60s</button>
       </div>
       <div class="alliance-interval-hint" id="alliance-interval-hint"></div>
+    </div>
+
+    <!-- Wave count override (r31) — default Auto = computed from member count -->
+    <div class="alliance-interval-section">
+      <div class="alliance-interval-label">🌊 <span data-i18n="waveCount">Number of waves</span></div>
+      <div class="alliance-interval-buttons" id="alliance-wavecount-buttons">
+        <button class="alliance-interval-btn" data-waves="0" onclick="setForceWaveCount(0)">Auto</button>
+        <button class="alliance-interval-btn" data-waves="2" onclick="setForceWaveCount(2)">2</button>
+        <button class="alliance-interval-btn" data-waves="3" onclick="setForceWaveCount(3)">3</button>
+        <button class="alliance-interval-btn" data-waves="4" onclick="setForceWaveCount(4)">4</button>
+        <button class="alliance-interval-btn" data-waves="5" onclick="setForceWaveCount(5)">5</button>
+        <button class="alliance-interval-btn" data-waves="6" onclick="setForceWaveCount(6)">6</button>
+        <button class="alliance-interval-btn" data-waves="7" onclick="setForceWaveCount(7)">7</button>
+        <button class="alliance-interval-btn" data-waves="8" onclick="setForceWaveCount(8)">8</button>
+      </div>
+      <div class="alliance-interval-hint" id="alliance-wavecount-hint"></div>
     </div>
 
     <!-- Sticky Generate Button -->
@@ -3566,15 +3614,32 @@
             <div class="ocr-upload-icon">📷</div>
             <div class="ocr-upload-text">
               <div>Click to upload Bear Trap result screenshots</div>
-              <div class="ocr-upload-sub">Up to 10 images · JPG, PNG, WebP</div>
+              <div class="ocr-upload-sub" id="damage-upload-sub">Up to 10 images · JPG, PNG, WebP</div>
             </div>
           </div>
           <input type="file" id="damage-ocr-file-input" accept="image/*" multiple style="display:none;" onchange="processDamageOCR(this)">
-          <!-- API key entry (shared with main OCR) -->
+
+          <!-- Provider selector (r26) — shared global state with main OCR -->
+          <div class="ocr-provider-row" style="margin-top:10px;">
+            <div style="font-size:11px;color:rgba(220,210,180,0.55);margin-bottom:4px;letter-spacing:0.04em;">🤖 AI Provider</div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" id="damage-provider-groq-btn" onclick="setOcrProvider('groq')"
+                style="flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                ⚡ Groq<br><span style="font-size:9px;opacity:0.75;font-weight:400;">1,000/day · recommended</span>
+              </button>
+              <button type="button" id="damage-provider-gemini-btn" onclick="setOcrProvider('gemini')"
+                style="flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                🤖 Gemini<br><span style="font-size:9px;opacity:0.75;font-weight:400;">~20/day</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- API key entry (shared with main OCR; provider-aware) -->
           <div style="margin-top:10px;">
             <input type="password" id="damage-ocr-apikey" class="alliance-search-input"
-              placeholder="🔑 Gemini API key (AIza...)" style="width:100%;">
-            <div style="font-size:10px; color:var(--gold-dim); margin-top:4px; font-style:italic;">Get a free key at aistudio.google.com/apikey · Saved in your browser only</div>
+              placeholder="🔑 Groq API key (gsk_...)" style="width:100%;"
+              oninput="saveApiKey(this.value)">
+            <div id="damage-ocr-apikey-help" style="font-size:10px; color:var(--gold-dim); margin-top:4px; font-style:italic;">Get a free key at console.groq.com/keys · Saved in your browser only</div>
           </div>
           <div id="damage-ocr-status" style="display:none; text-align:center; padding:14px; color:#c9a84c; font-style:italic;"></div>
         </div>
@@ -3618,7 +3683,7 @@
       <div class="alliance-modal-content">
         <div class="alliance-modal-title">📷 <span data-i18n="importScreenshotTitle">Import from Screenshot</span></div>
         <div class="alliance-modal-hint" data-i18n="importScreenshotHint">
-          Upload a screenshot of your Alliance Members list — names and power will be extracted automatically.
+          Upload a screenshot of your Alliance Members list <em>or</em> a Bear Trap Damage Rewards / Rankings screen — names will be extracted from either. Power/damage values are extracted when visible (set to 0 otherwise; you can fill them in by hand).
         </div>
 
         <!-- Upload area -->
@@ -3628,48 +3693,67 @@
             <div class="ocr-upload-icon">📷</div>
             <div class="ocr-upload-text">
               <div data-i18n="viewUploadMain">Click to upload screenshot(s)</div>
-              <div class="ocr-upload-sub">Up to 10 images at once · JPG, PNG, WebP</div>
+              <div class="ocr-upload-sub" id="ocr-upload-sub">Up to 5 images at once · JPG, PNG, WebP</div>
             </div>
           </div>
 
-          <!-- Online only toggle -->
+          <!-- Online only toggle — legacy filter, only useful for live Members list screenshots
+               (NOT Damage Rewards / Rankings). Default OFF for the standard workflow. -->
           <div class="ocr-online-toggle">
             <label class="ocr-toggle-label">
-              <input type="checkbox" id="ocr-online-only" checked>
-              <span class="ocr-toggle-text">🟢 <span data-i18n="onlineOnly">Import Online members only</span></span>
+              <input type="checkbox" id="ocr-online-only">
+              <span class="ocr-toggle-text">🟢 <span data-i18n="onlineOnly">Import Online members only (legacy)</span></span>
             </label>
           </div>
 
-          <!-- First-time info (shown only when no API key saved) -->
+          <!-- First-time info (shown only when no API key saved). Provider-aware
+               copy is populated by refreshProviderUI() based on the active provider. -->
           <div id="ocr-first-time-info" class="ocr-first-time-info" style="display:none;">
             <div class="ocr-fti-title">⚔️ First time? Read this</div>
-            <div class="ocr-fti-intro">
-              To read your screenshot, BEAR uses Google's free AI.<br>
-              You need a <strong>free key from Google</strong> — takes 30 seconds, no credit card.
+            <div class="ocr-fti-intro" id="ocr-fti-intro">
+              To read your screenshot, BEAR uses a free AI.<br>
+              You need a <strong>free API key</strong> — takes 30 seconds, no credit card.
             </div>
-            <a href="https://aistudio.google.com/apikey" target="_blank" class="ocr-fti-cta">
-              🔑 Get my free Google key →
+            <a href="https://console.groq.com/keys" target="_blank" id="ocr-fti-cta-link" class="ocr-fti-cta">
+              🔑 <span id="ocr-fti-cta-label">Get my free Groq key →</span>
             </a>
             <div class="ocr-fti-steps-title">Then come back here and:</div>
             <ol>
-              <li>Copy your key (it starts with <code>AIza...</code>)</li>
+              <li id="ocr-fti-step1">Copy your key (it starts with <code>gsk_...</code>)</li>
               <li>Paste it in the box below ↓</li>
               <li>Upload your screenshots — done!</li>
             </ol>
-            <div class="ocr-fti-footnote">
+            <div class="ocr-fti-footnote" id="ocr-fti-footnote">
               🔒 Your key stays on your phone — only used to read your screenshots.<br>
-              ✨ 250 free screenshots per day.
+              ✨ 1,000 free screenshots per day.
             </div>
           </div>
 
-          <!-- API Key input -->
+          <!-- Provider selector (r26): Groq (default, generous free tier) vs Gemini.
+               Saved in localStorage as 'btOcrProvider'. Each provider has its own
+               API key slot, so users can switch back and forth without re-pasting. -->
+          <div class="ocr-provider-row" style="margin-top:10px;">
+            <div style="font-size:11px;color:rgba(220,210,180,0.55);margin-bottom:4px;letter-spacing:0.04em;">🤖 AI Provider</div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" id="ocr-provider-groq-btn" onclick="setOcrProvider('groq')"
+                style="flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                ⚡ Groq<br><span style="font-size:9px;opacity:0.75;font-weight:400;">1,000/day · recommended</span>
+              </button>
+              <button type="button" id="ocr-provider-gemini-btn" onclick="setOcrProvider('gemini')"
+                style="flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;">
+                🤖 Gemini<br><span style="font-size:9px;opacity:0.75;font-weight:400;">~20/day</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- API Key input (placeholder + helper link are updated by refreshProviderUI) -->
           <div class="ocr-apikey-row" style="margin-top:10px;">
             <input type="password" id="ocr-apikey-input" class="alliance-search-input"
-              placeholder="🔑 Gemini API key (AIza...)"
+              placeholder="🔑 Groq API key (gsk_...)"
               style="font-size:12px;"
               oninput="saveApiKey(this.value); var f=document.getElementById('ocr-first-time-info'); if(f && this.value.length>=10) f.style.display='none';">
-            <div style="font-size:10px;color:rgba(220,210,180,0.45);margin-top:4px;">
-              ✨ Free · <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--gold-dim);">Get free key at aistudio.google.com/apikey →</a>
+            <div style="font-size:10px;color:rgba(220,210,180,0.45);margin-top:4px;" id="ocr-apikey-help">
+              ✨ Free · <a href="https://console.groq.com/keys" target="_blank" id="ocr-apikey-help-link" style="color:var(--gold-dim);">Get free key at console.groq.com/keys →</a>
             </div>
           </div>
         </div>
@@ -3764,7 +3848,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r25</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r42</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4224,228 +4308,6 @@
       exportCopied: '✓ Lista copiada para a área de transferência',
       leftoverMembers: 'próxima rotação (5 min)',
       dir: 'ltr'
-    },
-    de: {
-      yourArmy: 'Deine Armee', numMarches: 'Anzahl der Märsche', rallyLeader: 'Sammlungsführer',
-      rallyOff: 'Aus – Nur Beitreten', rallyOn: 'An – Marsch 1 = Anführer',
-      rallySub: 'Aktivieren, wenn einer deiner Märsche der Sammlungsführer ist',
-      rallySubOn: 'Marsch 1 sendet deine gesamte Armee zur Sammlung',
-      calcBtn: 'Ideale Märsche berechnen', yourMarches: 'Deine Märsche',
-      summary: 'Nutzungsübersicht', tips: 'Tipps',
-      tip1: '<strong>Immer T10 vor T9</strong> – T10-Truppen verursachen ~40% mehr Schaden. Verwende T9 nur, um restliche Plätze zu füllen',
-      tip2: '<strong>Bogenschützen = Haupt-DPS</strong> in der Bärenfalle. Infanterie absorbiert Schaden, Kavallerie füllt den Rest',
-      tip3: '<strong>6 Minuten vor Ende der Bärenfalle</strong> – alle öffnen gleichzeitig Sammlungen für maximalen Endschaden. Wenn bereits 4 Chenkos in der Sammlung sind → nur Truppen senden!',
-      type: 'Typ', sent: 'Gesendet', home: 'Bleibt zu Hause', total: 'Gesamt', atHome: 'zu Hause',
-      opensRally: 'Öffnet die Sammlung', rallyLeaderLabel: '👑 Sammlungsführer',
-      archerFocus: '🏹 Bogen-Fokus', mixedMarch: '🏹 Gemischter Marsch', supportMarch: '⚔️ Unterstützungs-Marsch',
-      march: 'Marsch', target: 'Ziel: 85% / 10% / 5%', composition: 'Zusammensetzung',
-      personalView: 'Persönlich', allianceView: 'Allianz',
-      alliancePlannerTitle: 'Allianz-Sammlungsplaner',
-      allianceDesc: 'Füge Online-Mitglieder hinzu. Jedes Mitglied öffnet seine eigene Sammlung — stärkstes zuerst (am nächsten zum Bären), schwächstes zuletzt. Wellen feuern im Abstand von 40 Sekunden. Bei richtigem Timing füllen sich alle Sammlungen organisch, während Mitglieder zwischen ihren eigenen Wellen Märsche senden. Top-Sammlungsführer (⭐) haben meist die meiste Macht und öffnen zuerst.',
-      rallyCapTop: 'Top-Sammlung — Kapazität',
-      rallyCapRegular: 'Reguläre Sammlung — Kapazität',
-      totalCapacity: 'Gesamtplätze',
-      joinersFooter: 'Beitritte: öffne das Spiel, finde eine verfügbare Sammlung, drücke Beitreten.',
-      addMember: 'Mitglied hinzufügen', memberName: 'Mitgliedsname', memberPower: 'Macht', topRL: 'Top RL',
-      reset: 'Zurücksetzen', members: 'Mitglieder', topRLs: 'Top-Anführer', waves: 'Wellen',
-      generatePlan: 'Wellenplan erstellen', waveAssignments: 'Wellenzuweisungen',
-      waveInterval: 'Zeit zwischen Wellen',
-      wave: 'Welle', rallyLeaderShort: 'RL', joiner: 'Beitreten',
-      copyPlan: 'Welle 1 kopieren', copied: '✓ In Zwischenablage kopiert',
-      copyMsgBtn: 'Nachricht {n}/{total} kopieren',
-      copyNextMsg: '✓ Nachricht {n}/2 — in den Chat einfügen, dann für Nachricht {next} tippen',
-      copyDone: 'Alle {n} Nachrichten gesendet! Zähler zurückgesetzt.',
-      copyManual: 'Manuell kopieren:',
-      statusAvailable: 'Verfügbar für die Bärenfalle',
-      statusLeader: 'Sammlungsführer (führt eigene Sammlung)',
-      statusUnavailable: 'Nicht verfügbar für dieses Event',
-      sortByPower: 'Nach Macht sortieren',
-      sortedByPower: 'Nach Macht sortiert (stärkste zuerst)',
-      fromScreenshot: 'Aus Screenshot',
-      ocrTitle: 'Aus Screenshot importieren',
-      ocrHint: 'Lade einen Screenshot deiner Allianz-Mitgliederliste hoch. Das Tool zeigt das Bild für einfache manuelle Übertragung an.',
-      ocrUploadMain: 'Klicke, um Screenshot hochzuladen',
-      ocrUploadSub: 'JPG, PNG, WebP unterstützt',
-      ocrProcessing: 'Bild wird verarbeitet...',
-      ocrPreviewTitle: 'Erkannte Mitglieder',
-      ocrPreviewHint: 'Überprüfe und bearbeite die erkannten Daten vor dem Hinzufügen.',
-      ocrNoData: 'Keine Mitgliederdaten im Bild erkannt. Versuche einen klareren Screenshot.',
-      ocrError: 'Fehler beim Verarbeiten des Bildes. Bitte erneut versuchen.',
-      ocrSuccess: '{n} Mitglieder erfolgreich aus dem Screenshot importiert',
-      ocrUnavailable: 'OCR-Funktion ist derzeit nicht verfügbar.',
-      ocrFallbackTitle: 'Manuelle Übertragung',
-      ocrFallbackHint: 'OCR fehlgeschlagen, aber du kannst deinen Screenshot unten ansehen und Text manuell in Massen-Einfügen kopieren.',
-      useBulkPaste: 'Massen-Einfügen verwenden',
-      viewScreenshot: 'Screenshot ansehen',
-      viewScreenshotTitle: 'Screenshot-Viewer',
-      viewScreenshotHint: 'Lade einen Screenshot hoch, um ihn klar zu sehen. Du kannst dann Namen und Macht manuell ins Massen-Einfügen kopieren.',
-      viewUploadMain: 'Klicke, um Screenshot hochzuladen',
-      viewUploadSub: 'JPG, PNG, WebP unterstützt',
-      emptySlot: 'freier Platz', emptySlots: 'freie Plätze',
-      alliancePromptAdd: 'Mitglieder hinzufügen, um zu beginnen ⚔️',
-      confirmReset: 'Alle Mitglieder löschen und neu beginnen?',
-      noValidMembers: 'Bitte füge mindestens ein Mitglied mit einem Namen hinzu.',
-      bulkPaste: 'Massen-Einfügen', bulkPasteTitle: 'Mitgliederliste einfügen',
-      bulkPasteHint: 'Ein Mitglied pro Zeile. Beispiele: "ShadowKing 15.2M RL", "DragonSlayer, 12M". Macht unterstützt M / K / B-Endungen. Markiere Top RL mit "RL", "★", "👑", "*", oder "(RL)".',
-      bulkPastePreview: 'Vorschau', bulkPasteParsed: 'Mitglieder erkannt',
-      bulkPasteEmpty: 'Keine gültigen Mitglieder erkannt. Überprüfe die Formatierung.',
-      bulkPasteAppend: 'Anhängen', bulkPasteReplace: 'Alle ersetzen',
-      cancel: 'Abbrechen',
-      exportRoster: 'Exportieren', importRoster: 'Importieren',
-      importRosterTitle: 'Mitgliederliste importieren',
-      importHint: 'Füge JSON ein, das aus diesem Tool exportiert wurde (oder ein kompatibles Format mit name / power / isTopRL Feldern).',
-      importInvalid: 'Ungültiges JSON. Überprüfe das Format.',
-      exportCopied: '✓ Liste in Zwischenablage kopiert',
-      leftoverMembers: 'als nächstes für nächste Rotation (5 Min)',
-      dir: 'ltr'
-    },
-    sv: {
-      yourArmy: 'Din Armé', numMarches: 'Antal Marscher', rallyLeader: 'Rallyledare',
-      rallyOff: 'Av – Endast anslutning', rallyOn: 'På – Marsch 1 = Ledare',
-      rallySub: 'Aktivera om en av dina marscher är rallyledaren',
-      rallySubOn: 'Marsch 1 skickar hela armén till rallyt',
-      calcBtn: 'Beräkna ideala marscher', yourMarches: 'Dina marscher',
-      summary: 'Användningssammanfattning', tips: 'Tips',
-      tip1: '<strong>Alltid T10 före T9</strong> – T10-trupper gör ~40% mer skada. Använd T9 endast för att fylla återstående platser',
-      tip2: '<strong>Bågskyttar = huvud-DPS</strong> i Björnfällan. Infanteri absorberar skada, kavalleri fyller resten',
-      tip3: '<strong>6 minuter före Björnfällan slutar</strong> – alla öppnar Rallyn samtidigt för maximal slutskada. Om 4 Chenkos redan i rally → skicka endast trupper!',
-      type: 'Typ', sent: 'Skickade', home: 'Stannar hemma', total: 'Totalt', atHome: 'hemma',
-      opensRally: 'Öppnar Rallyt', rallyLeaderLabel: '👑 Rallyledare',
-      archerFocus: '🏹 Bågskytte-fokus', mixedMarch: '🏹 Blandad marsch', supportMarch: '⚔️ Stödmarsch',
-      march: 'Marsch', target: 'Mål: 85% / 10% / 5%', composition: 'Sammansättning',
-      personalView: 'Personlig', allianceView: 'Allians',
-      alliancePlannerTitle: 'Allians Rallyplanerare',
-      allianceDesc: 'Lägg till online-medlemmar. Varje medlem öppnar sitt eget rally — starkast först (närmast björnen), svagast sist. Vågorna skjuter med 40 sekunders mellanrum. Med rätt timing fylls alla rallyn organiskt när medlemmar skickar marscher mellan sina egna vågor. Topprallyledare (⭐) har vanligtvis mest makt och öppnar först.',
-      rallyCapTop: 'Topprally — kapacitet',
-      rallyCapRegular: 'Vanligt rally — kapacitet',
-      totalCapacity: 'totala platser',
-      joinersFooter: 'Anslutare: öppna spelet, hitta ett tillgängligt rally, tryck på anslut.',
-      addMember: 'Lägg till medlem', memberName: 'Medlemsnamn', memberPower: 'Makt', topRL: 'Topp RL',
-      reset: 'Återställ', members: 'medlemmar', topRLs: 'topp-RL', waves: 'vågor',
-      generatePlan: 'Generera vågplan', waveAssignments: 'Vågtilldelningar',
-      waveInterval: 'Tid mellan vågor',
-      wave: 'Våg', rallyLeaderShort: 'RL', joiner: 'Anslut',
-      copyPlan: 'Kopiera våg 1', copied: '✓ Kopierat till urklipp',
-      copyMsgBtn: 'Kopiera meddelande {n}/{total}',
-      copyNextMsg: '✓ Meddelande {n}/2 — klistra in i chatt, tryck sedan för meddelande {next}',
-      copyDone: 'Alla {n} meddelanden skickade! Räknare återställd.',
-      copyManual: 'Kopiera manuellt:',
-      statusAvailable: 'Tillgänglig för Björnfällan',
-      statusLeader: 'Rallyledare (leder eget rally)',
-      statusUnavailable: 'Inte tillgänglig för detta event',
-      sortByPower: 'Sortera efter makt',
-      sortedByPower: 'Sorterat efter makt (starkast först)',
-      fromScreenshot: 'Från skärmdump',
-      ocrTitle: 'Importera från skärmdump',
-      ocrHint: 'Ladda upp en skärmdump av din allianses medlemslista. Verktyget visar bilden för enkel manuell överföring.',
-      ocrUploadMain: 'Klicka för att ladda upp skärmdump',
-      ocrUploadSub: 'JPG, PNG, WebP stöds',
-      ocrProcessing: 'Behandlar bild...',
-      ocrPreviewTitle: 'Upptäckta medlemmar',
-      ocrPreviewHint: 'Granska och redigera upptäckt data innan du lägger till.',
-      ocrNoData: 'Ingen medlemsdata upptäckt i bilden. Försök med en tydligare skärmdump.',
-      ocrError: 'Fel vid behandling av bild. Försök igen.',
-      ocrSuccess: '{n} medlemmar importerade framgångsrikt från skärmdump',
-      ocrUnavailable: 'OCR-funktion är för närvarande inte tillgänglig.',
-      ocrFallbackTitle: 'Manuell överföring',
-      ocrFallbackHint: 'OCR misslyckades, men du kan se din skärmdump nedan och kopiera text manuellt till Massinklistring.',
-      useBulkPaste: 'Använd Massinklistring',
-      viewScreenshot: 'Visa skärmdump',
-      viewScreenshotTitle: 'Skärmdumpvisare',
-      viewScreenshotHint: 'Ladda upp en skärmdump för att se den tydligt. Du kan sedan manuellt kopiera namn och maktnivåer till Massinklistring.',
-      viewUploadMain: 'Klicka för att ladda upp skärmdump',
-      viewUploadSub: 'JPG, PNG, WebP stöds',
-      emptySlot: 'ledig plats', emptySlots: 'lediga platser',
-      alliancePromptAdd: 'Lägg till medlemmar för att börja planera ⚔️',
-      confirmReset: 'Rensa alla medlemmar och börja om?',
-      noValidMembers: 'Lägg till minst en medlem med ett namn.',
-      bulkPaste: 'Massinklistring', bulkPasteTitle: 'Klistra in medlemslista',
-      bulkPasteHint: 'En medlem per rad. Exempel: "ShadowKing 15.2M RL", "DragonSlayer, 12M". Makt stöder M / K / B-suffix. Markera Topp RL med "RL", "★", "👑", "*", eller "(RL)".',
-      bulkPastePreview: 'Förhandsgranska', bulkPasteParsed: 'medlemmar upptäckta',
-      bulkPasteEmpty: 'Inga giltiga medlemmar upptäcktes. Kontrollera formateringen.',
-      bulkPasteAppend: 'Lägg till', bulkPasteReplace: 'Ersätt alla',
-      cancel: 'Avbryt',
-      exportRoster: 'Exportera', importRoster: 'Importera',
-      importRosterTitle: 'Importera medlemslista',
-      importHint: 'Klistra in JSON exporterad från detta verktyg (eller kompatibelt format med name / power / isTopRL-fält).',
-      importInvalid: 'Ogiltig JSON. Kontrollera formatet.',
-      exportCopied: '✓ Lista kopierad till urklipp',
-      leftoverMembers: 'först ut för nästa rotation (5 min)',
-      dir: 'ltr'
-    },
-    ko: {
-      yourArmy: '내 군대', numMarches: '행군 수', rallyLeader: '랠리 리더',
-      rallyOff: '끄기 – 참여만', rallyOn: '켜기 – 행군 1 = 리더',
-      rallySub: '행군 중 하나가 랠리 리더인 경우 활성화',
-      rallySubOn: '행군 1이 전체 군대를 랠리에 보냅니다',
-      calcBtn: '최적 행군 계산', yourMarches: '내 행군',
-      summary: '사용 요약', tips: '팁',
-      tip1: '<strong>T10을 T9보다 먼저</strong> – T10 부대는 약 40% 더 많은 피해를 줍니다. T9는 남은 슬롯을 채우는 데만 사용하세요',
-      tip2: '<strong>궁수 = 주요 DPS</strong> 베어 트랩에서. 보병은 피해를 흡수하고, 기병은 나머지를 채웁니다',
-      tip3: '<strong>베어 트랩 종료 6분 전</strong> – 모두 동시에 랠리를 열어 최대 최종 피해를 입힙니다. 이미 랠리에 첸코 4명이 있다면 → 부대만 보내세요!',
-      type: '유형', sent: '보냄', home: '집에 남음', total: '합계', atHome: '집에',
-      opensRally: '랠리 시작', rallyLeaderLabel: '👑 랠리 리더',
-      archerFocus: '🏹 궁수 중심', mixedMarch: '🏹 혼합 행군', supportMarch: '⚔️ 지원 행군',
-      march: '행군', target: '목표: 85% / 10% / 5%', composition: '구성',
-      personalView: '개인', allianceView: '동맹',
-      alliancePlannerTitle: '동맹 랠리 플래너',
-      allianceDesc: '온라인 멤버를 추가하세요. 각 멤버는 자신의 랠리를 엽니다 — 가장 강한 사람이 먼저(곰에 가장 가까운), 가장 약한 사람이 마지막. 웨이브는 40초 간격으로 발사됩니다. 적절한 타이밍으로 모든 랠리가 자연스럽게 채워집니다. 상위 RL(⭐)은 보통 가장 강력하고 먼저 엽니다.',
-      rallyCapTop: '상위 RL 랠리 — 용량',
-      rallyCapRegular: '일반 랠리 — 용량',
-      totalCapacity: '총 슬롯',
-      joinersFooter: '참여자: 게임을 열고, 사용 가능한 랠리를 찾아 참여를 누르세요.',
-      addMember: '멤버 추가', memberName: '멤버 이름', memberPower: '파워', topRL: '상위 RL',
-      reset: '초기화', members: '멤버', topRLs: '상위 RL', waves: '웨이브',
-      generatePlan: '웨이브 계획 생성', waveAssignments: '웨이브 배정',
-      waveInterval: '웨이브 간 시간',
-      wave: '웨이브', rallyLeaderShort: 'RL', joiner: '참여',
-      copyPlan: '웨이브 1 복사', copied: '✓ 클립보드에 복사됨',
-      copyMsgBtn: '메시지 {n}/{total} 복사',
-      copyNextMsg: '✓ 메시지 {n}/2 — 채팅에 붙여넣은 다음 메시지 {next}를 누르세요',
-      copyDone: '모든 {n}개 메시지가 전송되었습니다! 카운터 재설정.',
-      copyManual: '수동 복사:',
-      statusAvailable: '베어 트랩 참여 가능',
-      statusLeader: '랠리 리더 (자체 랠리 주도)',
-      statusUnavailable: '이 이벤트에 참여 불가',
-      sortByPower: '파워별 정렬',
-      sortedByPower: '파워별 정렬됨 (강한 순)',
-      fromScreenshot: '스크린샷에서',
-      ocrTitle: '스크린샷에서 가져오기',
-      ocrHint: '동맹 멤버 목록의 스크린샷을 업로드하세요. 도구가 이미지를 표시하여 쉽게 수동 전송할 수 있습니다.',
-      ocrUploadMain: '클릭하여 스크린샷 업로드',
-      ocrUploadSub: 'JPG, PNG, WebP 지원',
-      ocrProcessing: '이미지 처리 중...',
-      ocrPreviewTitle: '감지된 멤버',
-      ocrPreviewHint: '추가하기 전에 감지된 데이터를 검토하고 편집하세요.',
-      ocrNoData: '이미지에서 멤버 데이터가 감지되지 않았습니다. 더 선명한 스크린샷으로 시도하세요.',
-      ocrError: '이미지 처리 오류. 다시 시도해주세요.',
-      ocrSuccess: '스크린샷에서 {n}명의 멤버를 성공적으로 가져왔습니다',
-      ocrUnavailable: 'OCR 기능을 현재 사용할 수 없습니다.',
-      ocrFallbackTitle: '수동 전송',
-      ocrFallbackHint: 'OCR 실패. 아래에서 스크린샷을 보고 일괄 붙여넣기에 텍스트를 수동으로 복사할 수 있습니다.',
-      useBulkPaste: '일괄 붙여넣기 사용',
-      viewScreenshot: '스크린샷 보기',
-      viewScreenshotTitle: '스크린샷 뷰어',
-      viewScreenshotHint: '스크린샷을 업로드하여 명확하게 보세요. 그런 다음 이름과 파워 레벨을 일괄 붙여넣기에 수동으로 복사할 수 있습니다.',
-      viewUploadMain: '클릭하여 스크린샷 업로드',
-      viewUploadSub: 'JPG, PNG, WebP 지원',
-      emptySlot: '빈 슬롯', emptySlots: '빈 슬롯들',
-      alliancePromptAdd: '계획을 시작하려면 멤버를 추가하세요 ⚔️',
-      confirmReset: '모든 멤버를 지우고 다시 시작하시겠습니까?',
-      noValidMembers: '이름이 있는 멤버를 하나 이상 추가하세요.',
-      bulkPaste: '일괄 붙여넣기', bulkPasteTitle: '멤버 목록 붙여넣기',
-      bulkPasteHint: '한 줄에 한 명. 예: "ShadowKing 15.2M RL", "DragonSlayer, 12M". 파워는 M / K / B 접미사 지원. 상위 RL은 "RL", "★", "👑", "*", 또는 "(RL)"로 표시.',
-      bulkPastePreview: '미리보기', bulkPasteParsed: '명 감지됨',
-      bulkPasteEmpty: '유효한 멤버가 감지되지 않았습니다. 형식을 확인하세요.',
-      bulkPasteAppend: '추가', bulkPasteReplace: '모두 교체',
-      cancel: '취소',
-      exportRoster: '내보내기', importRoster: '가져오기',
-      importRosterTitle: '명단 가져오기',
-      importHint: '이 도구에서 내보낸 JSON을 붙여넣으세요 (또는 name / power / isTopRL 필드가 있는 호환 형식).',
-      importInvalid: '잘못된 JSON입니다. 형식을 확인하세요.',
-      exportCopied: '✓ 명단이 클립보드에 복사되었습니다',
-      leftoverMembers: '다음 로테이션 우선 (5분)',
-      dir: 'ltr'
     }
   };
 
@@ -4493,7 +4355,6 @@
     });
     updateMarchRec();
     updateTotals(); // refresh archer rating bar (depends on marches count)
-    updateMarchTooltips(); // refresh the "X joiners + 1 RL = Y total" label
     saveArmy(); // persist marches selection to current preset
   }
 
@@ -4712,12 +4573,12 @@
       t10Wrap.style.display = 'none';
     }
 
-    const MIN_PER_MARCH = 47059; // 40K archers / 0.85 = ~47K total
-    // Archers are the bottleneck: each march needs >= 30,000 archers (floor)
+    const MIN_PER_MARCH = 50000;
+    // Archers are the bottleneck: each march needs >= 42,500 archers (85% of 50k)
     const recArcTotal = (parseInt(document.getElementById('arc-t10').value)||0)
                       + (parseInt(document.getElementById('arc-t9').value)||0)
                       + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
-    const MIN_ARC = 40000; // 40K archers per march minimum
+    const MIN_ARC = Math.floor(50000 * 0.85); // 42,500
 
     const errBox = document.getElementById('army-error-box');
     const errTitle = document.getElementById('army-error-title');
@@ -4727,7 +4588,7 @@
       if (errBox) {
         const needed = MIN_ARC;
         errTitle.textContent = 'Not enough archers for even 1 march!';
-        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} per march`;
+        errSub.textContent = `You have ${fmt(recArcTotal)} archers — need at least ${fmt(needed)} (85% of 50K)`;
         errBox.style.display = 'block';
       }
       return;
@@ -4769,39 +4630,12 @@
       return arcT + cavT + infT;
     }
 
-    // Auto-recommendation: prefer max marches where each gets EXCELLENT rating (70K+ archers).
-    // If army can't support any Excellent marches, fall back gracefully:
-    //   - Try GOOD (55K), then OK (40K floor).
-    const TARGET_EXCELLENT = 70000;
-    const TARGET_GOOD = 55000;
     let recTotal = 1;
-    // Try Excellent first
     for (let n = maxTotal; n >= 1; n--) {
       const arcPerMarch = Math.floor(recArcTotal / n);
+      // Use ACTUAL per-march total (not theoretical 85%) for capacity check
       const totalPerMarch = actualPerMarch(n);
-      if (arcPerMarch >= TARGET_EXCELLENT && totalPerMarch <= capacity) { recTotal = n; break; }
-    }
-    // If not even 1 march at Excellent, try Good
-    if (recTotal === 1) {
-      const arcPerMarch1 = Math.floor(recArcTotal / 1);
-      if (arcPerMarch1 < TARGET_EXCELLENT) {
-        for (let n = maxTotal; n >= 1; n--) {
-          const arcPerMarch = Math.floor(recArcTotal / n);
-          const totalPerMarch = actualPerMarch(n);
-          if (arcPerMarch >= TARGET_GOOD && totalPerMarch <= capacity) { recTotal = n; break; }
-        }
-      }
-    }
-    // Final fallback to floor (40K)
-    if (recTotal === 1) {
-      const arcPerMarch1 = Math.floor(recArcTotal / 1);
-      if (arcPerMarch1 < TARGET_GOOD) {
-        for (let n = maxTotal; n >= 1; n--) {
-          const arcPerMarch = Math.floor(recArcTotal / n);
-          const totalPerMarch = actualPerMarch(n);
-          if (arcPerMarch >= MIN_ARC && totalPerMarch <= capacity) { recTotal = n; break; }
-        }
-      }
+      if (arcPerMarch >= MIN_ARC && totalPerMarch <= capacity) { recTotal = n; break; }
     }
     // Convert to joiner count (what the toggle shows)
     const recJoiners = isRallyLeader ? Math.max(1, recTotal - 1) : recTotal;
@@ -4871,12 +4705,8 @@
       const totalMarches = n + (isRL ? 1 : 0);
       const arcEach = Math.floor(arc / totalMarches);
       const totalEach = Math.floor(arcEach / 0.85);
-      // 4-tier color: Excellent (bright green) / Good (teal) / OK (yellow) / Below floor (red)
-      let color;
-      if (arcEach >= 70000) color = '#5ba85b';      // Excellent
-      else if (arcEach >= 55000) color = '#3da870'; // Good
-      else if (arcEach >= 40000) color = '#c9a84c'; // OK (yellow)
-      else color = '#c0392b';                       // Below floor (red)
+      const ok = totalEach >= 50000;
+      const color = ok ? '#5ba85b' : '#c0392b';
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
               `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;" title="${fmt(arcEach)}">${fmtCompact(arcEach)}</div>` +
               `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
@@ -4956,10 +4786,10 @@
       const marches = (typeof numMarches !== 'undefined' ? numMarches : 4) + (isRL ? 1 : 0);
       const arcPerMarch = Math.floor(arc / Math.max(marches, 1));
 
-      // Tiers based on 40K archer floor
-      const TIER_GREAT = 70000;   // ≥ 70K = Excellent (strong full march)
-      const TIER_GOOD  = 55000;   // ≥ 55K = Good (well above floor)
-      const TIER_OK    = 40000;   // ≥ 40K = OK (at floor, viable)
+      // Thresholds based on Bear Trap minimum (50K/march × 85% = 42,500 archers/march)
+      const TIER_GREAT = 59500;   // ≥ 70K full march
+      const TIER_GOOD  = 42500;   // ≥ 50K reasonable march
+      const TIER_OK    = 25500;   // ≥ 30K minimum viable
 
       let color, note, pctForBar, msg, msgColor;
       if (arcPerMarch >= TIER_GREAT) {
@@ -4968,35 +4798,20 @@
         msg = `✅ Strong archer count — ${fmt(arcPerMarch)} archers per march (max damage output)`;
         msgColor = '#5ba85b';
       } else if (arcPerMarch >= TIER_GOOD) {
-        // Good tier: a clearly different green (teal-green) — good but not best
-        color = '#3da870'; note = '✅ Good';
+        color = '#8bbb40'; note = '✅ Good';
         pctForBar = 80;
         msg = `✅ Good archer count — ${fmt(arcPerMarch)} archers per march`;
-        msgColor = '#3da870';
+        msgColor = '#8bbb40';
       } else if (arcPerMarch >= TIER_OK) {
-        // OK tier: yellow (above floor, viable but not optimal)
-        color = '#c9a84c'; note = '⚠️ Try fewer marches';
-        pctForBar = 60;
-        // Find the actual number of TOTAL marches that yields Excellent (≥ TIER_GREAT)
-        let suggestedTotal = 0;
-        for (let n = marches - 1; n >= 1; n--) {
-          if (Math.floor(arc / n) >= TIER_GREAT) { suggestedTotal = n; break; }
-        }
-        if (suggestedTotal > 0) {
-          // Convert total marches → joiners (for consistency with the toggle UI)
-          const suggestedJoiners = isRL ? Math.max(1, suggestedTotal - 1) : suggestedTotal;
-          const arcAtSuggested = Math.floor(arc / suggestedTotal);
-          msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — try ${suggestedJoiners} ${isRL ? 'joiners' : 'marches'} (${fmt(arcAtSuggested)} archers each = Excellent)`;
-        } else {
-          // No reduction in marches reaches Excellent (e.g., only 1 march and still not enough)
-          const needed = (TIER_GREAT * marches) - arc;
-          msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — train ${fmt(needed)} more archers to reach Excellent`;
-        }
+        color = '#c9a84c'; note = '⚠️ Reduce marches';
+        pctForBar = 55;
+        const needed = (TIER_GREAT * marches) - arc;
+        msg = `⚠️ Only ${fmt(arcPerMarch)} archers per march — try ${Math.max(1, marches - 1)} marches, or train ${fmt(needed)} more archers`;
         msgColor = '#c9a84c';
       } else {
-        color = '#c0392b'; note = '❌ Below floor';
+        color = '#c0392b'; note = '❌ Too few';
         pctForBar = 25;
-        msg = `❌ Only ${fmt(arcPerMarch)} archers per march — below 40K floor. Reduce marches or train more archers`;
+        msg = `❌ Only ${fmt(arcPerMarch)} archers per march — too low for Bear Trap. Reduce marches or train more archers`;
         msgColor = '#c0392b';
       }
 
@@ -5492,9 +5307,9 @@
     const grandTotal = totalInf + totalCav + totalArc;
 
     const MIN = 5000;
-    const MIN_MARCH = 47059; // 40K archers / 0.85
-    const MIN_ARC_PER_MARCH = 40000; // 40K archers per march minimum
-    // Find max marches where each march gets >= 40,000 archers
+    const MIN_MARCH = 50000;
+    const MIN_ARC_PER_MARCH = Math.floor(MIN_MARCH * 0.85); // 42,500
+    // Find max marches where each march gets >= 59,500 archers (= 70k total at 85%)
     const totalArchers = arcT10 + arcT9 + (arcT8||0) + (arcT7||0) + (arcT6||0);
     const maxTotal = isRallyLeader ? 7 : 6;
     const marchCapacityRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
@@ -6269,19 +6084,23 @@
     document.body.appendChild(overlay);
   }
 
-  function restoreAutoBackup(idx) {
+  async function restoreAutoBackup(idx) {
     const backups = getAutoBackups();
     const b = backups[idx];
     if (!b || !Array.isArray(b.members)) {
       showAllianceToast('❌ Backup not found');
       return;
     }
-    if (!confirm(`Restore ${b.count} members from this snapshot?\n\nYour current ${allianceMembers.length} members will be REPLACED.`)) return;
+    // Native confirm() is blocked in iframes and some mobile browsers (PWA, in-app),
+    // which silently kills this whole flow. Use the custom DOM-based confirm instead.
+    const ok = await allianceConfirm(`Restore ${b.count} members from this snapshot?\n\nYour current ${allianceMembers.length} members will be REPLACED.`);
+    if (!ok) return;
     allianceMembers = b.members.map(m => ({
       id: parseInt(m.id) || 0,
       name: String(m.name || ''),
       power: parseInt(m.power) || 0,
-      isTopRL: !!m.isTopRL
+      isTopRL: !!m.isTopRL,
+      nearBear: !!m.nearBear
     }));
     const maxId = allianceMembers.reduce((m,x) => Math.max(m, x.id || 0), 0);
     allianceNextId = maxId + 1;
@@ -6302,7 +6121,8 @@
             id: parseInt(m.id) || 0,
             name: String(m.name || ''),
             power: parseInt(m.power) || 0,
-            isTopRL: !!m.isTopRL
+            isTopRL: !!m.isTopRL,
+            nearBear: !!m.nearBear
           }));
         }
       }
@@ -6358,7 +6178,7 @@
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       let backup;
       try {
         backup = JSON.parse(e.target.result);
@@ -6383,7 +6203,8 @@
           id: 0, // assign new IDs after merge
           name: String(m.name).slice(0, 24).trim(),
           power: parseInt(m.power) || 0,
-          isTopRL: !!m.isTopRL
+          isTopRL: !!m.isTopRL,
+          nearBear: !!m.nearBear
         }));
       if (cleaned.length === 0) {
         showAllianceToast('❌ Backup file has no valid members');
@@ -6393,7 +6214,7 @@
 
       const existingCount = allianceMembers.length;
       const choice = existingCount > 0
-        ? confirm(`Restore ${cleaned.length} members from backup?\n\nClick OK to REPLACE your current ${existingCount} members.\nClick Cancel to keep current and ADD new members.`)
+        ? await allianceConfirm(`Restore ${cleaned.length} members from backup?\n\nClick OK to REPLACE your current ${existingCount} members.\nClick Cancel to keep current and ADD new members.`)
         : true;
 
       if (choice) {
@@ -6435,6 +6256,7 @@
       name: '',
       power: 0,
       isTopRL: false,
+      nearBear: false,
       status: 'available'
     });
     saveAlliance();
@@ -6463,8 +6285,8 @@
     m[field] = value;
     saveAlliance();
     updateAllianceStats();
-    // Re-render when visual indicators change (TopRL or status)
-    if (field === 'isTopRL' || field === 'status') renderAllianceMembers();
+    // Re-render when visual indicators change
+    if (field === 'isTopRL' || field === 'status' || field === 'nearBear') renderAllianceMembers();
   }
 
   let _allianceFilter = 'all';
@@ -6526,6 +6348,11 @@
                    onchange="updateAllianceMember(${m.id}, 'isTopRL', this.checked)">
             <span class="toprl-text">👑 ${t('topRL')}</span>
           </label>
+          <label class="member-nearbear-label" title="Player is close enough to the Bear that their rally will land in the last wave before it dies">
+            <input type="checkbox" ${m.nearBear ? 'checked' : ''}
+                   onchange="updateAllianceMember(${m.id}, 'nearBear', this.checked)">
+            <span class="nearbear-text">🐻 <span data-i18n="nearBear">Near</span></span>
+          </label>
           <div class="member-status-group">
             <label class="status-option ${status === 'available' ? 'active' : ''}" title="${t('statusAvailable')}">
               <input type="radio" name="status-${m.id}" value="available" 
@@ -6560,7 +6387,7 @@
     const allMembers = allianceMembers.filter(m => m.name.trim());
     if (allMembers.length === 0) {
       stats.innerHTML = '';
-      _refreshIntervalButtonState();
+      _refreshIntervalButtonState(); _refreshWaveCountButtonState();
       return;
     }
 
@@ -6570,7 +6397,7 @@
     const unavailable = allMembers.filter(m => (m.status || 'available') === 'unavailable').length;
     const participating = available + leaders;
     const topRLCount = allMembers.filter(m => m.isTopRL).length;
-    const numWaves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+    const numWaves = getEffectiveWaveCount(participating);
 
     // Power stats
     const powers = allMembers.map(m => m.power || 0).filter(p => p > 0);
@@ -6708,7 +6535,7 @@
         </div>
       ` : ''}
     `;
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
   }
 
   // Strategy: each "wave" is a synchronized burst of leaders opening rallies at the same
@@ -6726,44 +6553,70 @@
       const status = m.status || 'available';
       return status === 'available' || status === 'leader';
     });
-    
+
     const N = participating.length;
     if (N === 0) return { waves: [], totalMembers: 0, numWaves: 0 };
 
-    // Separate Top RLs and regular members, each sorted by power desc
-    const topRLs = participating.filter(m => m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
-    const regulars = participating.filter(m => !m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
-
-    // Compute number of waves
-    const numWaves = Math.min(ALLIANCE_MAX_WAVES, Math.ceil(N / TARGET_LEADERS_PER_WAVE));
+    // Compute number of waves — respects manual override from settings (Auto vs 2-8)
+    const numWaves = getEffectiveWaveCount(N);
 
     // Initialize empty waves
     const waves = Array.from({ length: numWaves }, () => ({ leaders: [], hasTopRL: false }));
 
-    // Distribute Top RLs evenly across waves (round-robin)
-    topRLs.forEach((m, i) => {
-      const waveIdx = i % numWaves;
-      waves[waveIdx].leaders.push(m);
-      waves[waveIdx].hasTopRL = true;
-    });
+    // r28: "Near bear" flag. Members marked as near can hit the last wave before
+    // the bear dies. Far members assigned to late waves often MISS, so we steer
+    // near members toward the END of the wave list, and far members toward the
+    // START (longer march time available).
+    const anyNearBear = participating.some(m => m.nearBear);
 
-    // Fill remaining slots with regulars, keeping waves as equal as possible
-    // Sort waves by current size ascending so we fill smallest waves first
-    let regIdx = 0;
-    while (regIdx < regulars.length) {
-      // Find wave with fewest members that still has room (target ~4 per wave)
-      const target = Math.ceil(N / numWaves);
-      let placed = false;
-      for (let w = 0; w < numWaves && regIdx < regulars.length; w++) {
-        if (waves[w].leaders.length < target) {
-          waves[w].leaders.push(regulars[regIdx++]);
-          placed = true;
+    if (anyNearBear && numWaves > 1) {
+      // r42: balanced reverse round-robin. Sort everyone by priority
+      // (near > Top RL > power), then deal across waves from the LAST wave backward,
+      // wrapping back to the last wave when we reach the first. This:
+      //   • puts the strongest near player in the last wave (his short march makes it),
+      //   • distributes the other near players across the next-latest waves,
+      //   • keeps wave sizes balanced (every wave ~ceil(N/W) leaders, not 1 alone),
+      //   • naturally biases strong players toward late waves.
+      const sorted = participating.slice().sort((a, b) => {
+        const aN = a.nearBear ? 1 : 0, bN = b.nearBear ? 1 : 0;
+        if (aN !== bN) return bN - aN;
+        const aT = a.isTopRL ? 1 : 0, bT = b.isTopRL ? 1 : 0;
+        if (aT !== bT) return bT - aT;
+        return (b.power || 0) - (a.power || 0);
+      });
+
+      sorted.forEach((m, i) => {
+        const waveIdx = numWaves - 1 - (i % numWaves);
+        waves[waveIdx].leaders.push(m);
+        if (m.isTopRL || m.nearBear) waves[waveIdx].hasTopRL = true;
+      });
+    } else {
+      // Original algorithm: no nearBear marks → balance evenly across all waves.
+      const topRLs = participating.filter(m => m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
+      const regulars = participating.filter(m => !m.isTopRL).sort((a, b) => (b.power || 0) - (a.power || 0));
+
+      // Distribute Top RLs evenly across waves (round-robin)
+      topRLs.forEach((m, i) => {
+        const waveIdx = i % numWaves;
+        waves[waveIdx].leaders.push(m);
+        waves[waveIdx].hasTopRL = true;
+      });
+
+      // Fill remaining slots with regulars, keeping waves as equal as possible
+      let regIdx = 0;
+      while (regIdx < regulars.length) {
+        const target = Math.ceil(N / numWaves);
+        let placed = false;
+        for (let w = 0; w < numWaves && regIdx < regulars.length; w++) {
+          if (waves[w].leaders.length < target) {
+            waves[w].leaders.push(regulars[regIdx++]);
+            placed = true;
+          }
         }
-      }
-      // Safety: if no wave accepted, just append to smallest wave
-      if (!placed && regIdx < regulars.length) {
-        const smallest = waves.reduce((min, w, i) => w.leaders.length < waves[min].leaders.length ? i : min, 0);
-        waves[smallest].leaders.push(regulars[regIdx++]);
+        if (!placed && regIdx < regulars.length) {
+          const smallest = waves.reduce((min, w, i) => w.leaders.length < waves[min].leaders.length ? i : min, 0);
+          waves[smallest].leaders.push(regulars[regIdx++]);
+        }
       }
     }
 
@@ -6784,7 +6637,9 @@
   // The interval is auto-recommended based on wave count, but user can override.
   const ALLIANCE_INTERVAL_KEY = 'btAllianceWaveInterval_v1';
   const ALLIANCE_INTERVAL_OVERRIDE_KEY = 'btAllianceWaveIntervalManual_v1';
-  const ALLIANCE_MAX_TIME_SEC = 240; // 4 minutes (30:00 → 26:00)
+  const ALLIANCE_MAX_TIME_SEC = 300; // 5 min — matches the game's rally-call cutoff (30:00 → 25:00).
+                                     // r32: raised from 240 to allow 6 waves × 50s and similar slower cadences
+                                     // that give borderline players (joining + leading) more recovery time.
   const ALLIANCE_INTERVAL_OPTIONS = [60, 50, 40, 30]; // largest first
 
   let _allianceWaveInterval = (function() {
@@ -6800,14 +6655,36 @@
   })();
   const ALLIANCE_MAX_WAVES = 8;
 
+  // r31: optional manual wave-count override. 0 = Auto (compute from member count).
+  // 2-8 = forced count. Per-Bear-preset so Bear 1 and Bear 2 can have different settings.
+  function _loadForceWaveCount() {
+    try {
+      const v = parseInt(localStorage.getItem(_bearKey('forceWaves')));
+      if (v >= 2 && v <= ALLIANCE_MAX_WAVES) return v;
+      return 0;
+    } catch (e) { return 0; }
+  }
+  function _saveForceWaveCount(n) {
+    try { localStorage.setItem(_bearKey('forceWaves'), String(n)); } catch (e) {}
+  }
+  // Returns the effective number of waves for the current member count, respecting any override
+  function getEffectiveWaveCount(memberCount) {
+    const forced = _loadForceWaveCount();
+    if (forced >= 2) return Math.min(forced, ALLIANCE_MAX_WAVES);
+    // r35: cap the auto count so every wave still fires inside the 2-minute window,
+    // i.e. the last-wave player can still land 5 rallies before the event ends.
+    if (memberCount <= 0) return 0;
+    const byMembers = Math.ceil(memberCount / 4);
+    return Math.min(byMembers, ALLIANCE_MAX_WAVES, maxWavesInWindow());
+  }
+
   // Compute the recommended interval given how many waves we'll have.
-  // Returns the largest interval where (waves-1)*interval <= 240 seconds.
+  // r38: default to 30s — the tightest spacing a clan can reliably hit by hand.
+  // (15-20s fits more waves but is too tight for human coordination.) At 30s the
+  // safe window holds 3 waves; that's the practical sweet spot for this event.
   function _recommendInterval(waveCount) {
-    if (waveCount <= 1) return 60; // single wave → no spacing constraint
-    for (const sec of ALLIANCE_INTERVAL_OPTIONS) {
-      if ((waveCount - 1) * sec <= ALLIANCE_MAX_TIME_SEC) return sec;
-    }
-    return 30; // fallback (shouldn't be reached for typical wave counts)
+    if (waveCount <= 1) return 60;
+    return 30;
   }
 
   // Apply the recommended interval if user hasn't manually overridden
@@ -6815,14 +6692,14 @@
     if (_allianceIntervalManual) return; // user chose explicitly — respect that
     const valid = allianceMembers.filter(m => m.name.trim());
     const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
-    const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+    const waves = getEffectiveWaveCount(participating);
     if (waves === 0) return;
     const recommended = _recommendInterval(waves);
     if (recommended !== _allianceWaveInterval) {
       _allianceWaveInterval = recommended;
       try { localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(recommended)); } catch (e) {}
     }
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
   }
 
   function _refreshIntervalButtonState() {
@@ -6834,18 +6711,19 @@
     if (hint) {
       const valid = allianceMembers.filter(m => m.name.trim());
       const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
-      const waves = participating > 0 ? Math.min(ALLIANCE_MAX_WAVES, Math.ceil(participating / 4)) : 0;
+      const waves = getEffectiveWaveCount(participating);
       const recommended = waves > 0 ? _recommendInterval(waves) : 40;
       const lastWaveSec = waves > 0 ? (waves - 1) * _allianceWaveInterval : 0;
       const lastWaveTime = _formatWaveTime(lastWaveSec);
-      const overflows = lastWaveSec > ALLIANCE_MAX_TIME_SEC;
-
+      // r35: late waves can't fit 5 rallies if they fire past the 2-minute window
+      const tooLate = lastWaveSec > MAX_WAVE_SPAN_SEC;
+      const warn = tooLate ? ' (last wave past 27:00 ⚠)' : '';
       if (_allianceIntervalManual) {
-        let html = `<span class="hint-manual">📌 Manual${overflows ? ' · last wave ' + lastWaveTime + ' (past 26:00 ⚠)' : ' · last wave ' + lastWaveTime}</span>`;
+        let html = `<span class="hint-manual">📌 Manual · last wave ${lastWaveTime}${warn}</span>`;
         html += ` <button class="hint-auto-btn" onclick="resetIntervalToAuto()">Use auto (${recommended}s)</button>`;
         hint.innerHTML = html;
       } else {
-        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${waves > 0 ? waves + ' waves · last at ' + lastWaveTime : 'add members to plan'}</span>`;
+        hint.innerHTML = `<span class="${tooLate ? 'hint-manual' : 'hint-auto'}">${tooLate ? '⚠' : '✨'} Auto · ${waves > 0 ? waves + ' waves · last at ' + lastWaveTime + warn : 'add members to plan'}</span>`;
       }
     }
   }
@@ -6859,20 +6737,52 @@
     return String(m) + ':' + String(s).padStart(2, '0');
   }
 
-  function getAllianceWaveTime(idx) {
+  // r39: wave-opening window — set directly from how the clan actually runs the event.
+  // First wave opens at 30:00, last wave opens by 27:00 left. A 3-minute window;
+  // at 30s spacing that's 7 waves. After opening, players cycle on their own —
+  // the planner only coordinates the staggered opening of the first round.
+  const MAX_WAVE_SPAN_SEC = 180;        // 30:00 → 27:00 left
+  // r41: rally cadence — 5:00 gather + 0:40 round-trip travel. A rally opened later
+  // than 5:20 left can't gather-and-land before the event ends, so the schedule
+  // stops there (late waves naturally show 4 rallies instead of an impossible 5th).
+  const RALLY_CYCLE_SEC = 340;          // 5:40 between consecutive rally opens
+  const RALLY_LAND_CUTOFF_SEC = 320;    // 5:20 — latest a rally can open and still land
+
+  // Largest wave count whose last wave still opens by 27:00 left, at the current interval.
+  function maxWavesInWindow() {
+    return Math.max(1, Math.floor(MAX_WAVE_SPAN_SEC / _allianceWaveInterval) + 1);
+  }
+
+  // Returns the displayed "MM:SS left" for wave `idx`. Start-anchored: wave 1 at 30:00.
+  function getAllianceWaveTime(idx, totalWaves) {
     if (idx < 0 || idx >= ALLIANCE_MAX_WAVES) return '--:--';
     return _formatWaveTime(idx * _allianceWaveInterval);
   }
 
+  // r41: rally schedule for a wave. Rallies open every RALLY_CYCLE_SEC (5:40) starting
+  // at the wave's open time. The list stops once the next rally would open later than
+  // 5:20 left (it couldn't land in time) — so late waves return 4 entries, not a fake 5.
+  function getWaveRallySchedule(idx) {
+    const r1Left = (30 * 60) - idx * _allianceWaveInterval;
+    const times = [];
+    let t = r1Left;
+    while (t >= RALLY_LAND_CUTOFF_SEC && times.length < 8) {
+      const m = Math.floor(t / 60), s = t % 60;
+      times.push(m + ':' + String(s).padStart(2, '0'));
+      t -= RALLY_CYCLE_SEC;
+    }
+    return times;
+  }
+
   function setAllianceWaveInterval(seconds) {
-    if (![30, 40, 50, 60].includes(seconds)) return;
+    if (![15, 20, 30, 40, 50, 60].includes(seconds)) return;
     _allianceWaveInterval = seconds;
     _allianceIntervalManual = true;
     try {
       localStorage.setItem(ALLIANCE_INTERVAL_KEY, String(seconds));
       localStorage.setItem(ALLIANCE_INTERVAL_OVERRIDE_KEY, '1');
     } catch (e) {}
-    _refreshIntervalButtonState();
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
     // Re-render plan if one is currently displayed
     if (window._lastAlliancePlan) {
       generateAlliancePlan();
@@ -6887,6 +6797,43 @@
       generateAlliancePlan();
     }
     showAllianceToast(`✨ Auto: ${_allianceWaveInterval}s between waves`);
+  }
+
+  // r31: wave-count override
+  function setForceWaveCount(n) {
+    const v = parseInt(n);
+    if (isNaN(v) || v < 0 || v > ALLIANCE_MAX_WAVES) return;
+    _saveForceWaveCount(v);
+    _refreshWaveCountButtonState();
+    // Re-recommend interval (different wave count → different optimal interval)
+    try { applyAutoIntervalIfNeeded(); } catch (e) {}
+    _refreshIntervalButtonState(); _refreshWaveCountButtonState();
+    // Re-render plan if one is currently displayed
+    if (window._lastAlliancePlan) {
+      generateAlliancePlan();
+    }
+  }
+
+  function _refreshWaveCountButtonState() {
+    const forced = _loadForceWaveCount(); // 0 = Auto
+    document.querySelectorAll('#alliance-wavecount-buttons .alliance-interval-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.waves) === forced);
+    });
+    const hint = document.getElementById('alliance-wavecount-hint');
+    if (hint) {
+      const valid = allianceMembers.filter(m => m.name.trim());
+      const participating = valid.filter(m => (m.status || 'available') !== 'unavailable').length;
+      const auto = getEffectiveWaveCount(participating);
+      const maxWin = maxWavesInWindow();
+      if (forced >= 2) {
+        const effective = Math.min(forced, ALLIANCE_MAX_WAVES);
+        const target = participating > 0 ? Math.ceil(participating / effective) : 0;
+        const tooMany = effective > maxWin;
+        hint.innerHTML = `<span class="${tooMany ? 'hint-manual' : 'hint-manual'}">📌 Manual · ${effective} waves · ~${target} RL${target === 1 ? '' : 's'} per wave${tooMany ? ' · ⚠ waves past #' + maxWin + ' open after 27:00' : ''}</span> <button class="hint-auto-btn" onclick="setForceWaveCount(0)">Use auto (${auto})</button>`;
+      } else {
+        hint.innerHTML = `<span class="hint-auto">✨ Auto · ${auto > 0 ? auto + ' waves · last wave by 27:00' : 'add members to plan'}</span>`;
+      }
+    }
   }
 
   function generateAlliancePlan() {
@@ -6989,12 +6936,12 @@
     });
   }
 
-  function resetAlliancePlanToAuto() {
+  async function resetAlliancePlanToAuto() {
     if (!window._lastAlliancePlan || !window._lastAlliancePlan.manuallyEdited) {
       showAllianceToast('ℹ️ Plan already at auto-generated state');
       return;
     }
-    if (!confirm('Reset all manual swaps and regenerate plan?')) return;
+    if (!await allianceConfirm('Reset all manual swaps and regenerate plan?')) return;
     generateAlliancePlan();
     showAllianceToast('↺ Plan reset to auto');
   }
@@ -7014,18 +6961,19 @@
     container.innerHTML = hintHtml + plan.waves.map((wave, i) => {
       const leaders = wave.leaders || [];
       if (leaders.length === 0) return '';
-      const time = getAllianceWaveTime(i);
+      const time = getAllianceWaveTime(i, plan.waves.length);
       const cls = 'alliance-wave-card' + (wave.hasTopRL ? ' wave-top-rl' : '');
       const leadersHtml = leaders.map((m, leaderIdx) => {
         const safeName = _allianceEscape(m.name || '?');
         const star = m.isTopRL ? '<span class="wave-toprl-badge">⭐</span>' : '';
+        const nearBadge = m.nearBear ? '<span class="wave-toprl-badge" title="Near bear" style="background:rgba(180,110,50,0.25);border-color:rgba(180,110,50,0.55);color:#e0a070;">🐻</span>' : '';
         return `
           <div class="wave-leader-row" data-wave-idx="${i}" data-leader-idx="${leaderIdx}"
                onclick="alliancePlayerTap(${i}, ${leaderIdx})"
                role="button" tabindex="0">
             <span class="wave-role-label">👑 ${t('rallyLeaderShort')}</span>
             <span class="wave-name">${safeName}</span>
-            ${star}
+            ${star}${nearBadge}
           </div>`;
       }).join('');
       return `
@@ -7035,6 +6983,7 @@
             <span class="wave-time">⏱ ${time}</span>
             <span class="wave-sent-badge" id="wave-sent-${i}" style="display:none;">✅ Sent</span>
           </div>
+          <div class="wave-rally-schedule">🏹 ${getWaveRallySchedule(i).length} rallies · ${getWaveRallySchedule(i).join('  ·  ')}</div>
           ${leadersHtml}
         </div>`;
     }).join('');
@@ -7134,7 +7083,9 @@
 
   function buildWaveText(plan, waveIdx) {
     const wave = plan.waves[waveIdx];
-    const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx)}`];
+    const lines = [`⏱ Wave ${waveIdx + 1}  ${getAllianceWaveTime(waveIdx, plan.waves.length)}`];
+    const _sched = getWaveRallySchedule(waveIdx);
+    lines.push(`🏹 ${_sched.length} rallies: ${_sched.join(' · ')}`);
     (wave.leaders || []).forEach(m => {
       const marker = m.isTopRL ? '⭐' : '•';
       lines.push(`   ${marker} ${m.name}`);
@@ -7190,7 +7141,7 @@
       waveCount: plan.waves.length,
       waves: plan.waves.map(w => ({
         time: w.time,
-        leaders: (w.leaders || []).map(l => ({ name: l.name, isTopRL: l.isTopRL }))
+        leaders: (w.leaders || []).map(l => ({ name: l.name, isTopRL: !!l.isTopRL, nearBear: !!l.nearBear }))
       }))
     };
     history.unshift(entry);
@@ -7257,7 +7208,7 @@
     const file = input?.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const text = String(ev.target?.result || '');
         const data = JSON.parse(text);
@@ -7277,7 +7228,7 @@
         let existing = [];
         try { existing = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) {}
         if (existing.length > 0) {
-          const choice = confirm(
+          const choice = await allianceConfirm(
             `Import ${valid.length} plan${valid.length === 1 ? '' : 's'}?\n\n` +
             `OK = Merge with existing ${existing.length} plan${existing.length === 1 ? '' : 's'} (keep newest 5)\n` +
             `Cancel = Replace all existing plans`
@@ -7324,9 +7275,9 @@
     // Reconstruct plan object and display it
     const plan = {
       waves: entry.waves.map((w, i) => ({
-        leaders: w.leaders.map(l => ({ name: l.name, isTopRL: l.isTopRL })),
+        leaders: w.leaders.map(l => ({ name: l.name, isTopRL: !!l.isTopRL, nearBear: !!l.nearBear })),
         hasTopRL: w.leaders.some(l => l.isTopRL),
-        time: getAllianceWaveTime(i)
+        time: getAllianceWaveTime(i, entry.waves.length)
       }))
     };
     window._lastAlliancePlan = plan;
@@ -7426,6 +7377,23 @@
       }
     }
 
+    // r28: Detect & strip "near bear" marker. Accepts: (near), [near], "near"
+    // as its own word, 🐻 emoji. Same idea as RL detection above.
+    let nearBear = false;
+    const nearPatterns = [
+      /\s*\(\s*near(?:\s*bear)?\s*\)\s*/i,
+      /\s*\[\s*near(?:\s*bear)?\s*\]\s*/i,
+      /(^|\s)near(?:\s*bear)?(\s|$)/i,
+      /\s*🐻\s*/
+    ];
+    for (const p of nearPatterns) {
+      if (p.test(s)) {
+        nearBear = true;
+        s = s.replace(p, ' ');
+        break;
+      }
+    }
+
     // Strip leading list-numbering: "1.", "1)", "1:", "#1"
     s = s.replace(/^\s*#?\d+[.)\]:]\s+/, '');
 
@@ -7462,7 +7430,7 @@
     name = name.replace(/^[\s,;|\-–—:]+|[\s,;|\-–—:]+$/g, '').trim();
     if (!name) return null;
     if (name.length > 24) name = name.slice(0, 24);
-    return { name, power: powerVal, isTopRL, status: 'available' };
+    return { name, power: powerVal, isTopRL, nearBear, status: 'available' };
   }
 
   function parseBulkPaste(text) {
@@ -7509,12 +7477,14 @@
     const rows = _bulkPreview.map((p, i) => {
       const safeName = _allianceEscape(p.name);
       const rlBadge = p.isTopRL ? `<span class="preview-rl">👑 ${_allianceEscape(t('topRL'))}</span>` : '';
+      const nearBadge = p.nearBear ? `<span class="preview-rl" style="color:#d49158;border-color:rgba(180,110,50,0.5);">🐻 Near</span>` : '';
       const powerStr = p.power > 0 ? formatPower(p.power) : '–';
       return `<div class="preview-row">
         <span class="preview-num">${i + 1}.</span>
         <span class="preview-name">${safeName}</span>
         <span class="preview-power">${powerStr}</span>
         ${rlBadge}
+        ${nearBadge}
         <button class="preview-remove" onclick="removeBulkPreviewRow(${i})" aria-label="Remove">✕</button>
       </div>`;
     }).join('');
@@ -7547,7 +7517,8 @@
         id: allianceNextId++,
         name: p.name,
         power: p.power,
-        isTopRL: p.isTopRL,
+        isTopRL: !!p.isTopRL,
+        nearBear: !!p.nearBear,
         status: p.status || 'available'
       });
     }
@@ -7586,7 +7557,8 @@
     const data = allianceMembers.map(m => ({
       name: m.name,
       power: m.power,
-      isTopRL: !!m.isTopRL
+      isTopRL: !!m.isTopRL,
+      nearBear: !!m.nearBear
     }));
     const json = JSON.stringify(data, null, 2);
 
@@ -7646,12 +7618,8 @@
     const commitEl = document.getElementById('damage-commit-area');
     if (commitEl) commitEl.style.display = 'none';
     _damagePreview = [];
-    // Load saved API key (shared with main OCR)
-    try {
-      const k = localStorage.getItem('btGeminiApiKey');
-      const ki = document.getElementById('damage-ocr-apikey');
-      if (ki && k) ki.value = k;
-    } catch(e) {}
+    // Sync provider toggle + key input to the active provider (shared with main OCR)
+    refreshProviderUI();
     // Default to paste tab
     switchDamageTab('paste');
   }
@@ -7753,28 +7721,31 @@
     }
   });
 
-  function commitDamageImport(mode) {
+  async function commitDamageImport(mode) {
     if (!_damagePreview || _damagePreview.length === 0) {
       showAllianceToast('Nothing to import. Paste data first.');
       return;
     }
     if (mode === 'replace') {
-      if (!confirm(`Replace all ${allianceMembers.length} current Bear ${_currentBearPreset} members with ${_damagePreview.length} imported?`)) return;
+      if (!await allianceConfirm(`Replace all ${allianceMembers.length} current Bear ${_currentBearPreset} members with ${_damagePreview.length} imported?`)) return;
       allianceMembers = _damagePreview.map(p => ({
         id: allianceNextId++,
         name: p.name,
         power: p.power,
         isTopRL: !!p.isTopRL,
+        nearBear: !!p.nearBear,
         status: 'available'
       }));
     } else if (mode === 'merge_update') {
-      // Update damage of existing names; do NOT add new
+      // Update damage of existing names; do NOT add new, and do NOT clobber nearBear
+      // (damage screenshots have no proximity info — preserve manual marks).
       let updated = 0;
       for (const incoming of _damagePreview) {
         const existing = allianceMembers.find(m => m.name.toLowerCase() === incoming.name.toLowerCase());
         if (existing) {
           existing.power = incoming.power;
           if (incoming.isTopRL !== undefined) existing.isTopRL = !!incoming.isTopRL;
+          if (incoming.nearBear) existing.nearBear = true; // only OR-in, never clear
           updated++;
         }
       }
@@ -7790,6 +7761,7 @@
             name: incoming.name,
             power: incoming.power,
             isTopRL: !!incoming.isTopRL,
+            nearBear: !!incoming.nearBear,
             status: 'available'
           });
           added++;
@@ -7809,20 +7781,40 @@
     if (!files || files.length === 0) return;
     const status = document.getElementById('damage-ocr-status');
     if (status) { status.style.display = 'block'; status.textContent = '🔍 Reading screenshots...'; }
-    // Get API key (saved in localStorage as 'btGeminiApiKey' shared with main OCR)
+    // Get API key (shared with main OCR — provider-aware)
     const apiKey = (document.getElementById('damage-ocr-apikey')?.value || '').trim();
     if (!apiKey) {
-      if (status) status.textContent = '❌ Please enter your Gemini API key first.';
-      showAllianceToast('Enter Gemini API key to use OCR.');
+      const provLabel = getProvider() === 'groq' ? 'Groq' : 'Gemini';
+      if (status) status.textContent = `❌ Please enter your ${provLabel} API key first.`;
+      showAllianceToast(`Enter ${provLabel} API key to use OCR.`);
       return;
     }
-    try { localStorage.setItem('btGeminiApiKey', apiKey); } catch(e) {}
+    saveApiKey(apiKey); // writes to whichever provider slot is active
+
+    // Cap per batch (same logic as Members OCR — scales with provider)
+    let fileList = Array.from(files);
+    const MAX_FILES = maxFilesForProvider();
+    if (fileList.length > MAX_FILES) {
+      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${fileList.length}.`);
+      fileList = fileList.slice(0, MAX_FILES);
+    }
+    // Throttle between calls so we stay under the per-minute rate
+    const THROTTLE_MS = 6500;
+    let lastCallAt = 0;
 
     const allParsed = [];
     let processed = 0;
-    for (const file of files) {
+    for (const file of fileList) {
       processed++;
-      if (status) status.textContent = `🔍 Processing image ${processed}/${files.length}...`;
+      if (processed > 1) {
+        const elapsed = Date.now() - lastCallAt;
+        const wait = Math.max(0, THROTTLE_MS - elapsed);
+        if (wait > 0) {
+          if (status) status.textContent = `⏳ Waiting ${Math.ceil(wait/1000)}s before image ${processed}/${fileList.length}…`;
+          await new Promise(r => setTimeout(r, wait));
+        }
+      }
+      if (status) status.textContent = `🔍 Processing image ${processed}/${fileList.length}...`;
       try {
         // Convert file → base64
         const base64 = await new Promise((resolve, reject) => {
@@ -7832,11 +7824,12 @@
           r.readAsDataURL(file);
         });
         const mediaType = file.type || 'image/jpeg';
-        // Reuse existing helper that calls Gemini with retries
-        const data = await callGeminiWithRetry(apiKey, base64, mediaType, (msg) => {
-          if (status) status.textContent = `🔍 Image ${processed}/${files.length}: ${msg}`;
+        lastCallAt = Date.now();
+        // Provider-aware vision call (Gemini or Groq)
+        const data = await callVisionAPI(apiKey, base64, mediaType, OCR_PROMPT_DAMAGE, (msg) => {
+          if (status) status.textContent = `🔍 Image ${processed}/${fileList.length}: ${msg}`;
         });
-        // Extract text response
+        // Extract text response (normalized to Gemini shape regardless of provider)
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         // Parse with same parser used for paste
         const parsed = parseBulkPaste(text);
@@ -7844,6 +7837,13 @@
       } catch (err) {
         console.error('Damage OCR error:', err);
         if (status) status.textContent = `⚠ Image ${processed} failed: ${err.message || 'unknown'}`;
+        // On quota errors, stop hammering the rest of the batch
+        if (err.status === 429) {
+          if (processed < fileList.length) {
+            showAllianceToast(`⏹ Skipping remaining ${fileList.length - processed} file(s) — quota hit.`);
+          }
+          break;
+        }
       }
     }
     // Deduplicate by name (case-insensitive), keeping highest damage
@@ -7856,7 +7856,7 @@
       }
     }
     const merged = Array.from(byName.values());
-    if (status) status.textContent = `✅ Extracted ${merged.length} unique participants from ${files.length} image(s)`;
+    if (status) status.textContent = `✅ Extracted ${merged.length} unique participants from ${fileList.length} image(s)`;
     _setDamagePreview(merged);
     // Reset file input so user can re-upload same files if needed
     if (input) input.value = '';
@@ -7980,12 +7980,117 @@
   // === Screenshot Import via Claude API ===
   let _ocrData = [];
 
+  // -----------------------------------------------------------------------
+  // OCR provider abstraction (r26): supports Gemini (Google) and Groq.
+  // Each provider has its own API key, stored separately so users can switch
+  // back and forth without re-pasting. Provider choice is also persisted.
+  // Migration: any old key stored under 'btApiKey' is moved to 'btGeminiApiKey'.
+  // -----------------------------------------------------------------------
+  const OCR_PROVIDER_DEFAULT = 'groq'; // Groq has a 50× larger free-tier daily quota
+
+  function getProvider() {
+    try {
+      // One-time migration: legacy 'btApiKey' → 'btGeminiApiKey'
+      const legacy = localStorage.getItem('btApiKey');
+      if (legacy && !localStorage.getItem('btGeminiApiKey')) {
+        localStorage.setItem('btGeminiApiKey', legacy);
+      }
+      return localStorage.getItem('btOcrProvider') || OCR_PROVIDER_DEFAULT;
+    } catch(e) { return OCR_PROVIDER_DEFAULT; }
+  }
+  function setProvider(p) {
+    if (p !== 'gemini' && p !== 'groq') return;
+    try { localStorage.setItem('btOcrProvider', p); } catch(e) {}
+  }
+  function _providerKeyName(p) {
+    return p === 'groq' ? 'btGroqApiKey' : 'btGeminiApiKey';
+  }
+
+  // Max screenshots per batch — Groq's generous limits (30 RPM, 1,000 RPD) allow
+  // larger batches; Gemini's 20-RPD free tier doesn't.
+  function maxFilesForProvider() {
+    return getProvider() === 'groq' ? 10 : 5;
+  }
+
   function saveApiKey(val) {
-    try { localStorage.setItem('btApiKey', val.trim()); } catch(e) {}
+    // Writes to the key slot for the CURRENT provider
+    try { localStorage.setItem(_providerKeyName(getProvider()), String(val || '').trim()); } catch(e) {}
   }
 
   function loadApiKey() {
-    try { return localStorage.getItem('btApiKey') || ''; } catch(e) { return ''; }
+    // Reads from the key slot for the CURRENT provider
+    try { return localStorage.getItem(_providerKeyName(getProvider())) || ''; } catch(e) { return ''; }
+  }
+
+  // ProviderUI: per-provider strings used to populate the dialogs.
+  const _PROVIDER_UI = {
+    groq: {
+      label: 'Groq', keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys',
+      keyDomain: 'console.groq.com/keys', freeDaily: '1,000 free screenshots per day'
+    },
+    gemini: {
+      label: 'Gemini', keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/apikey',
+      keyDomain: 'aistudio.google.com/apikey', freeDaily: '~20 free screenshots per day'
+    }
+  };
+
+  // Set provider, persist, and refresh both dialogs' UI in case either is open.
+  function setOcrProvider(p) {
+    if (p !== 'gemini' && p !== 'groq') return;
+    setProvider(p);
+    refreshProviderUI();
+  }
+
+  // Sync every provider-aware UI element (toggle buttons, placeholders, labels,
+  // helper links, key input values) to the current provider. Safe to call when
+  // either dialog isn't mounted yet — missing elements are skipped.
+  function refreshProviderUI() {
+    const p = getProvider();
+    const ui = _PROVIDER_UI[p] || _PROVIDER_UI.groq;
+    const savedKey = loadApiKey();
+    // Active/inactive style for each pair of toggle buttons
+    const activeStyle = 'flex:1;padding:8px 6px;background:rgba(95,184,95,0.18);border:1px solid rgba(95,184,95,0.5);color:#9ee29e;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;';
+    const inactiveStyle = 'flex:1;padding:8px 6px;background:transparent;border:1px solid rgba(220,210,180,0.25);color:rgba(220,210,180,0.7);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;';
+    ['ocr', 'damage'].forEach(prefix => {
+      const groqBtn = document.getElementById(prefix + '-provider-groq-btn');
+      const geminiBtn = document.getElementById(prefix + '-provider-gemini-btn');
+      if (groqBtn) groqBtn.style.cssText = (p === 'groq') ? activeStyle : inactiveStyle;
+      if (geminiBtn) geminiBtn.style.cssText = (p === 'gemini') ? activeStyle : inactiveStyle;
+    });
+    // Members OCR key input + helper text
+    const mainInput = document.getElementById('ocr-apikey-input');
+    if (mainInput) {
+      mainInput.placeholder = `🔑 ${ui.label} API key (${ui.keyPrefix}...)`;
+      mainInput.value = savedKey;
+    }
+    const mainHelpLink = document.getElementById('ocr-apikey-help-link');
+    if (mainHelpLink) {
+      mainHelpLink.href = ui.keyUrl;
+      mainHelpLink.textContent = `Get free key at ${ui.keyDomain} →`;
+    }
+    // First-time info block — only relevant text bits
+    const ftiCtaLink = document.getElementById('ocr-fti-cta-link');
+    if (ftiCtaLink) ftiCtaLink.href = ui.keyUrl;
+    const ftiCtaLabel = document.getElementById('ocr-fti-cta-label');
+    if (ftiCtaLabel) ftiCtaLabel.textContent = `Get my free ${ui.label} key →`;
+    const ftiStep1 = document.getElementById('ocr-fti-step1');
+    if (ftiStep1) ftiStep1.innerHTML = `Copy your key (it starts with <code>${ui.keyPrefix}...</code>)`;
+    const ftiFootnote = document.getElementById('ocr-fti-footnote');
+    if (ftiFootnote) ftiFootnote.innerHTML = `🔒 Your key stays on your phone — only used to read your screenshots.<br>✨ ${ui.freeDaily}.`;
+    // Damage OCR key input + help line
+    const damageInput = document.getElementById('damage-ocr-apikey');
+    if (damageInput) {
+      damageInput.placeholder = `🔑 ${ui.label} API key (${ui.keyPrefix}...)`;
+      damageInput.value = savedKey;
+    }
+    const damageHelp = document.getElementById('damage-ocr-apikey-help');
+    if (damageHelp) damageHelp.textContent = `Get a free key at ${ui.keyDomain} · Saved in your browser only`;
+    // Upload subtitles reflect the per-provider batch cap
+    const cap = maxFilesForProvider();
+    const mainSub = document.getElementById('ocr-upload-sub');
+    if (mainSub) mainSub.textContent = `Up to ${cap} images at once · JPG, PNG, WebP`;
+    const damageSub = document.getElementById('damage-upload-sub');
+    if (damageSub) damageSub.textContent = `Up to ${cap} images · JPG, PNG, WebP`;
   }
 
   function openScreenshotOCR() {
@@ -7997,10 +8102,9 @@
     document.getElementById('ocr-results-section').style.display = 'none';
     document.getElementById('ocr-initial-actions').style.display = 'flex';
     document.getElementById('ocr-file-input').value = '';
-    // Load saved API key
-    const keyInput = document.getElementById('ocr-apikey-input');
+    // Sync provider toggle + key input to the active provider
+    refreshProviderUI();
     const savedKey = loadApiKey();
-    if (keyInput) keyInput.value = savedKey;
     // Show first-time info only if no key is saved yet
     const ftiBox = document.getElementById('ocr-first-time-info');
     if (ftiBox) ftiBox.style.display = (savedKey && savedKey.length >= 10) ? 'none' : 'block';
@@ -8016,11 +8120,107 @@
   // Helper: sleep for ms milliseconds
   function _ocrSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Helper: call Gemini API with auto-retry on transient errors (503, 429, 500, network)
-  async function callGeminiWithRetry(apiKey, base64, mediaType, onProgress) {
+  // Prompt used by Members OCR — accepts BOTH Alliance Members list AND Damage Rewards/Rankings screens.
+  // Goal: always extract names; numeric value (power or damage) when present, else 0.
+  const OCR_PROMPT_MEMBERS = `This is a screenshot from the mobile game KingShot. It shows a list of players from an alliance. The list can be one of these formats:
+1. Alliance Members list — each row has a player name and a Power value (e.g. "38.5M", "58.6M", "1.2B"), sometimes with a green "Online" label.
+2. Damage Rewards / Bear Trap Rankings — each row has a rank number, a player name (often prefixed by an alliance tag in brackets like "[xXx]"), and "Damage Points:" followed by a comma-separated number (e.g. "760,040,003").
+3. Any other KingShot list showing player names.
+
+Extract EVERY visible player row and return ONLY a JSON array — no explanation, no markdown fences.
+
+Format: [{"name":"PlayerOne","power":760040003,"isOnline":false},{"name":"PlayerTwo","power":38500000,"isOnline":true}]
+
+Rules:
+- "name": the player name only. Strip leading alliance tags in brackets like "[xXx]" or "[ABC]". Keep the name itself exactly as shown (including special characters and unicode).
+- "power": numeric value as a plain integer. If the row shows Power with suffix, convert: 38.5M=38500000, 58.6M=58600000, 1.2B=1200000000. If the row shows "Damage Points: 760,040,003", strip commas → 760040003. If no numeric value is visible for the row, use 0.
+- "isOnline": true only if a green "Online" label is visible on that specific row, otherwise false. (Damage Rewards screens never show Online — always false there.)
+- Include EVERY visible player row, even partial or cut-off ones at the edges.
+- Return ONLY the JSON array. No prose, no comments, no markdown.`;
+
+  // Prompt used by Damage OCR — strictly extracts damage from Bear Trap reward/ranking screens.
+  // Output format matches parseBulkPaste expectations: one "Name <number>" per line.
+  const OCR_PROMPT_DAMAGE = `This is a screenshot from the mobile game KingShot showing a Bear Trap Damage Rewards / Rankings list. Each row has a rank number, a player name (often with an alliance tag in brackets like "[xXx]"), and "Damage Points:" followed by a comma-separated number (e.g. "760,040,003").
+
+Extract every player and their damage. Return ONLY plain text — one player per line, no explanation, no markdown, no JSON.
+
+Format (one per line):
+PlayerName 760040003
+AnotherPlayer 586837307
+
+Rules:
+- Strip leading alliance tags in brackets (like "[xXx]") from names.
+- Strip commas from the damage number.
+- One line per player, name then a space then the damage as a plain integer.
+- Include every visible row.
+- No headers, no commentary, no markdown.`;
+
+  // Build the per-provider HTTP request for a vision call. Both providers
+  // accept a base64 image + a text prompt; the body shape differs.
+  function _buildVisionRequest(provider, apiKey, base64, mediaType, prompt) {
+    if (provider === 'groq') {
+      // Groq uses an OpenAI-compatible /chat/completions endpoint.
+      // Llama 4 Scout is on the free tier (1,000 RPD vs Gemini's 20).
+      const dataUrl = `data:${mediaType};base64,${base64}`;
+      return {
+        url: 'https://api.groq.com/openai/v1/chat/completions',
+        init: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            temperature: 0,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image_url', image_url: { url: dataUrl } }
+              ]
+            }]
+          })
+        }
+      };
+    }
+    // Default: Gemini
+    return {
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inline_data: { mime_type: mediaType, data: base64 } },
+              { text: prompt }
+            ]
+          }],
+          generationConfig: { temperature: 0, thinkingConfig: { thinkingBudget: 0 } }
+        })
+      }
+    };
+  }
+
+  // Normalize provider response → Gemini-style shape so all callers can
+  // read `data.candidates[0].content.parts[0].text` regardless of provider.
+  function _normalizeVisionResponse(provider, data) {
+    if (provider === 'groq') {
+      const text = data?.choices?.[0]?.message?.content || '';
+      return { candidates: [{ content: { parts: [{ text }] } }] };
+    }
+    return data; // Gemini already in the right shape
+  }
+
+  // Helper: call the configured vision API (Gemini or Groq) with auto-retry on transient errors.
+  // 429 (rate limit / quota) is NOT retried — retrying just hammers the limit harder.
+  // `prompt` is required — each caller passes its own task-specific prompt.
+  async function callVisionAPI(apiKey, base64, mediaType, prompt, onProgress) {
+    const provider = getProvider();
     const MAX_ATTEMPTS = 3;
     const BACKOFF_MS = [1000, 2500, 5000]; // wait 1s, 2.5s, 5s before retries
-    const RETRYABLE_STATUS = [429, 500, 502, 503, 504];
+    const RETRYABLE_STATUS = [500, 502, 503, 504]; // 429 excluded on purpose
 
     let lastErr;
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -8028,37 +8228,20 @@
         if (onProgress && attempt > 1) {
           onProgress(`Retry ${attempt}/${MAX_ATTEMPTS} (server busy)...`);
         }
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { inline_data: { mime_type: mediaType, data: base64 } },
-                  { text: `This is a screenshot from the mobile game KingShot showing an Alliance Members list. Each member card shows a player name, power (like 38.5M or 58.6M), and sometimes green "Online" text.
-
-Extract ALL visible member cards and return ONLY a JSON array, no explanation, no markdown.
-
-Format: [{"name":"PlayerOne","power":38500000,"isOnline":true},{"name":"PlayerTwo","power":58600000,"isOnline":false}]
-
-Rules:
-- Convert power: 38.5M = 38500000, 58.6M = 58600000, 1.2B = 1200000000
-- isOnline = true only if green "Online" label is visible on the card
-- Include every player card visible, even partial ones
-- Return ONLY the JSON array, nothing else` }
-                ]
-              }],
-              generationConfig: { temperature: 0, thinkingConfig: { thinkingBudget: 0 } }
-            })
-          }
-        );
-        if (response.ok) return await response.json();
+        const { url, init } = _buildVisionRequest(provider, apiKey, base64, mediaType, prompt);
+        const response = await fetch(url, init);
+        if (response.ok) {
+          const raw = await response.json();
+          return _normalizeVisionResponse(provider, raw);
+        }
 
         const errText = await response.text().catch(() => '');
-        const err = new Error(`API ${response.status}: ${errText.slice(0, 200)}`);
+        // Log FULL body to console so 400/etc reasons are debuggable
+        console.error(`[${provider} API ${response.status}] full response body:`, errText);
+        const err = new Error(`API ${response.status}: ${errText.slice(0, 800)}`);
         err.status = response.status;
+        err.bodyText = errText;
+        err.provider = provider;
 
         // Don't retry on permanent errors (bad key, bad request, etc.)
         if (!RETRYABLE_STATUS.includes(response.status)) throw err;
@@ -8081,10 +8264,11 @@ Rules:
     if (!input.files || !input.files.length) return;
     let files = Array.from(input.files);
 
-    // Cap at 10 files to keep things responsive and protect free-tier quota
-    const MAX_FILES = 10;
+    // Cap per batch — scales with the active provider's free tier
+    const MAX_FILES = maxFilesForProvider();
     if (files.length > MAX_FILES) {
-      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${files.length}.`);
+      const limitNote = getProvider() === 'groq' ? "Groq free tier handles more if you re-run later." : "Gemini free tier is tight (~20/day) — re-run for the rest after a minute.";
+      showAllianceToast(`⚠️ Max ${MAX_FILES} screenshots at once — using first ${MAX_FILES} of ${files.length}. ${limitNote}`);
       files = files.slice(0, MAX_FILES);
     }
 
@@ -8111,6 +8295,8 @@ Rules:
     // Throttle: free tier allows 10 req/min — wait ~6.5s between calls (skip wait on first)
     const THROTTLE_MS = 6500;
     let lastCallAt = 0;
+    let lastError = null; // capture last API error for diagnostics
+    const rawResponses = []; // capture all raw Gemini responses for diagnostic
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -8150,10 +8336,11 @@ Rules:
         if (processingText) processingText.textContent = `File ${i+1}/${files.length}: calling AI (${Math.round(base64.length/1024)}KB)...`;
         const mediaType = 'image/jpeg';
         lastCallAt = Date.now();
-        const data = await callGeminiWithRetry(apiKey, base64, mediaType,
+        const data = await callVisionAPI(apiKey, base64, mediaType, OCR_PROMPT_MEMBERS,
           (msg) => { if (processingText) processingText.textContent = `File ${i+1}/${files.length}: ${msg}`; }
         );
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        rawResponses.push({ file: i+1, text: rawText, parsed: data });
         if (!rawText) continue;
         const clean = rawText.replace(/```json|```/g, '').trim();
         let members;
@@ -8173,13 +8360,24 @@ Rules:
         allMembers = allMembers.concat(members);
       } catch (err) {
         console.error('Screenshot OCR error:', err);
+        lastError = err; // remember for empty-state diagnostic
         // Friendly error messages
         let msg = err.message || String(err);
-        if (err.status === 429) msg = 'Rate limit reached — wait a minute and try again';
-        else if (err.status === 503) msg = 'AI server busy after 3 retries — try again in a minute';
-        else if (err.status === 400 && /API key/i.test(msg)) msg = 'API key invalid or expired — get a new one';
-        else if (err.status === 403) msg = 'API key not authorized — check it on aistudio.google.com';
-        showAllianceToast(`❌ File ${i+1}: ${msg.slice(0, 100)}`);
+        const _p = err.provider || getProvider();
+        const _pName = _p === 'groq' ? 'Groq' : 'Gemini';
+        const _pUrl = _p === 'groq' ? 'console.groq.com/keys' : 'aistudio.google.com/apikey';
+        if (err.status === 429) msg = `Quota / rate limit hit on ${_pName} — wait ~60s, then try 1-2 images at a time. (${_p === 'groq' ? 'Groq free tier: 30/min, 1,000/day' : 'Gemini free tier: ~20/day'}.)`;
+        else if (err.status === 503) msg = `${_pName} server busy after 3 retries — try again in a minute`;
+        else if (err.status === 401 || (err.status === 400 && /API key|api[ _]?key|unauthor/i.test(msg))) msg = `${_pName} API key invalid or expired — get a new one at ${_pUrl}`;
+        else if (err.status === 403) msg = `${_pName} API key not authorized — check it at ${_pUrl}`;
+        showAllianceToast(`❌ File ${i+1}: ${msg.slice(0, 300)}`);
+        // Don't keep trying further files if quota is exhausted — that just makes things worse
+        if (err.status === 429) {
+          if (i + 1 < files.length) {
+            showAllianceToast(`⏹ Skipping remaining ${files.length - i - 1} file(s) — quota exhausted.`);
+          }
+          break;
+        }
       }
     }
 
@@ -8193,6 +8391,10 @@ Rules:
     });
 
     const totalFound = allMembers.length;
+    // Keep a copy of the full list BEFORE the onlineOnly filter, so we can offer
+    // to import them anyway when the filter strips everything (e.g. Damage Rewards
+    // screenshots don't have an "Online" badge — everyone shows as offline).
+    const allMembersUnfiltered = allMembers.slice();
     if (onlineOnly) allMembers = allMembers.filter(m => m.isOnline);
 
     _ocrData = allMembers.map(m => {
@@ -8212,19 +8414,87 @@ Rules:
       }
       return { name: String(m.name).slice(0, 24), power: Math.round(power), isTopRL: false, status: 'available' };
     });
+    // Sort by power/damage descending — top players first (most useful for RL selection)
+    _ocrData.sort((a, b) => (b.power || 0) - (a.power || 0));
+
+    // Also build an unfiltered version (used when the onlineOnly filter strips everything,
+    // e.g. when importing Damage Rewards screenshots that have no Online label)
+    const _ocrDataUnfiltered = allMembersUnfiltered.map(m => {
+      let power = 0;
+      const raw = m.power;
+      if (typeof raw === 'number') { power = raw; }
+      else if (typeof raw === 'string') {
+        const match = raw.match(/([\d.]+)\s*([MKBmkb])?/);
+        if (match) {
+          const val = parseFloat(match[1]);
+          const suffix = (match[2] || '').toUpperCase();
+          if (suffix === 'B') power = val * 1e9;
+          else if (suffix === 'M') power = val * 1e6;
+          else if (suffix === 'K') power = val * 1e3;
+          else power = val;
+        }
+      }
+      return { name: String(m.name).slice(0, 24), power: Math.round(power), isTopRL: false, status: 'available' };
+    });
+    // Sort by power/damage descending — top players first
+    _ocrDataUnfiltered.sort((a, b) => (b.power || 0) - (a.power || 0));
 
     document.getElementById('ocr-processing').style.display = 'none';
     if (_ocrData.length > 0) {
       renderOCRResults(onlineOnly, totalFound, files.length);
       document.getElementById('ocr-results-section').style.display = 'block';
+    } else if (onlineOnly && _ocrDataUnfiltered.length > 0) {
+      // Special case: filter (Online only) stripped everyone — offer to import them all.
+      // Expose a one-shot handler so the inline button can flip _ocrData and re-render.
+      window._ocrImportAnyway = () => {
+        _ocrData = _ocrDataUnfiltered;
+        renderOCRResults(false, totalFound, files.length);
+        document.getElementById('ocr-results-section').style.display = 'block';
+        delete window._ocrImportAnyway;
+      };
+      const resultsSection = document.getElementById('ocr-results-section');
+      const resultsList = document.getElementById('ocr-results-list');
+      if (resultsList) {
+        resultsList.innerHTML = `<div style="color:#ffb060;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+          ✅ <b>Found ${_ocrDataUnfiltered.length} players</b>, but all are marked offline.<br>
+          <span style="font-size:11px;opacity:0.85;display:block;margin-top:4px;">Damage Rewards / Ranking screenshots don't show an "Online" badge — so the <b>Online only</b> filter strips them all. You can import them anyway:</span>
+          <button style="margin-top:10px;padding:8px 14px;background:#5fb85f;color:#0a1228;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px;" onclick="window._ocrImportAnyway && window._ocrImportAnyway()">📥 Import all ${_ocrDataUnfiltered.length} anyway</button>
+        </div>`;
+      }
+      if (resultsSection) resultsSection.style.display = 'block';
     } else if (allMembers.length === 0) {
       // Show debug info in results section
       const resultsSection = document.getElementById('ocr-results-section');
       const resultsList = document.getElementById('ocr-results-list');
-      if (resultsList) resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:center;">
-        ❌ No members detected.<br>
-        <span style="font-size:11px;opacity:0.7">Try unchecking "Online only" or use Bulk Paste.</span>
-      </div>`;
+      if (resultsList) {
+        if (lastError) {
+          // An API call actually failed — show the full body so user can debug
+          const bodyText = lastError.bodyText || lastError.message || String(lastError);
+          const status = lastError.status || '???';
+          const safeBody = String(bodyText).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+            ❌ <b>API error ${status}</b> — Gemini rejected the request.<br>
+            <span style="font-size:11px;opacity:0.8;display:block;margin-top:6px;">Full response body (for debugging):</span>
+            <textarea readonly style="width:100%;height:120px;margin-top:6px;background:#0a1228;color:#ffb0b0;border:1px solid #ff8080;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;resize:vertical;" onclick="this.select()">${safeBody}</textarea>
+            <button style="margin-top:6px;padding:6px 12px;background:#c9a84c;color:#0a1228;border:none;border-radius:6px;font-weight:600;cursor:pointer;" onclick="navigator.clipboard.writeText(this.previousElementSibling.value).then(()=>{this.textContent='✅ Copied';setTimeout(()=>this.textContent='📋 Copy error',1500);})">📋 Copy error</button>
+          </div>`;
+        } else if (rawResponses.length > 0) {
+          // API succeeded but extracted nothing — show what Gemini actually said
+          const debugDump = rawResponses.map(r => `--- File ${r.file} ---\n${r.text || '(empty response)'}`).join('\n\n');
+          const safeDump = String(debugDump).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          resultsList.innerHTML = `<div style="color:#ffb060;font-size:13px;padding:12px;border-radius:8px;text-align:left;">
+            ⚠️ <b>No members extracted</b> — Gemini answered but no player rows were found.<br>
+            <span style="font-size:11px;opacity:0.8;display:block;margin-top:6px;">Gemini's raw answer (paste this if asking for help):</span>
+            <textarea readonly style="width:100%;height:140px;margin-top:6px;background:#0a1228;color:#ffd080;border:1px solid #ffb060;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;resize:vertical;" onclick="this.select()">${safeDump}</textarea>
+            <button style="margin-top:6px;padding:6px 12px;background:#c9a84c;color:#0a1228;border:none;border-radius:6px;font-weight:600;cursor:pointer;" onclick="navigator.clipboard.writeText(this.previousElementSibling.value).then(()=>{this.textContent='✅ Copied';setTimeout(()=>this.textContent='📋 Copy raw',1500);})">📋 Copy raw</button>
+          </div>`;
+        } else {
+          resultsList.innerHTML = `<div style="color:#ff8080;font-size:13px;padding:12px;border-radius:8px;text-align:center;">
+            ❌ No members detected.<br>
+            <span style="font-size:11px;opacity:0.7">Try unchecking "Online only", use a clearer screenshot, or paste names with Bulk Paste.</span>
+          </div>`;
+        }
+      }
       if (resultsSection) resultsSection.style.display = 'block';
     }
   }
@@ -8352,7 +8622,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r25';
+  const BEAR_BUILD = 'v2026.05.01-r42';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
