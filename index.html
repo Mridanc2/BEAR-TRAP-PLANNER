@@ -3848,7 +3848,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r43</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r46</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4694,6 +4694,12 @@
     // Each toggle button's `n` represents JOINERS, but archers are split across ALL marches
     // (joiners + leader). So when Rally Leader is on, divide by n+1.
     const isRL = (typeof isRallyLeader !== 'undefined') && isRallyLeader;
+    // r44: cap by march capacity. A single march can't carry more troops than the cap,
+    // so showing `total_archers / N` raw lies whenever total/N would overflow. Assuming
+    // the 85% archer target ratio, max archers per march = capacity × 0.85.
+    const _capRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    const marchCap = _capRaw < 50000 ? 130000 : _capRaw;
+    const arcCapPerMarch = Math.floor(marchCap * 0.85);
     // Compact format for narrow grid: 78,087 → 78.1K, 1,234 → 1.2K
     const fmtCompact = (n) => {
       if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0','') + 'M';
@@ -4703,12 +4709,23 @@
     let tips = '';
     for (let n = 1; n <= 6; n++) {
       const totalMarches = n + (isRL ? 1 : 0);
-      const arcEach = Math.floor(arc / totalMarches);
+      const arcRaw  = Math.floor(arc / totalMarches);
+      const arcEach = Math.min(arcRaw, arcCapPerMarch);
+      const capped  = arcRaw > arcCapPerMarch;
       const totalEach = Math.floor(arcEach / 0.85);
       const ok = totalEach >= 50000;
-      const color = ok ? '#5ba85b' : '#c0392b';
+      // r45/r46: capped = march filled to capacity at the 85% archer target = perfect
+      // composition. Color it green like other good marches, and add a glow to mark
+      // it as the ideal-ratio winner.
+      const isMax = capped && ok;
+      const color = ok ? (isMax ? '#7de07d' : '#5ba85b') : '#c0392b';
+      const glowCss = isMax
+        ? 'text-shadow:0 0 6px rgba(125,224,125,0.85),0 0 12px rgba(125,224,125,0.55),0 0 18px rgba(125,224,125,0.25);'
+        : '';
+      const maxMark = isMax ? ' <span style="font-size:8px;opacity:0.7;color:#7de07d;text-shadow:0 0 4px rgba(125,224,125,0.6);">(max)</span>' : '';
+      const titleSuffix = isMax ? ' — march full at 85% archer target ('+fmt(arcCapPerMarch)+' archers in '+fmt(marchCap)+' capacity)' : '';
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
-              `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;" title="${fmt(arcEach)}">${fmtCompact(arcEach)}</div>` +
+              `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;${glowCss}" title="${fmt(arcEach)}${titleSuffix}">${fmtCompact(arcEach)}${maxMark}</div>` +
               `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
               `</div>`;
     }
@@ -8628,7 +8645,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r43';
+  const BEAR_BUILD = 'v2026.05.01-r46';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
