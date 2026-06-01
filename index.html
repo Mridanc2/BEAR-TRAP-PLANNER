@@ -3245,6 +3245,8 @@
       <div id="march-total-info" style="display:none;margin-top:8px;padding:6px 10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:6px;font-size:11px;color:#e8c87c;text-align:center;letter-spacing:0.05em;">
         <span id="march-total-info-text"></span>
       </div>
+      <!-- r55: dedicated RL row — appears only when Rally Leader is toggled on -->
+      <div id="march-rl-info" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:8px;"></div>
     </div>
     <div class="setting-box">
       <div class="section-title">👑 <span data-i18n="rallyLeader">Rally Leader</span></div>
@@ -3257,7 +3259,7 @@
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">⚔ My March Capacity</div>
         <input type="number" id="march-capacity" value="130000" min="50000" max="300000" step="5000"
           placeholder="e.g. 130,000"
-          oninput="updateMarchRec(); saveArmy(); updateCapacityHint()"
+          oninput="updateMarchRec(); saveArmy(); updateCapacityHint(); updateMarchTooltips(); _refreshIfShown()"
           style="width:100%;background:rgba(0,20,55,0.85);border:1.5px solid rgba(100,180,255,0.45);border-radius:8px;color:#f0f8ff;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;padding:8px 10px;outline:none;-moz-appearance:textfield;box-shadow:0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4);">
         <div style="font-size:10px;color:var(--gold-dim);margin-top:4px;">Max troops you can send in one march — check your in-game march screen</div>
         <div id="capacity-warn" style="display:none;font-size:11px;color:#e74c3c;margin-top:4px;font-weight:600;">⚠️ Value too low — typical capacity is 100,000–200,000. Did you mean to add a zero?</div>
@@ -3266,7 +3268,7 @@
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">🤝 Joiner Cap <span style="text-transform:none;color:var(--gold-dim);font-size:10px;opacity:0.8;">— deliberate self-limit per joiner march</span></div>
         <input type="number" id="joiner-cap" value="100000" min="40000" max="300000" step="5000"
           placeholder="e.g. 100,000"
-          oninput="updateMarchRec(); saveArmy()"
+          oninput="updateMarchRec(); saveArmy(); updateMarchTooltips(); _refreshIfShown()"
           style="width:100%;background:rgba(0,20,55,0.85);border:1.5px solid rgba(100,180,255,0.45);border-radius:8px;color:#f0f8ff;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;padding:8px 10px;outline:none;-moz-appearance:textfield;box-shadow:0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4);">
         <div style="font-size:10px;color:var(--gold-dim);margin-top:4px;">Under √damage, smaller joins per member deal more total damage and let more members fit in whale rallies. Common conventions: 80K–120K.</div>
       </div>
@@ -3857,7 +3859,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r51</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r56</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4364,6 +4366,7 @@
     });
     updateMarchRec();
     updateTotals(); // refresh archer rating bar (depends on marches count)
+    updateMarchTooltips(); // r54: refresh RL column for the new N
     saveArmy(); // persist marches selection to current preset
   }
 
@@ -4421,6 +4424,7 @@
       selectedLeaderHeroes.push(name); // select up to 3
     }
     buildLeaderPicker();
+    if (typeof updateMarchRLInfo === 'function') updateMarchRLInfo(); // r55: refresh portraits
     saveArmy(); // persist hero selection to current preset
   }
 
@@ -4757,8 +4761,120 @@
               `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
               `</div>`;
     }
+    tooltipDiv.style.gridTemplateColumns = 'repeat(6,minmax(0,1fr))';
     tooltipDiv.innerHTML = tips;
     updateMarchTotalInfo();
+    updateMarchRLInfo();
+  }
+
+  // r55: dedicated RL info row — appears under the "joiners + Rally Leader = N total"
+  // line whenever Rally Leader is toggled on. Left side: a glowing RL box with the
+  // leader's archer count for the currently selected N. Right side: portraits of the
+  // up-to-3 selected leader heroes (Front / Mid / Back).
+  // r56: archer count now reflects the ACTUAL post-refill value (what the leader card
+  // will show after Calculate), not the naive arc/(N+1) share. Mirrors _doCalculate
+  // exactly: 85/10/5 initial split → r49 joiner scaling → r50 archer refill into leader.
+  function updateMarchRLInfo() {
+    const box = document.getElementById('march-rl-info');
+    if (!box) return;
+    const isRL = (typeof isRallyLeader !== 'undefined') && isRallyLeader;
+    if (!isRL) { box.style.display = 'none'; return; }
+
+    // Read all troop totals (same way _doCalculate does)
+    const arcT10 = parseInt(document.getElementById('arc-t10').value) || 0;
+    const arcT9  = parseInt(document.getElementById('arc-t9').value)  || 0;
+    const totalArc = arcT10 + arcT9 + getT8Val('arc') + getT7Val('arc') + getT6Val('arc');
+    const cavT10 = parseInt(document.getElementById('cav-t10').value) || 0;
+    const cavT9  = parseInt(document.getElementById('cav-t9').value)  || 0;
+    const totalCav = cavT10 + cavT9 + getT8Val('cav') + getT7Val('cav') + getT6Val('cav');
+    const infT10 = parseInt(document.getElementById('inf-t10').value) || 0;
+    const infT9  = parseInt(document.getElementById('inf-t9').value)  || 0;
+    const totalInf = infT10 + infT9 + getT8Val('inf') + getT7Val('inf') + getT6Val('inf');
+    const grandTotal = totalArc + totalCav + totalInf;
+
+    const _capRaw = parseInt(document.getElementById('march-capacity')?.value) || 130000;
+    const marchCap = _capRaw < 50000 ? 130000 : _capRaw;
+    const _jcRaw = parseInt(document.getElementById('joiner-cap')?.value) || 100000;
+    const joinerCap = Math.min(_jcRaw < 40000 ? 100000 : _jcRaw, marchCap);
+
+    const selN = (typeof numMarches !== 'undefined' && numMarches > 0) ? numMarches : 1;
+    const N = selN + 1; // total marches incl. leader
+
+    // ── Stage 1: 85/10/5 initial split (matches _doCalculate exactly) ──
+    const MIN = 5000;
+    const perMarchTotal = Math.min(Math.floor(grandTotal / N), marchCap);
+    let arcTarget = Math.round(perMarchTotal * 0.85);
+    let cavTarget = Math.round(perMarchTotal * 0.10);
+    let infTarget = perMarchTotal - arcTarget - cavTarget;
+    const arcAvailPer = Math.floor(totalArc / N);
+    const cavAvailPer = Math.floor(totalCav / N);
+    const infAvailPer = Math.floor(totalInf / N);
+    if (totalArc >= MIN * N) arcTarget = Math.max(Math.min(arcTarget, arcAvailPer), MIN);
+    else arcTarget = arcAvailPer;
+    if (totalCav >= MIN * N) cavTarget = Math.max(Math.min(cavTarget, cavAvailPer), MIN);
+    else cavTarget = cavAvailPer;
+    if (totalInf >= MIN * N) infTarget = Math.max(Math.min(infTarget, infAvailPer), MIN);
+    else infTarget = infAvailPer;
+    const usedPerMarch = arcTarget + cavTarget + infTarget;
+    const surplus = perMarchTotal - usedPerMarch;
+    if (surplus > 0 && arcTarget + surplus <= arcAvailPer) arcTarget += surplus;
+
+    // ── Stage 2: r49 joiner scaling (leader is exempt) ──
+    let leaderArc = arcTarget;
+    const leaderCav = cavTarget;
+    const leaderInf = infTarget;
+    let leaderTotal = leaderArc + leaderCav + leaderInf;
+    let joinerArcAfter = arcTarget;
+    if (leaderTotal > joinerCap) {
+      const scale = joinerCap / leaderTotal;
+      joinerArcAfter = Math.floor(arcTarget * scale);
+    }
+    const numJoiners = selN;
+
+    // ── Stage 3: r50 archer refill into leader (T10→T6, but only arc total matters here) ──
+    const leftoverArc = Math.max(0, totalArc - leaderArc - joinerArcAfter * numJoiners);
+    const roomInLeader = Math.max(0, marchCap - leaderTotal);
+    const arcFilled = Math.min(roomInLeader, leftoverArc);
+    leaderArc += arcFilled;
+    leaderTotal += arcFilled;
+
+    // Display values
+    const ok = leaderTotal >= 50000;
+    const arcColor = ok ? '#5ba85b' : '#c0392b';
+    const atCap = leaderTotal >= marchCap - 100;
+    const fullTag = atCap ? ' <span style="font-size:9px;opacity:0.8;color:var(--gold-light);">(full)</span>' : '';
+
+    // Hero portraits (up to 3)
+    const labels = ['Front','Mid','Back'];
+    let heroesHtml = '';
+    if (Array.isArray(selectedLeaderHeroes) && selectedLeaderHeroes.length > 0) {
+      heroesHtml = selectedLeaderHeroes.map((name, i) => {
+        const img = (typeof HERO_IMAGES !== 'undefined') ? HERO_IMAGES[name] : null;
+        const borderColor = i === 0 ? 'var(--gold)' : 'rgba(201,168,76,0.35)';
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:42px;">`
+             + (img
+                ? `<img src="${img}" style="width:32px;height:32px;border-radius:5px;object-fit:cover;object-position:center top;border:1px solid ${borderColor};">`
+                : `<span style="font-size:20px;">⚔️</span>`)
+             + `<span style="font-size:9px;color:${i===0?'var(--gold)':'var(--gold-dim)'};font-weight:${i===0?'700':'500'};line-height:1;">${name}</span>`
+             + `<span style="font-size:8px;color:var(--gold-dim);letter-spacing:0.05em;">${labels[i] || ''}</span>`
+             + `</div>`;
+      }).join('');
+    } else {
+      heroesHtml = `<span style="font-size:10px;color:var(--gold-dim);font-style:italic;text-align:center;line-height:1.3;padding:0 4px;">Pick<br>3 heroes</span>`;
+    }
+
+    const title = `Actual leader march after refill — initial share ${fmt(arcTarget)} archers, then r50 refills ${fmt(arcFilled)} more from joiner scaling leftovers (joiner cap ${fmt(joinerCap)}). Final: ${fmt(leaderTotal)} total troops at march cap ${fmt(marchCap)}.`;
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
+        <div style="display:flex;flex-direction:column;align-items:center;min-width:60px;">
+          <div style="background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,180,0,0.08));border:1px solid var(--gold-light);border-radius:8px;color:var(--gold-light);font-family:'Crimson Pro',serif;font-size:15px;font-weight:700;padding:6px 14px;box-shadow:0 0 14px rgba(201,168,76,0.3), inset 0 1px 0 rgba(201,168,76,0.2);text-shadow:0 0 10px rgba(255,215,0,0.8);letter-spacing:0.08em;">RL</div>
+          <div style="margin-top:5px;font-size:12px;color:${arcColor};font-weight:700;white-space:nowrap;" title="${title}">${fmt(leaderArc)}${fullTag}</div>
+          <div style="font-size:9px;color:var(--gold-dim);margin-top:1px;">🏹 archers</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;flex-shrink:0;">${heroesHtml}</div>
+      </div>`;
+    box.style.display = 'block';
   }
 
   function updateMarchTotalInfo() {
@@ -5318,6 +5434,38 @@
   }
 
   function fmt(n) { return n.toLocaleString('en-US'); }
+
+  // r52/r53: when caps change after results are already showing, refresh the march
+  // cards and usage summary in place. Skipped if results haven't been calculated yet
+  // (avoids surprise-showing the cards just because a setting was tweaked).
+  // Debounced 350ms so rapid keystrokes coalesce into a single refresh, and the page
+  // scroll + focused input are preserved across the re-render (otherwise the marches
+  // grid re-mounting with its staggered animations would jump the viewport).
+  let _refreshDebounceTimer = null;
+  function _refreshIfShown() {
+    const res = document.getElementById('results');
+    if (!res || !res.classList || !res.classList.contains('show')) return;
+    if (_refreshDebounceTimer) clearTimeout(_refreshDebounceTimer);
+    _refreshDebounceTimer = setTimeout(() => {
+      const sy = window.scrollY;
+      const activeEl = document.activeElement;
+      const selStart = (activeEl && activeEl.selectionStart != null) ? activeEl.selectionStart : null;
+      const selEnd   = (activeEl && activeEl.selectionEnd   != null) ? activeEl.selectionEnd   : null;
+      try { _doCalculate(); } catch (e) {}
+      // Restore scroll & focus on the next frame so any layout settles first.
+      requestAnimationFrame(() => {
+        window.scrollTo(0, sy);
+        if (activeEl && activeEl.id && document.body.contains(activeEl)) {
+          try {
+            activeEl.focus({ preventScroll: true });
+            if (selStart != null && typeof activeEl.setSelectionRange === 'function') {
+              activeEl.setSelectionRange(selStart, selEnd != null ? selEnd : selStart);
+            }
+          } catch (e) {}
+        }
+      });
+    }, 350);
+  }
 
   function calculate() {
     // Loading animation
@@ -8774,7 +8922,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r51';
+  const BEAR_BUILD = 'v2026.05.01-r56';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
