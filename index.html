@@ -3334,6 +3334,7 @@
     <div class="summary-box">
       <div class="section-title">📊 <span data-i18n="summary">Usage Summary</span></div>
       <table id="summary-table"></table>
+      <div id="summary-warning"></div>
     </div>
     <div class="tips-box">
       <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
@@ -3856,7 +3857,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r48</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r51</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -5480,6 +5481,75 @@
       });
     }
 
+    // r49: apply the joiner cap. Each joiner march is scaled down proportionally
+    // (preserves the 85/10/5 ratio and the tier mix) if its total exceeds the joiner
+    // cap. The leader march keeps the full march capacity. This matches the strategic
+    // intent: bigger leader, deliberately smaller joiners → more √damage joins per
+    // member, more members fit in a whale rally.
+    const _jcRawDC = parseInt(document.getElementById('joiner-cap')?.value) || 100000;
+    const joinerCapDC = Math.min(_jcRawDC < 40000 ? 100000 : _jcRawDC, marchCapacity);
+    marchesList.forEach(m => {
+      if (m.isLeader) return;
+      if (m.total <= joinerCapDC) return;
+      const scale = joinerCapDC / m.total;
+      ['arcT10','arcT9','arcT8','arcT7','arcT6','cavT10','cavT9','cavT8','cavT7','cavT6','infT10','infT9','infT8','infT7','infT6']
+        .forEach(k => { m[k] = Math.floor((m[k] || 0) * scale); });
+      const _a = m.arcT10 + m.arcT9 + (m.arcT8||0) + (m.arcT7||0) + (m.arcT6||0);
+      const _c = m.cavT10 + m.cavT9 + (m.cavT8||0) + (m.cavT7||0) + (m.cavT6||0);
+      const _i = m.infT10 + m.infT9 + (m.infT8||0) + (m.infT7||0) + (m.infT6||0);
+      m.total = _a + _c + _i;
+      m.arcPct = m.total > 0 ? Math.round(_a / m.total * 100) : 0;
+      m.cavPct = m.total > 0 ? Math.round(_c / m.total * 100) : 0;
+      m.infPct = 100 - m.arcPct - m.cavPct;
+    });
+
+    // r50: archers shouldn't stay home if any march still has capacity.
+    // After the 85/10/5 split and the r49 joiner scaling, sweep each march and refill
+    // its remaining slot with leftover archers — leader first (biggest cap), then
+    // joiners. Higher tiers (T10) drain first, then T9, T8, T7, T6. This pushes the
+    // archer share above 85% only when cav/inf are too scarce to keep the ratio at
+    // those weights — which is exactly when you'd rather have extra archers than
+    // empty slots.
+    {
+      const totalArcT10 = parseInt(document.getElementById('arc-t10').value) || 0;
+      const totalArcT9  = parseInt(document.getElementById('arc-t9').value)  || 0;
+      const totalArcT8  = getT8Val('arc');
+      const totalArcT7  = getT7Val('arc');
+      const totalArcT6  = getT6Val('arc');
+      const usedT = (k) => marchesList.reduce((s, m) => s + (m[k] || 0), 0);
+      const leftArc = {
+        T10: Math.max(0, totalArcT10 - usedT('arcT10')),
+        T9:  Math.max(0, totalArcT9  - usedT('arcT9')),
+        T8:  Math.max(0, totalArcT8  - usedT('arcT8')),
+        T7:  Math.max(0, totalArcT7  - usedT('arcT7')),
+        T6:  Math.max(0, totalArcT6  - usedT('arcT6'))
+      };
+      const stillHome = leftArc.T10 + leftArc.T9 + leftArc.T8 + leftArc.T7 + leftArc.T6;
+      if (stillHome > 0) {
+        const fillOrder = marchesList.slice().sort((a, b) => (b.isLeader ? 1 : 0) - (a.isLeader ? 1 : 0));
+        for (const m of fillOrder) {
+          const cap = m.isLeader ? marchCapacity : joinerCapDC;
+          let room = Math.max(0, cap - m.total);
+          if (room <= 0) continue;
+          for (const tier of ['T10','T9','T8','T7','T6']) {
+            if (room <= 0) break;
+            if (leftArc[tier] <= 0) continue;
+            const add = Math.min(room, leftArc[tier]);
+            m['arc' + tier] = (m['arc' + tier] || 0) + add;
+            leftArc[tier] -= add;
+            room -= add;
+          }
+          const _a = m.arcT10 + m.arcT9 + (m.arcT8||0) + (m.arcT7||0) + (m.arcT6||0);
+          const _c = m.cavT10 + m.cavT9 + (m.cavT8||0) + (m.cavT7||0) + (m.cavT6||0);
+          const _i = m.infT10 + m.infT9 + (m.infT8||0) + (m.infT7||0) + (m.infT6||0);
+          m.total = _a + _c + _i;
+          m.arcPct = m.total > 0 ? Math.round(_a / m.total * 100) : 0;
+          m.cavPct = m.total > 0 ? Math.round(_c / m.total * 100) : 0;
+          m.infPct = 100 - m.arcPct - m.cavPct;
+        }
+      }
+    }
+
     // Render cards
     const grid = document.getElementById('marches-grid');
     // Responsive columns: 3-up only on wide screens (≥900px), otherwise 2-up.
@@ -5609,6 +5679,38 @@
           <td class="home">${fmt(grandTotal - sentTotal)} ${t('atHome')}</td>
         </tr>
       </tbody>`;
+
+    // r51: if archers are still staying home after r50 refill, the joiner cap is too
+    // tight — surface a warning + a recommended joiner-cap that would deploy all archers.
+    // Formula (intentionally a bit conservative): assume the leader can absorb up to
+    // marchCap × 0.85 archers, and each joiner contributes joinerCap × 0.80 archers
+    // (real-world ratio dips below the 85% target when cav/inf are scarce).
+    const warnEl = document.getElementById('summary-warning');
+    if (warnEl) {
+      const archersHome = totalArc - sentArc;
+      const numJoinersHere = isRallyLeader ? Math.max(0, N - 1) : N;
+      if (archersHome > 1000 && numJoinersHere > 0) {
+        const leaderArcMax = Math.floor(marchCapacity * 0.85);
+        const archersForJoiners = Math.max(0, totalArc - leaderArcMax);
+        let recCap = Math.ceil(archersForJoiners / numJoinersHere / 0.80 / 5000) * 5000;
+        recCap = Math.max(50000, Math.min(recCap, marchCapacity));
+        const curCap = parseInt(document.getElementById('joiner-cap')?.value) || 100000;
+        const recHigherThanCur = recCap > curCap;
+        warnEl.innerHTML = `
+          <div style="margin-top:12px;padding:12px 14px;background:rgba(192,57,43,0.10);border:1px solid rgba(192,57,43,0.45);border-radius:8px;">
+            <div style="font-size:12px;color:#e57368;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;">⚠ ${fmt(archersHome)} archers staying home</div>
+            <div style="font-size:13px;color:var(--parchment);line-height:1.45;">
+              The joiner cap (<strong>${fmt(curCap)}</strong>) is too tight to fit all your archers, even after sending the surplus to the rally leader.
+              ${recHigherThanCur
+                ? `Raise <strong>Joiner Cap → ${fmt(recCap)}</strong> to deploy all archers (or as close to all as fits within your march cap).`
+                : `You're already at the highest joiner cap your march cap allows — the remaining archers can't fit without raising march capacity itself.`}
+            </div>
+            ${recHigherThanCur ? `<button onclick="document.getElementById('joiner-cap').value=${recCap};document.getElementById('joiner-cap').dispatchEvent(new Event('input'));setTimeout(()=>_doCalculate(),100);" style="margin-top:8px;background:linear-gradient(180deg,var(--gold),var(--gold-dim));color:#1a1410;border:none;border-radius:6px;padding:6px 14px;font-family:'Crimson Pro',serif;font-size:13px;font-weight:700;cursor:pointer;">Set joiner cap to ${fmt(recCap)}</button>` : ''}
+          </div>`;
+      } else {
+        warnEl.innerHTML = '';
+      }
+    }
 
     // Donut chart
     const totalArcSent = marchesList.reduce((s,m) => s + m.arcT10 + m.arcT9, 0);
@@ -8672,7 +8774,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r48';
+  const BEAR_BUILD = 'v2026.05.01-r51';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
