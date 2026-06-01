@@ -3266,9 +3266,16 @@
       </div>
       <div style="margin-top:10px;">
         <div style="font-size:11px;color:var(--gold-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">🤝 Joiner Cap <span style="text-transform:none;color:var(--gold-dim);font-size:10px;opacity:0.8;">— deliberate self-limit per joiner march</span></div>
+        <!-- r57-C: quick preset buttons (50K / 80K / 100K / 130K) -->
+        <div id="joiner-cap-presets" style="display:flex;gap:4px;margin-bottom:5px;">
+          <button type="button" onclick="setJoinerCap(50000)" data-jcap="50000" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:var(--parchment);font-family:'Crimson Pro',serif;font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer;transition:all 0.15s;">50K</button>
+          <button type="button" onclick="setJoinerCap(80000)" data-jcap="80000" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:var(--parchment);font-family:'Crimson Pro',serif;font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer;transition:all 0.15s;">80K</button>
+          <button type="button" onclick="setJoinerCap(100000)" data-jcap="100000" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:var(--parchment);font-family:'Crimson Pro',serif;font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer;transition:all 0.15s;">100K</button>
+          <button type="button" onclick="setJoinerCap(130000)" data-jcap="130000" style="flex:1;background:rgba(0,0,0,0.35);border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:var(--parchment);font-family:'Crimson Pro',serif;font-size:13px;font-weight:600;padding:6px 4px;cursor:pointer;transition:all 0.15s;">130K</button>
+        </div>
         <input type="number" id="joiner-cap" value="100000" min="40000" max="300000" step="5000"
           placeholder="e.g. 100,000"
-          oninput="updateMarchRec(); saveArmy(); updateMarchTooltips(); _refreshIfShown()"
+          oninput="updateMarchRec(); saveArmy(); updateMarchTooltips(); _refreshIfShown(); updateJoinerCapPresets()"
           style="width:100%;background:rgba(0,20,55,0.85);border:1.5px solid rgba(100,180,255,0.45);border-radius:8px;color:#f0f8ff;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;padding:8px 10px;outline:none;-moz-appearance:textfield;box-shadow:0 0 8px rgba(80,160,255,0.15),inset 0 1px 3px rgba(0,0,0,0.4);">
         <div style="font-size:10px;color:var(--gold-dim);margin-top:4px;">Under √damage, smaller joins per member deal more total damage and let more members fit in whale rallies. Common conventions: 80K–120K.</div>
       </div>
@@ -3859,7 +3866,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r56</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r62</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4751,13 +4758,21 @@
         ? 'text-shadow:0 0 6px rgba(125,224,125,0.85),0 0 12px rgba(125,224,125,0.55),0 0 18px rgba(125,224,125,0.25);'
         : '';
       // Tags: ⭐ for the best-damage N; (cap) for those that hit the joiner cap.
+      // r61: (cap) gets its own line below the number — inline + nowrap was clipping
+      // the closing paren in narrow columns (visible on mobile, ~63px column width).
+      // r62: ALWAYS render the (cap) line (visibility:hidden when not capped) so the
+      // cell height stays constant. Prevents the page from jumping when typing in the
+      // joiner cap field crosses the capping threshold for one or more N values.
       const bestMark = isBest ? ' <span style="font-size:8px;opacity:0.85;color:#7de07d;text-shadow:0 0 4px rgba(125,224,125,0.6);">⭐</span>' : '';
-      const capMark = capped ? ' <span style="font-size:8px;opacity:0.55;color:var(--gold-dim);">(cap)</span>' : '';
+      const capMark = capped
+        ? `<div style="font-size:8px;opacity:0.55;color:var(--gold-dim);line-height:1;margin-top:1px;letter-spacing:0.04em;">(cap)</div>`
+        : `<div style="font-size:8px;line-height:1;margin-top:1px;letter-spacing:0.04em;visibility:hidden;" aria-hidden="true">(cap)</div>`;
       const titleParts = [fmt(arcEach)];
       if (capped) titleParts.push('capped at joiner cap ('+fmt(arcCapPerMarch)+' archers @ 85% of '+fmt(joinerCap)+')');
       if (isBest) titleParts.push('best √damage at this roster — score ≈ '+Math.round(bestScore));
       tips += `<div style="text-align:center;line-height:1.2;min-width:0;overflow:hidden;">` +
-              `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;${glowCss}" title="${titleParts.join(' — ')}">${fmtCompact(arcEach)}${bestMark}${capMark}</div>` +
+              `<div style="font-size:11px;color:${color};font-weight:700;white-space:nowrap;${glowCss}" title="${titleParts.join(' — ')}">${fmtCompact(arcEach)}${bestMark}</div>` +
+              capMark +
               `<div style="font-size:9px;color:var(--gold-dim);">🏹</div>` +
               `</div>`;
     }
@@ -4876,6 +4891,51 @@
       </div>`;
     box.style.display = 'block';
   }
+
+  // r57-C: preset buttons for joiner cap. Click sets the input, refreshes everything.
+  function setJoinerCap(val) {
+    const input = document.getElementById('joiner-cap');
+    if (!input) return;
+    input.value = val;
+    updateMarchRec();
+    saveArmy();
+    updateMarchTooltips();
+    if (typeof _refreshIfShown === 'function') _refreshIfShown();
+    updateJoinerCapPresets();
+    updateMembersFitIndicator();
+  }
+
+  // r57-C: highlight the preset button matching the current joiner cap.
+  function updateJoinerCapPresets() {
+    const current = parseInt(document.getElementById('joiner-cap')?.value) || 100000;
+    document.querySelectorAll('#joiner-cap-presets [data-jcap]').forEach(b => {
+      const v = parseInt(b.dataset.jcap);
+      const active = (v === current);
+      if (active) {
+        b.style.background = 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,180,0,0.08))';
+        b.style.borderColor = 'var(--gold-light)';
+        b.style.color = 'var(--gold-light)';
+        b.style.boxShadow = '0 0 10px rgba(201,168,76,0.25), inset 0 1px 0 rgba(201,168,76,0.2)';
+        b.style.transform = 'translateY(-1px)';
+        b.style.textShadow = '0 0 8px rgba(255,215,0,0.6)';
+      } else {
+        b.style.background = 'rgba(0,0,0,0.35)';
+        b.style.borderColor = 'rgba(201,168,76,0.2)';
+        b.style.color = 'var(--parchment)';
+        b.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 4px rgba(0,0,0,0.3)';
+        b.style.transform = 'none';
+        b.style.textShadow = '';
+      }
+    });
+  }
+
+  // r57-A: members-per-rally indicator. Assumes ~1.4M effective rally troop capacity
+  // (matches the community infographic: 100K cap → 14 members, 150K cap → 9 members).
+  // Hard ceiling of 15 marches per rally (1 RL + 14 joiners) per Kingshot mechanics.
+  // r60: removed per Idan's request — the 1.4M assumption doesn't hold across all
+  // alliances (xXx members can push more than typical; weaker alliances less).
+  // Stub retained as a no-op so legacy callers won't break.
+  function updateMembersFitIndicator() { /* removed in r60 */ }
 
   function updateMarchTotalInfo() {
     const box = document.getElementById('march-total-info');
@@ -8922,7 +8982,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r56';
+  const BEAR_BUILD = 'v2026.05.01-r62';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
@@ -8937,6 +8997,8 @@ Rules:
     updateMarchTooltips();   // ← Now correctly includes T8
     updatePromoteTip();
     updateCapacityHint();
+    if (typeof updateJoinerCapPresets === 'function') updateJoinerCapPresets();   // r57-C
+    if (typeof updateMembersFitIndicator === 'function') updateMembersFitIndicator(); // r57-A
     initAlliancePlanner();   // ← Alliance Planner: load saved members + restore last view
 
     // Re-render march grid columns on viewport resize (responsive 3-up vs 2-up)
