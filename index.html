@@ -3899,6 +3899,42 @@ const I18N = {
     vi: 'Hành trình tới Full Đỏ',
     th: 'เส้นทางสู่แดงเต็ม'
   },
+  'progress.power': {
+    en: 'Gear Power',
+    he: 'עוצמת ציוד',
+    es: 'Poder de equipo',
+    pt: 'Poder do equipamento',
+    fr: 'Puissance d’équipement',
+    de: 'Ausrüstungsstärke',
+    it: 'Potenza equipaggiamento',
+    nl: 'Uitrustingskracht',
+    ru: 'Сила снаряжения',
+    pl: 'Moc sprzętu',
+    tr: 'Ekipman gücü',
+    ar: 'قوة العتاد',
+    zh: '装备战力',
+    ja: '装備パワー',
+    ko: '장비 파워',
+    id: 'Kekuatan gear',
+    vi: 'Sức mạnh trang bị',
+    th: 'พลังอุปกรณ์'
+  },
+  'progress.powerHint': {
+    en: 'Every upgrade you log raises this — and your spot on the alliance board.',
+    he: 'כל שדרוג שתעדכן מעלה את זה — ואת המקום שלך בלוח הברית.',
+    es: 'Cada mejora que registres sube esto — y tu lugar en el tablero.',
+    pt: 'Cada melhoria que você registra aumenta isto — e seu lugar no quadro.',
+    fr: 'Chaque amélioration enregistrée augmente ceci — et ta place au classement.',
+    de: 'Jedes Upgrade erhöht das — und deinen Platz im Allianz-Board.',
+    ru: 'Каждое улучшение поднимает это — и ваше место в рейтинге.',
+    ar: 'كل ترقية تسجّلها ترفع هذا — ومكانك في اللوحة.',
+    zh: '你记录的每次升级都会提升它——以及你在联盟榜上的位置。',
+    ja: '記録した強化ごとに上がり、同盟ボードの順位も上がります。',
+    ko: '업그레이드를 기록할 때마다 올라가고 연합 순위도 올라갑니다.',
+    id: 'Setiap peningkatan yang kamu catat menaikkan ini — dan posisimu di papan.',
+    vi: 'Mỗi nâng cấp bạn ghi lại sẽ tăng cái này — và vị trí của bạn trên bảng.',
+    th: 'ทุกการอัปเกรดที่คุณบันทึกจะเพิ่มค่านี้ — และอันดับของคุณบนบอร์ด'
+  },
   'progress.phaseNow': {
     en: 'Phase {n} progress',
     es: 'Progreso Fase {n}',
@@ -9172,7 +9208,8 @@ const CommentsSection = ({
       borderRadius: 9,
       background: 'var(--kp-surface-3)',
       border: '1px solid rgba(201,169,97,0.18)',
-      minHeight: 70,
+      height: 104,
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center'
@@ -9402,12 +9439,13 @@ const AllianceWidget = ({
     onClick: onJoin,
     className: "kp-card",
     style: {
-      display: 'inline-flex',
+      display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       gap: 9,
       width: '100%',
       maxWidth: 320,
+      margin: '0 auto',
       padding: '13px 20px',
       borderRadius: 99,
       background: 'linear-gradient(135deg, #fbbf24, #d97706)',
@@ -9427,8 +9465,9 @@ const AllianceWidget = ({
   }, "\u2694\uFE0F"), " ", t('alliance.join'), " xXx #1494"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
-      display: 'inline-flex',
+      display: 'flex',
       flexDirection: 'column',
+      alignItems: 'center',
       gap: 6
     }
   }, mottos.map((m, i) => /*#__PURE__*/React.createElement("div", {
@@ -12527,6 +12566,64 @@ export default function App() {
     }, "\uD83D\uDD34 ", t('progress.redPieces', {
       n: red
     }))));
+  })(), (() => {
+    const power = gearScore(state.gear);
+    const MAX = TROOPS.length * SLOTS.length * ((RARITY_RANK.red || 6) * 1000 + (LEVEL_CAP.red || 100) * 5 + MASTERY_MAX * 25);
+    const pct = Math.min(100, Math.round(power / MAX * 100));
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 14,
+        borderRadius: 13,
+        padding: '12px 15px',
+        background: 'linear-gradient(135deg, rgba(96,165,250,0.12), var(--kp-panel))',
+        border: '1px solid rgba(96,165,250,0.3)',
+        boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: 7
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 12.5,
+        fontWeight: 800,
+        color: '#93c5fd',
+        letterSpacing: 0.5
+      }
+    }, "\u2694 ", t('progress.power')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 18,
+        fontWeight: 900,
+        color: '#bfdbfe'
+      }
+    }, fmt(power))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 9,
+        borderRadius: 99,
+        background: 'rgba(0,0,0,0.45)',
+        overflow: 'hidden',
+        border: '1px solid rgba(96,165,250,0.18)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${pct}%`,
+        height: '100%',
+        background: 'linear-gradient(90deg,#3b82f6,#a855f7,#fbbf24)',
+        transition: 'width 0.5s ease'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: 'var(--kp-text-faint)',
+        marginTop: 6,
+        lineHeight: 1.4
+      }
+    }, t('progress.powerHint')));
   })(), /*#__PURE__*/React.createElement(ResourcePills, {
     resources: state.resources,
     onEdit: () => setEditingResources(true),
@@ -13644,6 +13741,9 @@ if (__el) {
 </script>
 </body>
 </html>
+
+
+
 
 
 

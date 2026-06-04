@@ -658,6 +658,8 @@ const I18N = {
   'progress.goals': { en: '{done} / {total} gear goals done', es: '{done} / {total} objetivos hechos', pt: '{done} / {total} metas concluídas', fr: '{done} / {total} objectifs faits', de: '{done} / {total} Ziele erreicht', it: '{done} / {total} obiettivi fatti', nl: '{done} / {total} doelen klaar', ru: '{done} / {total} целей выполнено', pl: '{done} / {total} celów zrobionych', tr: '{done} / {total} hedef tamam', ar: '{done} / {total} أهداف منجزة', he: '{done} / {total} יעדי ציוד הושלמו', zh: '{done} / {total} 装备目标完成', ja: '{done} / {total} 装備目標達成', ko: '{done} / {total} 장비 목표 달성', id: '{done} / {total} target gear selesai', vi: '{done} / {total} mục tiêu hoàn thành', th: '{done} / {total} เป้าหมายอุปกรณ์สำเร็จ' },
   'progress.redPieces': { en: '{n}/12 Red', es: '{n}/12 Rojo', pt: '{n}/12 Vermelho', fr: '{n}/12 Rouge', de: '{n}/12 Rot', it: '{n}/12 Rosso', nl: '{n}/12 Rood', ru: '{n}/12 красных', pl: '{n}/12 Czerwony', tr: '{n}/12 Kırmızı', ar: '{n}/12 أحمر', he: '{n}/12 אדום', zh: '{n}/12 红装', ja: '{n}/12 レッド', ko: '{n}/12 레드', id: '{n}/12 Merah', vi: '{n}/12 Đỏ', th: '{n}/12 แดง' },
   'progress.journey': { en: 'Journey to Full Red', es: 'Camino al Rojo total', pt: 'Jornada ao Vermelho total', fr: 'Parcours vers le Rouge complet', de: 'Weg zu voll Rot', it: 'Percorso al Rosso completo', nl: 'Reis naar vol Rood', ru: 'Путь к полному красному', pl: 'Droga do pełnej czerwieni', tr: 'Tam Kırmızıya Yolculuk', ar: 'الطريق إلى الأحمر الكامل', he: 'הדרך לאדום מלא', zh: '通往全红之路', ja: 'フルレッドへの道', ko: '풀 레드까지의 여정', id: 'Perjalanan ke Full Merah', vi: 'Hành trình tới Full Đỏ', th: 'เส้นทางสู่แดงเต็ม' },
+  'progress.power': { en: 'Gear Power', he: 'עוצמת ציוד', es: 'Poder de equipo', pt: 'Poder do equipamento', fr: 'Puissance d’équipement', de: 'Ausrüstungsstärke', it: 'Potenza equipaggiamento', nl: 'Uitrustingskracht', ru: 'Сила снаряжения', pl: 'Moc sprzętu', tr: 'Ekipman gücü', ar: 'قوة العتاد', zh: '装备战力', ja: '装備パワー', ko: '장비 파워', id: 'Kekuatan gear', vi: 'Sức mạnh trang bị', th: 'พลังอุปกรณ์' },
+  'progress.powerHint': { en: 'Every upgrade you log raises this — and your spot on the alliance board.', he: 'כל שדרוג שתעדכן מעלה את זה — ואת המקום שלך בלוח הברית.', es: 'Cada mejora que registres sube esto — y tu lugar en el tablero.', pt: 'Cada melhoria que você registra aumenta isto — e seu lugar no quadro.', fr: 'Chaque amélioration enregistrée augmente ceci — et ta place au classement.', de: 'Jedes Upgrade erhöht das — und deinen Platz im Allianz-Board.', ru: 'Каждое улучшение поднимает это — и ваше место в рейтинге.', ar: 'كل ترقية تسجّلها ترفع هذا — ومكانك في اللوحة.', zh: '你记录的每次升级都会提升它——以及你在联盟榜上的位置。', ja: '記録した強化ごとに上がり、同盟ボードの順位も上がります。', ko: '업그레이드를 기록할 때마다 올라가고 연합 순위도 올라갑니다.', id: 'Setiap peningkatan yang kamu catat menaikkan ini — dan posisimu di papan.', vi: 'Mỗi nâng cấp bạn ghi lại sẽ tăng cái này — và vị trí của bạn trên bảng.', th: 'ทุกการอัปเกรดที่คุณบันทึกจะเพิ่มค่านี้ — และอันดับของคุณบนบอร์ด' },
   'progress.phaseNow': { en: 'Phase {n} progress', es: 'Progreso Fase {n}', pt: 'Progresso Fase {n}', fr: 'Progrès Phase {n}', de: 'Phase {n} Fortschritt', it: 'Progresso Fase {n}', nl: 'Fase {n} voortgang', ru: 'Прогресс фазы {n}', pl: 'Postęp Fazy {n}', tr: 'Aşama {n} ilerlemesi', ar: 'تقدم المرحلة {n}', he: 'התקדמות שלב {n}', zh: '第{n}阶段进度', ja: 'フェーズ{n}の進捗', ko: '{n}단계 진행도', id: 'Progres Fase {n}', vi: 'Tiến độ Giai đoạn {n}', th: 'ความคืบหน้าเฟส {n}' },
   'progress.toGo': { en: '{n} more to finish this phase', es: '{n} más para terminar esta fase', pt: 'mais {n} para concluir esta fase', fr: 'encore {n} pour finir cette phase', de: 'noch {n} bis Phasenende', it: 'altri {n} per finire la fase', nl: 'nog {n} om deze fase af te ronden', ru: 'ещё {n} до конца фазы', pl: 'jeszcze {n} do końca fazy', tr: 'bu aşamayı bitirmek için {n} daha', ar: '{n} أخرى لإنهاء المرحلة', he: 'עוד {n} לסיום השלב', zh: '再完成 {n} 个即可结束本阶段', ja: 'このフェーズ完了まであと{n}個', ko: '이 단계 완료까지 {n}개', id: '{n} lagi untuk selesaikan fase ini', vi: 'còn {n} để hoàn thành giai đoạn', th: 'อีก {n} เพื่อจบเฟสนี้' },
   'ach.title': { en: 'ACHIEVEMENTS', es: 'LOGROS', pt: 'CONQUISTAS', fr: 'SUCCÈS', de: 'ERFOLGE', it: 'OBIETTIVI', nl: 'PRESTATIES', ru: 'ДОСТИЖЕНИЯ', pl: 'OSIĄGNIĘCIA', tr: 'BAŞARIMLAR', ar: 'الإنجازات', he: 'הישגים', zh: '成就', ja: '実績', ko: '업적', id: 'PENCAPAIAN', vi: 'THÀNH TỰU', th: 'ความสำเร็จ' },
@@ -3269,7 +3271,7 @@ const CommentsSection = ({ t }) => {
         padding: '12px 14px', borderRadius: 9,
         background: 'var(--kp-surface-3)',
         border: '1px solid rgba(201,169,97,0.18)',
-        minHeight: 70,
+        height: 104, overflow: 'hidden',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
       }}>
         <div style={{
@@ -3419,8 +3421,8 @@ const AllianceWidget = ({ onJoin, t }) => {
         xXx
       </div>
       <button onClick={onJoin} className="kp-card" style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9,
-        width: '100%', maxWidth: 320, padding: '13px 20px', borderRadius: 99,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+        width: '100%', maxWidth: 320, margin: '0 auto', padding: '13px 20px', borderRadius: 99,
         background: 'linear-gradient(135deg, #fbbf24, #d97706)',
         border: 'none', cursor: 'pointer',
         color: '#1a1205', fontFamily: 'Cinzel, serif', fontWeight: 900,
@@ -3430,7 +3432,7 @@ const AllianceWidget = ({ onJoin, t }) => {
         <span style={{ fontSize: 16 }}>⚔️</span> {t('alliance.join')} xXx #1494
       </button>
 
-      <div style={{ marginTop: 16, display: 'inline-flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         {mottos.map((m, i) => (
           <div key={i} style={{
             display: 'flex', alignItems: 'center', gap: 9,
@@ -5003,6 +5005,25 @@ export default function App() {
                 <span style={{ color: 'var(--kp-text-faint)' }}>{t('progress.goals', { done: jp.done, total: jp.total })}</span>
                 <span style={{ color: red >= 12 ? '#86efac' : '#fca5a5', fontWeight: 800 }}>🔴 {t('progress.redPieces', { n: red })}</span>
               </div>
+            </div>
+          );
+        })()}
+
+        {/* Gear Power — live strength that rises with every level/rarity/mastery you log */}
+        {(() => {
+          const power = gearScore(state.gear);
+          const MAX = TROOPS.length * SLOTS.length * ((RARITY_RANK.red || 6) * 1000 + (LEVEL_CAP.red || 100) * 5 + MASTERY_MAX * 25);
+          const pct = Math.min(100, Math.round(power / MAX * 100));
+          return (
+            <div style={{ marginBottom: 14, borderRadius: 13, padding: '12px 15px', background: 'linear-gradient(135deg, rgba(96,165,250,0.12), var(--kp-panel))', border: '1px solid rgba(96,165,250,0.3)', boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 7 }}>
+                <span style={{ fontFamily: 'Cinzel, serif', fontSize: 12.5, fontWeight: 800, color: '#93c5fd', letterSpacing: 0.5 }}>⚔ {t('progress.power')}</span>
+                <span style={{ fontFamily: 'Cinzel, serif', fontSize: 18, fontWeight: 900, color: '#bfdbfe' }}>{fmt(power)}</span>
+              </div>
+              <div style={{ height: 9, borderRadius: 99, background: 'rgba(0,0,0,0.45)', overflow: 'hidden', border: '1px solid rgba(96,165,250,0.18)' }}>
+                <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#3b82f6,#a855f7,#fbbf24)', transition: 'width 0.5s ease' }} />
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--kp-text-faint)', marginTop: 6, lineHeight: 1.4 }}>{t('progress.powerHint')}</div>
             </div>
           );
         })()}
