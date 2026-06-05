@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>/* Funnel: opening the Bear directly sends you into the Kingshot Companion hub; inside the Companion frame (or with ?standalone) it stays as the Bear. */(function(){try{if(window.self===window.top&&location.search.indexOf("standalone")===-1){location.replace("https://mridanc2.github.io/kingshot-companion/#/bear");}}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -1571,8 +1572,8 @@
     border-radius: 6px;
     color: var(--text);
     font-family: 'Crimson Pro', serif;
-    font-size: 14px;
-    padding: 8px 10px;
+    font-size: 16px; /* r63: 16px min prevents iOS Safari auto-zoom when tapping the field */
+    padding: 10px 10px;
     transition: border-color 0.2s;
   }
   .member-card input[type="text"]:focus,
@@ -1617,9 +1618,10 @@
     background: rgba(0,0,0,0.3);
     border: 1px solid rgba(201,168,76,0.22);
     border-radius: 4px;
-    padding: 4px 6px;
+    padding: 8px 10px; /* r63: larger tap target for thumbs */
+    min-height: 40px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--parchment);
     user-select: none;
     transition: all 0.2s;
@@ -1636,8 +1638,8 @@
   .member-nearbear-label input[type="checkbox"] {
     margin: 0;
     accent-color: var(--gold);
-    width: 12px;
-    height: 12px;
+    width: 18px;  /* r63: was 12px — easier to tap on mobile */
+    height: 18px;
     cursor: pointer;
   }
   .member-nearbear-label input[type="checkbox"] {
@@ -1660,8 +1662,9 @@
     border: 1px solid rgba(192,57,43,0.4);
     color: #ff8060;
     border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 8px 12px; /* r63: bigger tap target (was 4px 8px) */
+    min-height: 40px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
     line-height: 1;
@@ -1694,8 +1697,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 38px;  /* r63: was 22px — meets mobile tap-target minimum */
+    height: 38px;
     border-radius: 2px;
     cursor: pointer;
     transition: all 0.15s;
@@ -1707,7 +1710,7 @@
     pointer-events: none;
   }
   .status-option .status-icon {
-    font-size: 12px;
+    font-size: 16px; /* r63: scaled up with the larger 38px buttons */
     transition: all 0.15s;
     line-height: 1;
   }
@@ -3481,9 +3484,12 @@
         ⚔️ <span data-i18n="waveAssignments">Wave Assignments</span>
       </div>
       <div id="alliance-waves"></div>
-      <div style="display:flex;gap:8px;margin-top:4px;align-items:stretch;">
-        <button class="alliance-copy-btn" onclick="copyAlliancePlan()" style="flex:1 1 auto;min-width:0;">
-          📋 <span data-i18n="copyPlan">Copy to Clipboard</span>
+      <div style="display:flex;gap:8px;margin-top:4px;align-items:stretch;flex-wrap:wrap;">
+        <button id="btn-gamechat-copy" class="alliance-copy-btn" onclick="copyAlliancePlan()" style="flex:2 1 220px;min-width:0;" title="In-game chat: copies one message at a time — tap again for the next">
+          🎮 <span data-i18n="copyPlan">Game chat — copy wave-by-wave</span>
+        </button>
+        <button id="btn-discord-copy" class="alliance-copy-btn" onclick="copyPlanForDiscord()" style="flex:1 1 160px;min-width:0;background:linear-gradient(135deg,rgba(88,101,242,0.28),rgba(88,101,242,0.12));border-color:rgba(88,101,242,0.6);color:#aeb6ff;" title="Discord: copies the entire plan as one message">
+          💬 <span data-i18n="copyDiscord">Discord — all in one</span>
         </button>
         <button class="alliance-copy-btn" onclick="shareWhatsApp()" style="flex:0 0 auto;width:auto;padding:12px 16px;background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1));border-color:rgba(37,211,102,0.5);color:#25d366;font-size:18px;" title="Share on WhatsApp" aria-label="Share on WhatsApp">
           📲
@@ -3841,7 +3847,7 @@
         <li><span class="recruit-check">✓</span> Welcoming to all power levels</li>
       </ul>
 
-      <a href="https://discord.gg/FvWgrCEC" target="_blank" rel="noopener" class="recruit-cta">
+      <a href="https://discord.gg/b6TVFffcwk" target="_blank" rel="noopener" class="recruit-cta">
         <span class="recruit-cta-icon">💬</span>
         <span class="recruit-cta-text">Join on Discord</span>
         <span class="recruit-cta-arrow">→</span>
@@ -3866,7 +3872,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r62</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r65</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -3908,11 +3914,14 @@
       generatePlan: 'Generate Wave Plan', waveAssignments: 'Wave Assignments',
       waveInterval: 'Time between waves',
       wave: 'Wave', rallyLeaderShort: 'RL', joiner: 'Join',
-      copyPlan: 'Copy Wave 1', copied: '✓ Copied to clipboard',
-      copyMsgBtn: 'Copy Message {n}/{total}',
+      copyPlan: 'Game chat — copy wave-by-wave', copied: '✓ Copied to clipboard',
+      copyMsgBtn: 'Game chat — copy msg {n}/{total}',
       copyNextMsg: '✓ Message {n}/2 — paste to chat, then tap for Message {next}',
       copyDone: 'All {n} messages sent! Counter reset.',
       copyManual: 'Copy manually:',
+      copyDiscord: 'Discord — all in one',
+      discordCopied: '✓ Full plan copied — paste once in Discord',
+      discordLong: '✓ Copied (long plan — Discord may split it)',
       statusAvailable: 'Available for Bear Trap',
       statusLeader: 'Rally Leader (will lead own rally)',
       statusUnavailable: 'Not available for this event',
@@ -3982,11 +3991,14 @@
       reset: 'Sıfırla', members: 'üye', topRLs: 'top RL', waves: 'dalga',
       generatePlan: 'Dalga Planı Oluştur', waveAssignments: 'Dalga Atamaları',
       wave: 'Dalga', rallyLeaderShort: 'RL', joiner: 'Katılan',
-      copyPlan: 'Dalga 1\'i Kopyala', copied: '✓ Panoya kopyalandı',
-      copyMsgBtn: 'Mesaj {n}/{total} Kopyala',
+      copyPlan: 'Oyun sohbeti — dalga dalga kopyala', copied: '✓ Panoya kopyalandı',
+      copyMsgBtn: 'Oyun sohbeti — mesaj {n}/{total} kopyala',
       copyNextMsg: '✓ Mesaj {n}/2 — sohbete yapıştır, sonra Mesaj {next} için dokun',
       copyDone: 'Tüm {n} mesaj gönderildi! Sayaç sıfırlandı.',
       copyManual: 'Manuel kopyala:',
+      copyDiscord: 'Discord — hepsi tek mesajda',
+      discordCopied: '✓ Tüm plan kopyalandı — Discord\'a bir kez yapıştır',
+      discordLong: '✓ Kopyalandı (uzun plan — Discord bölebilir)',
       statusAvailable: 'Bear Trap için müsait',
       statusLeader: 'Rally Lideri (kendi rally\'sini yönetecek)',
       statusUnavailable: 'Bu etkinlik için müsait değil',
@@ -4056,11 +4068,14 @@
       reset: 'Réinitialiser', members: 'membres', topRLs: 'top RL', waves: 'vagues',
       generatePlan: 'Générer le Plan', waveAssignments: 'Attributions des Vagues',
       wave: 'Vague', rallyLeaderShort: 'RL', joiner: 'Rejoint',
-      copyPlan: 'Copier Vague 1', copied: '✓ Copié',
-      copyMsgBtn: 'Copier Message {n}/{total}',
+      copyPlan: 'Chat du jeu — copier vague par vague', copied: '✓ Copié',
+      copyMsgBtn: 'Chat du jeu — copier msg {n}/{total}',
       copyNextMsg: '✓ Message {n}/2 — coller dans le chat, puis appuyer pour Message {next}',
       copyDone: 'Tous les {n} messages envoyés ! Compteur réinitialisé.',
       copyManual: 'Copier manuellement :',
+      copyDiscord: 'Discord — tout en un',
+      discordCopied: '✓ Plan complet copié — collez une fois dans Discord',
+      discordLong: '✓ Copié (plan long — Discord peut le diviser)',
       statusAvailable: 'Disponible pour Bear Trap',
       statusLeader: 'Chef de Rally (dirigera son propre rally)',
       statusUnavailable: 'Non disponible pour cet événement',
@@ -4130,11 +4145,14 @@
       reset: 'إعادة تعيين', members: 'أعضاء', topRLs: 'قادة رئيسيون', waves: 'موجات',
       generatePlan: 'إنشاء خطة الموجات', waveAssignments: 'تعيينات الموجات',
       wave: 'موجة', rallyLeaderShort: 'قائد', joiner: 'منضم',
-      copyPlan: 'نسخ الموجة 1', copied: '✓ تم النسخ',
-      copyMsgBtn: 'نسخ الرسالة {n}/{total}',
+      copyPlan: 'دردشة اللعبة — انسخ موجة بموجة', copied: '✓ تم النسخ',
+      copyMsgBtn: 'دردشة اللعبة — انسخ الرسالة {n}/{total}',
       copyNextMsg: '✓ الرسالة {n}/2 — الصق في الدردشة، ثم اضغط للرسالة {next}',
       copyDone: 'تم إرسال جميع الرسائل الـ{n}! تمت إعادة تعيين العداد.',
       copyManual: 'انسخ يدوياً:',
+      copyDiscord: 'Discord — الكل في رسالة واحدة',
+      discordCopied: '✓ تم نسخ الخطة كاملة — الصقها مرة واحدة في Discord',
+      discordLong: '✓ تم النسخ (خطة طويلة — قد يقسمها Discord)',
       statusAvailable: 'متاح لـ Bear Trap',
       statusLeader: 'قائد Rally (سيقود rally الخاص)',
       statusUnavailable: 'غير متاح لهذا الحدث',
@@ -4204,11 +4222,14 @@
       reset: 'Reiniciar', members: 'miembros', topRLs: 'top RL', waves: 'olas',
       generatePlan: 'Generar Plan de Olas', waveAssignments: 'Asignación de Olas',
       wave: 'Ola', rallyLeaderShort: 'RL', joiner: 'Une',
-      copyPlan: 'Copiar Ola 1', copied: '✓ Copiado',
-      copyMsgBtn: 'Copiar Mensaje {n}/{total}',
+      copyPlan: 'Chat del juego — copiar ola por ola', copied: '✓ Copiado',
+      copyMsgBtn: 'Chat del juego — copiar msj {n}/{total}',
       copyNextMsg: '✓ Mensaje {n}/2 — pega en el chat, luego toca para Mensaje {next}',
       copyDone: '¡Todos los {n} mensajes enviados! Contador reiniciado.',
       copyManual: 'Copiar manualmente:',
+      copyDiscord: 'Discord — todo en uno',
+      discordCopied: '✓ Plan completo copiado — pégalo una vez en Discord',
+      discordLong: '✓ Copiado (plan largo — Discord puede dividirlo)',
       statusAvailable: 'Disponível para Bear Trap',
       statusLeader: 'Líder de Rally (liderará seu próprio rally)',
       statusUnavailable: 'Não disponível para este evento',
@@ -4304,11 +4325,14 @@
       reset: 'Reiniciar', members: 'membros', topRLs: 'top RL', waves: 'ondas',
       generatePlan: 'Gerar Plano de Ondas', waveAssignments: 'Atribuição de Ondas',
       wave: 'Onda', rallyLeaderShort: 'RL', joiner: 'Entra',
-      copyPlan: 'Copiar Onda 1', copied: '✓ Copiado',
-      copyMsgBtn: 'Copiar Mensagem {n}/{total}',
+      copyPlan: 'Chat do jogo — copiar onda por onda', copied: '✓ Copiado',
+      copyMsgBtn: 'Chat do jogo — copiar msg {n}/{total}',
       copyNextMsg: '✓ Mensagem {n}/2 — cole no chat, depois toque para Mensagem {next}',
       copyDone: 'Todas as {n} mensagens enviadas! Contador reiniciado.',
       copyManual: 'Copiar manualmente:',
+      copyDiscord: 'Discord — tudo em uma',
+      discordCopied: '✓ Plano completo copiado — cole uma vez no Discord',
+      discordLong: '✓ Copiado (plano longo — Discord pode dividir)',
       emptySlot: 'vaga aberta', emptySlots: 'vagas abertas',
       alliancePromptAdd: 'Adicione membros para começar ⚔️',
       confirmReset: 'Apagar todos os membros e começar de novo?',
@@ -7454,17 +7478,20 @@
   }
 
   function updateAllianceCopyButton() {
-    const btn = document.querySelector('.alliance-copy-btn');
+    // r64: target the GAME CHAT button by id (not the first .alliance-copy-btn,
+    // which is no longer this one) and always keep the "Game chat" context in the
+    // label — both the idle state and the per-message counter.
+    const btn = document.getElementById('btn-gamechat-copy');
     if (!btn) return;
     const plan = window._lastAlliancePlan;
     if (!plan || !plan.waves || !plan.waves.length) {
-      btn.innerHTML = `📋 <span>${t('copyPlan')}</span>`;
+      btn.innerHTML = `🎮 <span>${t('copyPlan')}</span>`;
       return;
     }
     // Calculate how many messages we'll need
     const messages = groupWavesIntoMessages(plan, 150);
     const msgIdx = window._allianceCopyIdx || 0;
-    btn.innerHTML = `📋 ${t('copyMsgBtn').replace('{n}', msgIdx + 1).replace('{total}', messages.length)}`;
+    btn.innerHTML = `🎮 ${t('copyMsgBtn').replace('{n}', msgIdx + 1).replace('{total}', messages.length)}`;
   }
 
   function showAllianceToast(msg) {
@@ -7486,6 +7513,52 @@
     const fullText = messages.map(m => m.text).join('\n\n---\n\n');
     const url = 'https://wa.me/?text=' + encodeURIComponent(fullText);
     window.open(url, '_blank');
+  }
+
+  // === Discord one-shot copy (r63) ===
+  // copyAlliancePlan() chunks the plan into ~150-char messages for KingShot's
+  // in-game chat (which mangles long messages). Discord has a 2000-char limit and
+  // renders multi-line text fine, so here we copy the WHOLE plan at once, wrapped
+  // in a ``` code block so it pastes as one tidy block and names containing
+  // *, _, ~ aren't turned into Discord markdown.
+  function copyPlanForDiscord() {
+    if (!window._lastAlliancePlan) generateAlliancePlan();
+    const plan = window._lastAlliancePlan;
+    if (!plan || !plan.waves || !plan.waves.length) return;
+
+    const body = ['🐻 BEAR TRAP — WAVE PLAN'];
+    for (let i = 0; i < plan.waves.length; i++) {
+      body.push('');                       // blank line between waves
+      body.push(buildWaveText(plan, i));
+    }
+    const inner = body.join('\n');
+    const wrapped = '```\n' + inner + '\n```';
+    // If the code-block version would exceed Discord's 2000-char message limit,
+    // drop the fences (raw text still pastes; Discord just may split very long plans).
+    const text = wrapped.length <= 2000 ? wrapped : inner;
+    const over = text.length > 2000;
+
+    const finish = () => {
+      savePlanToHistory(plan);
+      showAllianceToast(over ? t('discordLong') : t('discordCopied'));
+    };
+    const onFail = () => { try { window.prompt(t('copyManual'), text); } catch (e) {} };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(finish).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); finish(); } catch (e) { onFail(); }
+        document.body.removeChild(ta);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); finish(); } catch (e) { onFail(); }
+      document.body.removeChild(ta);
+    }
   }
 
   // === Plan History (last 5) ===
@@ -8982,7 +9055,7 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r62';
+  const BEAR_BUILD = 'v2026.05.01-r65';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
