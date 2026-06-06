@@ -3419,6 +3419,9 @@
         <button class="alliance-tool-btn" onclick="openBulkPaste()">
           📋 <span data-i18n="bulkPaste">Bulk Paste</span>
         </button>
+        <button class="alliance-tool-btn" onclick="openCompanionImport()" style="border-color:rgba(100,180,255,0.5);background:linear-gradient(135deg,rgba(100,180,255,0.16),rgba(100,180,255,0.06));color:#9fd0ff;">
+          📡 <span data-i18n="importCompanion">From Companion</span>
+        </button>
         <button class="alliance-tool-btn" onclick="openScreenshotOCR()">
           📷 <span data-i18n="fromScreenshot">From Screenshot</span>
         </button>
@@ -3470,11 +3473,16 @@
       <div class="alliance-interval-hint" id="alliance-wavecount-hint"></div>
     </div>
 
-    <!-- Sticky Generate Button -->
-    <div class="alliance-sticky-bar">
-      <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()">
+    <!-- Sticky Generate Buttons (r66: second button = Auto Rally Assignment) -->
+    <div class="alliance-sticky-bar" style="display:flex;gap:8px;">
+      <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()" style="flex:1 1 50%;min-width:0;">
         <div class="btn-content">
           <span>🐻 <span data-i18n="generatePlan">Generate Wave Plan</span></span>
+        </div>
+      </button>
+      <button class="calc-btn alliance-sticky-generate" onclick="generateRallyAssignment()" style="flex:1 1 50%;min-width:0;">
+        <div class="btn-content">
+          <span>🎯 <span data-i18n="autoRallyBtn">Auto Rally Assignment</span></span>
         </div>
       </button>
     </div>
@@ -3493,6 +3501,22 @@
         </button>
         <button class="alliance-copy-btn" onclick="shareWhatsApp()" style="flex:0 0 auto;width:auto;padding:12px 16px;background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1));border-color:rgba(37,211,102,0.5);color:#25d366;font-size:18px;" title="Share on WhatsApp" aria-label="Share on WhatsApp">
           📲
+        </button>
+      </div>
+    </div>
+
+    <!-- r66: Auto Rally Assignment results (1 leader + 14 joiners per rally) -->
+    <div id="rally-assignment-results" style="display:none;">
+      <div class="section-title" id="rally-assign-title" style="text-align:center; margin:16px 0; scroll-margin-top:16px;">
+        🎯 <span data-i18n="rallyAssignTitle">Rally Assignments</span>
+      </div>
+      <div id="rally-assign-waves"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;align-items:stretch;flex-wrap:wrap;">
+        <button id="btn-rally-gamechat-copy" class="alliance-copy-btn" onclick="copyRallyAssignment()" style="flex:2 1 220px;min-width:0;" title="In-game chat: copies one message at a time — tap again for the next">
+          🎮 <span data-i18n="copyPlan">Game chat — copy wave-by-wave</span>
+        </button>
+        <button class="alliance-copy-btn" onclick="copyRallyAssignmentDiscord()" style="flex:1 1 160px;min-width:0;background:linear-gradient(135deg,rgba(88,101,242,0.28),rgba(88,101,242,0.12));border-color:rgba(88,101,242,0.6);color:#aeb6ff;" title="Discord: copies the entire assignment as one message">
+          💬 <span data-i18n="copyDiscord">Discord — all in one</span>
         </button>
       </div>
     </div>
@@ -3575,6 +3599,28 @@
           </button>
           <button class="alliance-tool-btn alliance-warn" onclick="commitBulkPaste('replace')">
             ↺ <span data-i18n="bulkPasteReplace">Replace All</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- r66: Companion Import Modal -->
+    <div id="companion-import-modal" class="alliance-modal" style="display:none;" onclick="if(event.target===this)closeCompanionImport()">
+      <div class="alliance-modal-content">
+        <div class="alliance-modal-title">📡 <span data-i18n="companionImportTitle">Import from Companion</span></div>
+        <div class="alliance-modal-hint" data-i18n="companionPowerHint">
+          Players who registered in the Kingshot Companion. The power column shows their total troops from the Companion (not in-game power) — if your roster uses in-game power values, sorting may mix scales.
+        </div>
+        <div id="companion-import-preview" class="alliance-bulk-preview"></div>
+        <div id="companion-import-commit" class="alliance-modal-actions" style="display:none;">
+          <button class="alliance-add-btn" style="margin-bottom:0;" onclick="commitCompanionImport('append')">
+            ➕ <span data-i18n="companionAddNew">Add new only</span>
+          </button>
+          <button class="alliance-tool-btn" onclick="commitCompanionImport('update')">
+            🔄 <span data-i18n="companionAddUpdate">Add new + update power</span>
+          </button>
+          <button class="alliance-tool-btn alliance-cancel" onclick="closeCompanionImport()">
+            ✕ <span data-i18n="cancel">Cancel</span>
           </button>
         </div>
       </div>
@@ -3872,7 +3918,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r65</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r66</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -3909,6 +3955,23 @@
       rallyCapRegular: 'Regular rally — capacity',
       totalCapacity: 'total slots',
       joinersFooter: 'Joiners: open the game, find any available rally, hit join.',
+      autoRallyBtn: 'Auto Rally Assignment',
+      rallyAssignTitle: 'Rally Assignments',
+      importCompanion: 'From Companion',
+      companionImportTitle: 'Import from Companion',
+      companionPowerHint: 'Players who registered in the Kingshot Companion. The power column shows their total troops from the Companion (not in-game power) — if your roster uses in-game power values, sorting may mix scales.',
+      companionAddNew: 'Add new only',
+      companionAddUpdate: 'Add new + update power',
+      companionLoading: 'Loading Companion roster…',
+      companionFail: 'Couldn\'t reach Companion data — check your connection, or use Bulk Paste.',
+      companionEmpty: 'No players found in Companion data yet.',
+      companionDone: '{a} added, {u} updated from Companion',
+      autoPickedHint: 'No members are marked 👑 Leader, so the strongest players were auto-picked as rally leaders. Mark 👑 Leader in the roster to choose them yourself, then regenerate.',
+      extrasLabel: 'Extra joiners',
+      extrasHint: 'All rallies are full (1 leader + 14 joiners each) — these players join any rally with an open slot.',
+      noJoiners: 'no joiners assigned',
+      joinsLabel: 'join',
+      leadsLabel: 'leads',
       addMember: 'Add Member', memberName: 'Member name', memberPower: 'Power', topRL: 'Top RL',
       reset: 'Reset', members: 'members', topRLs: 'top RLs', waves: 'waves',
       generatePlan: 'Generate Wave Plan', waveAssignments: 'Wave Assignments',
@@ -8395,6 +8458,10 @@
       allianceNextId = 1;
       window._lastAlliancePlan = null;
       window._allianceCopyIdx = 0;
+      window._lastRallyAssignment = null;
+      window._rallyCopyIdx = 0;
+      const _ras = document.getElementById('rally-assignment-results');
+      if (_ras) _ras.style.display = 'none';
       _allianceSearch = '';
       _allianceFilter = 'all';
       const searchEl = document.getElementById('alliance-search');
@@ -9035,6 +9102,11 @@ Rules:
     renderAllianceMembers();
     updateAllianceStats();
     renderPlanHistory();
+    // r66: rally assignment belongs to the previous preset's roster — hide it
+    window._lastRallyAssignment = null;
+    window._rallyCopyIdx = 0;
+    const _ras = document.getElementById('rally-assignment-results');
+    if (_ras) _ras.style.display = 'none';
   }
 
   function _updateBearPresetUI() {
@@ -9055,7 +9127,338 @@ Rules:
   }
 
   // Build version — bump this whenever you push a change
-  const BEAR_BUILD = 'v2026.05.01-r65';
+  // ============================================================
+  // r66: AUTO RALLY ASSIGNMENT — 1 leader + 14 joiners per rally (cap 15).
+  // Leaders come from 👑 Leader status (auto-picked by power if none marked).
+  // Leaders are placed into waves with the SAME proven logic as the wave plan
+  // (near-bear reverse round-robin, Top RL spread). Joiners are then dealt
+  // across rallies with a snake draft by power so every rally lands a
+  // similar total punch.
+  // ============================================================
+  const RALLY_JOINER_CAP = 14; // 1 leader + 14 joiners = 15 per rally
+  window._lastRallyAssignment = null;
+  window._rallyCopyIdx = 0;
+
+  function computeRallyAssignment() {
+    const participating = allianceMembers.filter(m => {
+      if (!m || !m.name || !m.name.trim()) return false;
+      const st = m.status || 'available';
+      return st === 'available' || st === 'leader';
+    });
+    if (participating.length === 0) return null;
+
+    // Pick rally leaders
+    let leaders = participating.filter(m => (m.status || '') === 'leader');
+    let autoPicked = false;
+    if (leaders.length === 0) {
+      autoPicked = true;
+      const need = Math.max(1, Math.ceil(participating.length / (RALLY_JOINER_CAP + 1)));
+      leaders = participating.slice().sort((a, b) => {
+        if (!!a.isTopRL !== !!b.isTopRL) return a.isTopRL ? -1 : 1;
+        return (b.power || 0) - (a.power || 0);
+      }).slice(0, need);
+    }
+    const leaderIds = new Set(leaders.map(m => m.id));
+    const joiners = participating.filter(m => !leaderIds.has(m.id));
+
+    // Reuse the wave engine on the leaders only (near-bear cadence, RL spread)
+    const wavePlan = computeAlliancePlan(leaders);
+
+    // Flatten rallies in firing order: wave 1 first
+    const rallies = [];
+    wavePlan.waves.forEach((w, wi) => {
+      (w.leaders || []).forEach(L => rallies.push({ leader: L, joiners: [], waveIdx: wi }));
+    });
+
+    // Snake-draft joiners by power across rallies (skip full ones)
+    const sortedJoiners = joiners.slice().sort((a, b) => (b.power || 0) - (a.power || 0));
+    const extras = [];
+    if (rallies.length === 0) {
+      extras.push.apply(extras, sortedJoiners);
+    } else {
+      let order = rallies.map((_, i) => i);
+      let pos = 0;
+      sortedJoiners.forEach(j => {
+        let placed = false;
+        for (let scan = 0; scan < rallies.length * 2 && !placed; scan++) {
+          const r = rallies[order[pos]];
+          if (r.joiners.length < RALLY_JOINER_CAP) { r.joiners.push(j); placed = true; }
+          pos++;
+          if (pos >= order.length) { pos = 0; order = order.slice().reverse(); }
+        }
+        if (!placed) extras.push(j);
+      });
+    }
+
+    return {
+      wavePlan, rallies, extras, autoPicked,
+      totalMembers: participating.length,
+      leadersCount: leaders.length
+    };
+  }
+
+  function generateRallyAssignment() {
+    const a = computeRallyAssignment();
+    if (!a) { showAllianceToast('⚠️ ' + t('noValidMembers')); return; }
+    window._lastRallyAssignment = a;
+    window._rallyCopyIdx = 0;
+    renderRallyAssignment(a);
+    const sec = document.getElementById('rally-assignment-results');
+    if (sec) sec.style.display = 'block';
+    updateRallyCopyButton();
+    const title = document.getElementById('rally-assign-title');
+    if (title) setTimeout(() => title.scrollIntoView({ behavior: 'smooth' }), 50);
+  }
+
+  function renderRallyAssignment(a) {
+    const container = document.getElementById('rally-assign-waves');
+    if (!container) return;
+    const totalWaves = a.wavePlan.waves.length;
+    let html = '';
+    if (a.autoPicked) {
+      html += `<div class="alliance-swap-hint">💡 ${_allianceEscape(t('autoPickedHint'))}</div>`;
+    }
+    a.wavePlan.waves.forEach((wave, wi) => {
+      const waveRallies = a.rallies.filter(r => r.waveIdx === wi);
+      if (!waveRallies.length) return;
+      const nearLed = !!(wave.leaders && wave.leaders[0] && wave.leaders[0].nearBear);
+      const sched = getWaveRallySchedule(wi, nearLed);
+      const hasTop = waveRallies.some(r => r.leader.isTopRL);
+      html += `<div class="alliance-wave-card${hasTop ? ' wave-top-rl' : ''}">
+        <div class="wave-header">
+          <span class="wave-number">${_allianceEscape(t('wave'))} ${wi + 1}</span>
+          <span class="wave-time">⏱ ${getAllianceWaveTime(wi, totalWaves)}</span>
+        </div>
+        <div class="wave-rally-schedule">🏹 ${sched.length} ${_allianceEscape(t('rallies') || 'rallies')}: ${sched.join(' · ')}</div>`;
+      waveRallies.forEach(r => {
+        const L = r.leader;
+        const marks = (L.isTopRL ? ' ⭐' : '') + (L.nearBear ? ' 🐻' : '');
+        html += `<div class="wave-leader-row" style="cursor:default;">
+          <span class="wave-role-label">${_allianceEscape(t('rallyLeaderShort'))}</span>
+          <span class="wave-name">${_allianceEscape(L.name)}${marks}</span>
+          <span style="margin-left:auto;font-size:11px;color:var(--gold-dim);white-space:nowrap;">${r.joiners.length}/${RALLY_JOINER_CAP} ${_allianceEscape(t('joinsLabel'))}</span>
+        </div>`;
+        if (r.joiners.length) {
+          html += `<div class="wave-joiner-row" style="display:flex;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;">` +
+            r.joiners.map(j => `<span style="font-size:12px;">${_allianceEscape(j.name)}</span>`).join('') +
+            `</div>`;
+        } else {
+          html += `<div class="wave-empty-slot">— ${_allianceEscape(t('noJoiners'))} —</div>`;
+        }
+      });
+      html += `</div>`;
+    });
+    if (a.extras.length) {
+      html += `<div class="alliance-wave-card">
+        <div class="wave-header"><span class="wave-number">➕ ${_allianceEscape(t('extrasLabel'))}</span></div>
+        <div class="wave-joiner-row" style="display:flex;flex-wrap:wrap;gap:4px 10px;padding:8px 12px;">${a.extras.map(j => `<span style="font-size:12px;">${_allianceEscape(j.name)}</span>`).join('')}</div>
+        <div class="wave-cap-hint">${_allianceEscape(t('extrasHint'))}</div>
+      </div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // ---- Copy: in-game chat (≤150 chars per message, one rally can span several) ----
+  function groupRallyMessages(a, maxChars = 150) {
+    const msgs = [];
+    const totalWaves = a.wavePlan.waves.length;
+    const push = s => { if (s && s.trim()) msgs.push(s.replace(/,\s*$/, '')); };
+    a.wavePlan.waves.forEach((w, wi) => {
+      a.rallies.filter(r => r.waveIdx === wi).forEach(r => {
+        const star = r.leader.isTopRL ? '⭐' : '🐻';
+        let cur = `${star} W${wi + 1} ${getAllianceWaveTime(wi, totalWaves)} ${r.leader.name} ${t('leadsLabel')}. ${t('joiner')}:`;
+        if (!r.joiners.length) { push(cur.replace(/\.\s.*$/, '.')); return; }
+        r.joiners.forEach(j => {
+          const piece = ' ' + j.name + ',';
+          if ((cur + piece).length > maxChars) { push(cur); cur = `${star} ${r.leader.name} +`; }
+          cur += piece;
+        });
+        push(cur);
+      });
+    });
+    if (a.extras.length) {
+      let cur = `➕ ${t('extrasLabel')}:`;
+      a.extras.forEach(j => {
+        const piece = ' ' + j.name + ',';
+        if ((cur + piece).length > maxChars) { push(cur); cur = '➕ +'; }
+        cur += piece;
+      });
+      push(cur);
+    }
+    return msgs;
+  }
+
+  function _rallyCopyText(text, onDone) {
+    const onFail = () => { try { window.prompt(t('copyManual'), text); } catch (e) {} };
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); onDone(); } catch (e) { onFail(); }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(fallback);
+    } else { fallback(); }
+  }
+
+  function copyRallyAssignment() {
+    if (!window._lastRallyAssignment) generateRallyAssignment();
+    const a = window._lastRallyAssignment;
+    if (!a || !a.rallies.length) return;
+    const messages = groupRallyMessages(a, 150);
+    let idx = window._rallyCopyIdx || 0;
+    if (idx >= messages.length) idx = 0;
+    _rallyCopyText(messages[idx], () => {
+      const justSent = idx + 1;
+      if (justSent >= messages.length) {
+        window._rallyCopyIdx = 0;
+        showAllianceToast(t('copyDone').replace('{n}', messages.length));
+      } else {
+        window._rallyCopyIdx = justSent;
+        showAllianceToast(t('copyNextMsg').replace('{n}', justSent).replace('{next}', justSent + 1));
+      }
+      updateRallyCopyButton();
+    });
+  }
+
+  function updateRallyCopyButton() {
+    const btn = document.getElementById('btn-rally-gamechat-copy');
+    if (!btn) return;
+    const a = window._lastRallyAssignment;
+    if (!a || !a.rallies.length) { btn.innerHTML = `🎮 <span>${t('copyPlan')}</span>`; return; }
+    const messages = groupRallyMessages(a, 150);
+    const idx = window._rallyCopyIdx || 0;
+    btn.innerHTML = `🎮 ${t('copyMsgBtn').replace('{n}', idx + 1).replace('{total}', messages.length)}`;
+  }
+
+  function copyRallyAssignmentDiscord() {
+    if (!window._lastRallyAssignment) generateRallyAssignment();
+    const a = window._lastRallyAssignment;
+    if (!a || !a.rallies.length) return;
+    const totalWaves = a.wavePlan.waves.length;
+    const lines = ['🎯 BEAR TRAP — RALLY ASSIGNMENTS', ''];
+    a.wavePlan.waves.forEach((w, wi) => {
+      const waveRallies = a.rallies.filter(r => r.waveIdx === wi);
+      if (!waveRallies.length) return;
+      const nearLed = !!(w.leaders && w.leaders[0] && w.leaders[0].nearBear);
+      const sched = getWaveRallySchedule(wi, nearLed);
+      lines.push(`⏱ Wave ${wi + 1}  ${getAllianceWaveTime(wi, totalWaves)}  (🏹 ${sched.length}: ${sched.join(' · ')})`);
+      waveRallies.forEach(r => {
+        const marker = r.leader.isTopRL ? '⭐' : '•';
+        lines.push(`${marker} ${r.leader.name} ${t('leadsLabel')}`);
+        if (r.joiners.length) lines.push(`   ↳ ${r.joiners.map(j => j.name).join(', ')}`);
+      });
+      lines.push('');
+    });
+    if (a.extras.length) {
+      lines.push(`➕ ${t('extrasLabel')}: ${a.extras.map(j => j.name).join(', ')}`);
+      lines.push(t('extrasHint'));
+    }
+    _rallyCopyText(lines.join('\n').trim(), () => showAllianceToast('💬 ✓'));
+  }
+
+  // ============================================================
+  // r66: COMPANION ROSTER IMPORT — read-only fetch of the Kingshot
+  // Companion player summaries (Firebase RTDB). Power = total troops.
+  // ============================================================
+  const COMPANION_DB_URL = 'https://kingdom1494-6305a-default-rtdb.firebaseio.com/summaries.json';
+  let _companionPlayers = [];
+
+  async function openCompanionImport() {
+    showAllianceToast('📡 ' + t('companionLoading'));
+    let data = null;
+    try {
+      const res = await fetch(COMPANION_DB_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      data = await res.json();
+    } catch (e) {
+      showAllianceToast('⚠️ ' + t('companionFail'));
+      return;
+    }
+    const players = Object.values(data || {})
+      .filter(s => s && s.name && String(s.name).trim())
+      .map(s => ({
+        name: String(s.name).trim(),
+        power: parseInt(s.army) || 0,
+        alliance: s.alliance ? String(s.alliance).trim() : ''
+      }))
+      .sort((a, b) => b.power - a.power);
+    // Dedupe by lowercase name, keep highest power
+    const seen = {};
+    _companionPlayers = players.filter(p => {
+      const k = p.name.toLowerCase();
+      if (seen[k]) return false;
+      seen[k] = true;
+      return true;
+    });
+    if (!_companionPlayers.length) { showAllianceToast('⚠️ ' + t('companionEmpty')); return; }
+    _renderCompanionPreview();
+    const modal = document.getElementById('companion-import-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeCompanionImport() {
+    const modal = document.getElementById('companion-import-modal');
+    if (modal) modal.style.display = 'none';
+    _companionPlayers = [];
+  }
+
+  function _renderCompanionPreview() {
+    const previewEl = document.getElementById('companion-import-preview');
+    const commitEl = document.getElementById('companion-import-commit');
+    if (!previewEl || !commitEl) return;
+    const existing = {};
+    allianceMembers.forEach(m => { if (m && m.name) existing[m.name.trim().toLowerCase()] = true; });
+    const rows = _companionPlayers.map((p, i) => {
+      const isNew = !existing[p.name.toLowerCase()];
+      const badge = isNew
+        ? `<span class="preview-rl" style="color:#7fd87f;border-color:rgba(80,180,80,0.5);">NEW</span>`
+        : `<span class="preview-rl" style="opacity:0.6;">in roster</span>`;
+      const allianceTag = p.alliance ? ` <span style="opacity:0.55;font-size:11px;">[${_allianceEscape(p.alliance)}]</span>` : '';
+      return `<div class="preview-row">
+        <span class="preview-num">${i + 1}.</span>
+        <span class="preview-name">${_allianceEscape(p.name)}${allianceTag}</span>
+        <span class="preview-power">${p.power > 0 ? formatPower(p.power) : '–'}</span>
+        ${badge}
+      </div>`;
+    }).join('');
+    const newCount = _companionPlayers.filter(p => !existing[p.name.toLowerCase()]).length;
+    previewEl.innerHTML = `<div class="preview-header">${_companionPlayers.length} players in Companion — ${newCount} new</div>` + rows;
+    commitEl.style.display = '';
+  }
+
+  function commitCompanionImport(mode) {
+    if (!_companionPlayers.length) { closeCompanionImport(); return; }
+    const byName = {};
+    allianceMembers.forEach(m => { if (m && m.name) byName[m.name.trim().toLowerCase()] = m; });
+    let added = 0, updated = 0;
+    _companionPlayers.forEach(p => {
+      const k = p.name.toLowerCase();
+      const existing = byName[k];
+      if (existing) {
+        if (mode === 'update' && p.power > 0 && existing.power !== p.power) {
+          existing.power = p.power;
+          updated++;
+        }
+      } else {
+        allianceMembers.push({
+          id: allianceNextId++,
+          name: p.name,
+          power: p.power,
+          isTopRL: false,
+          status: 'available'
+        });
+        added++;
+      }
+    });
+    saveAlliance();
+    renderAllianceMembers();
+    closeCompanionImport();
+    showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
+  }
+
+  const BEAR_BUILD = 'v2026.05.01-r66';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
