@@ -104,13 +104,13 @@
     100% { transform: translateY(-20px) translateX(40px) scale(0.5); opacity: 0; }
   }
 
-  .container { max-width: 820px; margin: 0 auto; padding: 24px 16px 60px; position: relative; z-index: 1; }
+  .container { max-width: 920px; margin: 0 auto; padding: 24px 16px 60px; position: relative; z-index: 1; }
   /* Wide screens: allow more horizontal room so 3-march grid doesn't crush troop blocks */
   @media (min-width: 1100px) {
-    .container { max-width: 1080px; }
+    .container { max-width: 920px; }
   }
   @media (min-width: 1400px) {
-    .container { max-width: 1240px; }
+    .container { max-width: 920px; }
   }
 
   /* HEADER */
@@ -3929,7 +3929,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r67</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r68</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -9513,7 +9513,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r67';
+  const BEAR_BUILD = 'v2026.05.01-r68';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
