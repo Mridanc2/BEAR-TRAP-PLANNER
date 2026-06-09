@@ -3486,14 +3486,9 @@
 
     <!-- Sticky Generate Buttons (r66: second button = Auto Rally Assignment) -->
     <div class="alliance-sticky-bar" style="display:flex;gap:8px;">
-      <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()" style="flex:1 1 50%;min-width:0;">
+      <button class="calc-btn alliance-sticky-generate" onclick="generateAlliancePlan()" style="flex:1 1 100%;min-width:0;">
         <div class="btn-content">
           <span>🐻 <span data-i18n="generatePlan">Generate Wave Plan</span></span>
-        </div>
-      </button>
-      <button class="calc-btn alliance-sticky-generate" onclick="generateRallyAssignment()" style="flex:1 1 50%;min-width:0;">
-        <div class="btn-content">
-          <span>🎯 <span data-i18n="autoRallyBtn">Auto Rally Assignment</span></span>
         </div>
       </button>
     </div>
@@ -3512,22 +3507,6 @@
         </button>
         <button class="alliance-copy-btn" onclick="shareWhatsApp()" style="flex:0 0 auto;width:auto;padding:12px 16px;background:linear-gradient(135deg,rgba(37,211,102,0.2),rgba(37,211,102,0.1));border-color:rgba(37,211,102,0.5);color:#25d366;font-size:18px;" title="Share on WhatsApp" aria-label="Share on WhatsApp">
           📲
-        </button>
-      </div>
-    </div>
-
-    <!-- r66: Auto Rally Assignment results (1 leader + 14 joiners per rally) -->
-    <div id="rally-assignment-results" style="display:none;">
-      <div class="section-title" id="rally-assign-title" style="text-align:center; margin:16px 0; scroll-margin-top:16px;">
-        🎯 <span data-i18n="rallyAssignTitle">Rally Assignments</span>
-      </div>
-      <div id="rally-assign-waves"></div>
-      <div style="display:flex;gap:8px;margin-top:4px;align-items:stretch;flex-wrap:wrap;">
-        <button id="btn-rally-gamechat-copy" class="alliance-copy-btn" onclick="copyRallyAssignment()" style="flex:2 1 220px;min-width:0;" title="In-game chat: copies one message at a time — tap again for the next">
-          🎮 <span data-i18n="copyPlan">Game chat — copy wave-by-wave</span>
-        </button>
-        <button class="alliance-copy-btn" onclick="copyRallyAssignmentDiscord()" style="flex:1 1 160px;min-width:0;background:linear-gradient(135deg,rgba(88,101,242,0.28),rgba(88,101,242,0.12));border-color:rgba(88,101,242,0.6);color:#aeb6ff;" title="Discord: copies the entire assignment as one message">
-          💬 <span data-i18n="copyDiscord">Discord — all in one</span>
         </button>
       </div>
     </div>
@@ -9513,7 +9492,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r68';
+  const BEAR_BUILD = 'v2026.05.01-r69';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
