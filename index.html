@@ -3137,6 +3137,25 @@
     <button class="preset-btn" id="preset-btn-2" onclick="switchPreset(2)">🗡 Second Account</button>
   </div>
 
+  <!-- BEAR JOINERS (r70) -->
+  <div style="background:rgba(10,18,30,0.55); border:1px solid var(--gold-dim); border-radius:14px; padding:16px; margin-bottom:18px;">
+    <div class="section-title">🐻 Best Bear Joiners</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
+        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#7fd39a,var(--archer));">CH</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Chenko</div><div style="font-size:12px;color:var(--gold-dim);">Lethality</div></div>
+        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
+        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#e0a868,var(--cavalry));">AM</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Amane</div><div style="font-size:12px;color:var(--gold-dim);">Attack</div></div>
+        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--gold-dim);font-size:13px;margin-top:12px;"><b style="color:var(--text);">2 lethality + 2 attack</b> = most damage (they multiply).</div>
+    <div style="text-align:center;font-size:12px;color:#c0392b;margin-top:6px;">Avoid as joiner: Zoe, Petra, Marlin &mdash; luck-based, only 1 ever works.</div>
+  </div>
+
   <!-- ARMY EDITOR -->
   <div class="army-editor">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
@@ -3343,6 +3362,19 @@
     </div>
   </button>
 
+  <!-- TIPS (always visible) -->
+    <div class="tips-box">
+      <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
+      <div class="tip-item"><span class="tip-icon">⚖️</span><span class="tip-text"><strong>Mix your joiner heroes:</strong> 2 Lethality (Chenko/Yeonwoo) + 2 Attack (Amane). Same buffs add, Attack × Lethality multiply — never stack just one type.</span></div>
+      <div class="tip-item"><span class="tip-icon">🎲</span><span class="tip-text"><strong>Skip chance-based heroes as a joiner</strong> (Zoe, Petra, Marlin) — only one ever triggers, wasting a slot.</span></div>
+      <div class="tip-item"><span class="tip-icon">🚩</span><span class="tip-text"><strong>Join order matters</strong> — the rally locks the first 4 joiner skills as people join, so fill both buff types early. Check the rally's yellow flag first.</span></div>
+      <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Max your lead hero's first Expedition skill</strong> — only that one skill counts when you join.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏇</span><span class="tip-text"><strong>Diana speeds your march</strong> — for smaller / further-out accounts she cuts the return trip from the Bear, getting you back into rallies ~25% faster, so more total damage over the event.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers are your main DPS</strong> — go mostly archers (5/10/80), and always T10 before T9 (~40% more damage).</span></div>
+      <div class="tip-item"><span class="tip-icon">🏰</span><span class="tip-text"><strong>Pre-activate Attack/Lethality buffs</strong> (and rally capacity if leading) before the event.</span></div>
+      <div class="tip-item"><span class="tip-icon">🛡️</span><span class="tip-text"><strong>Plan with the Alliance tab</strong> — build a Wave to maximize how many rallies your alliance can run at once.</span></div>
+    </div>
+
   <!-- RESULTS -->
   <div id="results">
     <div class="donut-wrap" id="donut-wrap">
@@ -3358,15 +3390,6 @@
       <div class="section-title">📊 <span data-i18n="summary">Usage Summary</span></div>
       <table id="summary-table"></table>
       <div id="summary-warning"></div>
-    </div>
-    <div class="tips-box">
-      <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
-      <div class="tip-item"><span class="tip-icon">⚔️</span><span class="tip-text"><strong>Always T10 before T9</strong> – T10 troops deal ~40% more damage. Use T9 only to fill remaining slots.</span></div>
-      <div class="tip-item"><span class="tip-icon">🏙️</span><span class="tip-text"><strong>Activate city buffs</strong> such as Attack or Lethality before the event starts.</span></div>
-      <div class="tip-item"><span class="tip-icon">👑</span><span class="tip-text"><strong>Rally leader:</strong> Activate capacity buff before opening the rally.</span></div>
-      <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Make sure your Expeditions skill is maxed</strong> before joining or leading a rally.</span></div>
-      <div class="tip-item"><span class="tip-icon">⏰</span><span class="tip-text"><strong>6 minutes before Bear Trap ends</strong> – everyone opens Rallies simultaneously for maximum final damage.</span></div>
-      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers = main DPS</strong> in Bear Trap. Infantry absorbs damage, Cavalry fills the rest.</span></div>
     </div>
   </div>
   </div><!-- /#personal-planner-view -->
@@ -9492,7 +9515,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r69';
+  const BEAR_BUILD = 'v2026.05.01-r74';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
