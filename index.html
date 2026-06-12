@@ -3,6 +3,15 @@
 <head>
 <script>/* Funnel: opening the Bear directly sends you into the Kingshot Companion hub; inside the Companion frame (or with ?standalone) it stays as the Bear. */(function(){try{if(window.self===window.top&&location.search.indexOf("standalone")===-1){location.replace("https://mridanc2.github.io/kingshot-companion/#/bear");}}catch(e){}})();</script>
 <meta charset="UTF-8">
+<!-- r78: embed font receiver — honors &font= passed by the Companion -->
+<style id="kc-embed-font">
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+html[data-kcfont="system"] *{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important;}
+html[data-kcfont="nunito"] *{font-family:"Nunito Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important;}
+html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
+</style>
+<script>(function(){try{var f=new URLSearchParams(location.search).get('font');if(f&&/^(system|nunito|inter)$/.test(f))document.documentElement.setAttribute('data-kcfont',f);}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -3362,19 +3371,6 @@
     </div>
   </button>
 
-  <!-- TIPS (always visible) -->
-    <div class="tips-box">
-      <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
-      <div class="tip-item"><span class="tip-icon">⚖️</span><span class="tip-text"><strong>Mix your joiner heroes:</strong> 2 Lethality (Chenko/Yeonwoo) + 2 Attack (Amane). Same buffs add, Attack × Lethality multiply — never stack just one type.</span></div>
-      <div class="tip-item"><span class="tip-icon">🎲</span><span class="tip-text"><strong>Skip chance-based heroes as a joiner</strong> (Zoe, Petra, Marlin) — only one ever triggers, wasting a slot.</span></div>
-      <div class="tip-item"><span class="tip-icon">🚩</span><span class="tip-text"><strong>Join order matters</strong> — the rally locks the first 4 joiner skills as people join, so fill both buff types early. Check the rally's yellow flag first.</span></div>
-      <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Max your lead hero's first Expedition skill</strong> — only that one skill counts when you join.</span></div>
-      <div class="tip-item"><span class="tip-icon">🏇</span><span class="tip-text"><strong>Diana speeds your march</strong> — for smaller / further-out accounts she cuts the return trip from the Bear, getting you back into rallies ~25% faster, so more total damage over the event.</span></div>
-      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers are your main DPS</strong> — go mostly archers (5/10/80), and always T10 before T9 (~40% more damage).</span></div>
-      <div class="tip-item"><span class="tip-icon">🏰</span><span class="tip-text"><strong>Pre-activate Attack/Lethality buffs</strong> (and rally capacity if leading) before the event.</span></div>
-      <div class="tip-item"><span class="tip-icon">🛡️</span><span class="tip-text"><strong>Plan with the Alliance tab</strong> — build a Wave to maximize how many rallies your alliance can run at once.</span></div>
-    </div>
-
   <!-- RESULTS -->
   <div id="results">
     <div class="donut-wrap" id="donut-wrap">
@@ -3392,6 +3388,19 @@
       <div id="summary-warning"></div>
     </div>
   </div>
+
+  <!-- TIPS (below marches) -->
+    <div class="tips-box">
+      <div class="section-title">💡 <span data-i18n="tips">Tips</span></div>
+      <div class="tip-item"><span class="tip-icon">⚖️</span><span class="tip-text"><strong>Mix your joiner heroes:</strong> 2 Lethality (Chenko/Yeonwoo) + 2 Attack (Amane). Same buffs add, Attack × Lethality multiply — never stack just one type.</span></div>
+      <div class="tip-item"><span class="tip-icon">🎲</span><span class="tip-text"><strong>Skip chance-based heroes as a joiner</strong> (Zoe, Petra, Marlin) — only one ever triggers, wasting a slot.</span></div>
+      <div class="tip-item"><span class="tip-icon">🚩</span><span class="tip-text"><strong>Join order matters</strong> — the rally locks the first 4 joiner skills as people join, so fill both buff types early. Check the rally's yellow flag first.</span></div>
+      <div class="tip-item"><span class="tip-icon">📚</span><span class="tip-text"><strong>Max your lead hero's first Expedition skill</strong> — only that one skill counts when you join.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏇</span><span class="tip-text"><strong>Diana speeds your march</strong> — for smaller / further-out accounts she cuts the return trip from the Bear, getting you back into rallies ~25% faster, so more total damage over the event.</span></div>
+      <div class="tip-item"><span class="tip-icon">🏹</span><span class="tip-text"><strong>Archers are your main DPS</strong> — go mostly archers (5/10/80), and always T10 before T9 (~40% more damage).</span></div>
+      <div class="tip-item"><span class="tip-icon">🏰</span><span class="tip-text"><strong>Pre-activate Attack/Lethality buffs</strong> (and rally capacity if leading) before the event.</span></div>
+      <div class="tip-item"><span class="tip-icon">🛡️</span><span class="tip-text"><strong>Plan with the Alliance tab</strong> — build a Wave to maximize how many rallies your alliance can run at once.</span></div>
+    </div>
   </div><!-- /#personal-planner-view -->
 
   <!-- COMMANDER FEEDBACK - Personal Planner only -->
@@ -3931,7 +3940,7 @@
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r68</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r78</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4534,6 +4543,8 @@
     }
     buildLeaderPicker();
     if (typeof updateMarchRLInfo === 'function') updateMarchRLInfo(); // r55: refresh portraits
+    // r77: re-run joiner assignment so a hero chosen as leader is removed from joiner marches
+    if (typeof window._marchesList !== 'undefined' && window._marchesList && typeof calculate === 'function') calculate();
     saveArmy(); // persist hero selection to current preset
   }
 
@@ -4557,17 +4568,17 @@
   }
 
   // Joiner heroes per march position
-  // March 1-3: FIXED heroes (everyone has these — Chenko, Yeonwoo, Amane)
-  // March 4: Amadeus (premium, can be marked as missing)
-  // March 5-6: No hero — these always deploy solo
-  const MARCH_JOINER_OPTIONS = [
-    [{name:'Chenko',  note:'If <4 Chenkos in rally — else no hero'}],
-    [{name:'Yeonwoo', note:'+Lethality joiner'}],
-    [{name:'Amane',   note:'+ATK support'}],
-    [{name:'Amadeus', note:'Best overall joiner'}],
-    [],   // March 5: always no hero
-    [],   // March 6: always no hero
+  // Each of YOUR joiner marches brings a DISTINCT hero (you own one of each).
+  // Heroes already in your rally-leader formation are excluded — you can't field
+  // the same hero twice. Only ~4 joiner skills matter per rally, so 5-6 go solo.
+  const JOINER_POOL = [
+    {name:'Chenko',  note:'Lethality joiner'},
+    {name:'Yeonwoo', note:'Lethality joiner'},
+    {name:'Amane',   note:'Attack joiner'},
+    {name:'Amadeus', note:'Lethality / damage joiner'},
+    {name:'Hilde',   note:'Attack joiner'},
   ];
+  const JOINER_MARCH_LIMIT = 4;
   // Persistent: which heroes the user marked as "don't have"
   function getMissingHeroes() {
     try { return JSON.parse(localStorage.getItem('btMissingHeroes') || '[]'); }
@@ -4585,15 +4596,20 @@
     if (typeof window._marchesList !== 'undefined' && window._marchesList) calculate();
   }
   function pickJoinerHero(marchIdx) {
-    const options = MARCH_JOINER_OPTIONS[Math.min(marchIdx, MARCH_JOINER_OPTIONS.length - 1)];
-    // Marches 5-6 have no options — always solo (intentional, not "missing")
-    if (!options || options.length === 0) {
+    // Beyond the joiner-skill limit, marches deploy solo (intentional).
+    if (marchIdx >= JOINER_MARCH_LIMIT) {
       return { hero: null, primary: null, allMissing: false, alwaysSolo: true };
     }
-    const missing = getMissingHeroes();
-    const available = options.find(h => !missing.includes(h.name));
-    return { hero: available || null, primary: options[0], allMissing: !available, alwaysSolo: false };
+    // Exclude heroes the user lacks AND heroes already used in the leader formation.
+    const excluded = new Set(getMissingHeroes());
+    if (typeof selectedLeaderHeroes !== 'undefined' && Array.isArray(selectedLeaderHeroes)) {
+      selectedLeaderHeroes.forEach(n => excluded.add(n));
+    }
+    const avail = JOINER_POOL.filter(h => !excluded.has(h.name));
+    const hero = avail[marchIdx] || null;
+    return { hero, primary: hero, allMissing: !hero, alwaysSolo: false };
   }
+
 
   function buildJoinerHeroTip(isLeader, marchIdx) {
     if (isLeader) return '';
@@ -4628,7 +4644,7 @@
     const portrait = img
       ? `<img src="${img}" style="width:30px;height:30px;border-radius:5px;object-fit:cover;object-position:center top;flex-shrink:0;">`
       : `<span style="font-size:22px">🐻</span>`;
-    const showDontHaveBtn = (display.name === 'Amadeus');
+    const showDontHaveBtn = true;
     const haveBtn = showDontHaveBtn
       ? `<button onclick="toggleMissingHero('${display.name}', ${marchIdx}); event.stopPropagation();" style="margin-left:auto;background:rgba(100,100,120,0.15);border:1px solid rgba(150,150,170,0.3);color:rgba(180,180,200,0.7);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">✗ Don't have</button>`
       : '';
@@ -7301,7 +7317,6 @@
     const valid = allianceMembers.filter(m => m.name.trim());
     if (valid.length === 0) {
       showAllianceToast('⚠️ ' + t('noValidMembers')); return;
-      return;
     }
     const plan = computeAlliancePlan(valid);
     window._lastAlliancePlan = plan;
@@ -9515,11 +9530,12 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r74';
+  const BEAR_BUILD = 'v2026.05.01-r78';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
     loadTheme();
+    try { const _sb = document.getElementById('sig-build'); if (_sb) _sb.textContent = 'build ' + BEAR_BUILD; } catch (e) {}
     loadFontSize();
     initSparkles();
     initParticles();
@@ -9572,6 +9588,46 @@ Rules:
     loadComments();
   };
 
+</script>
+<script>
+/* Companion v2 profile bridge (r75): pre-fill EMPTY troop inputs from shared ks_profile. Additive, non-destructive. */
+(function(){
+  function fill(){
+    try{
+      var raw=localStorage.getItem('ks_profile'); if(!raw) return;
+      var p=JSON.parse(raw); if(!p||!p.troops) return;
+      var map={'inf-t10':['inf','t10'],'inf-t9':['inf','t9'],'inf-t8':['inf','t8'],'cav-t10':['cav','t10'],'cav-t9':['cav','t9'],'cav-t8':['cav','t8'],'arc-t10':['arc','t10'],'arc-t9':['arc','t9'],'arc-t8':['arc','t8']};
+      Object.keys(map).forEach(function(id){
+        var el=document.getElementById(id); if(!el) return;
+        var cur=parseInt(el.value)||0; var t=p.troops[map[id][0]]||{}; var val=parseInt(t[map[id][1]])||0;
+        if(cur===0 && val>0){ el.value=val; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true})); }
+      });
+      var mc=document.getElementById('march-capacity');
+      if(mc && p.marchCap && (parseInt(mc.value)||130000)===130000){ mc.value=p.marchCap; mc.dispatchEvent(new Event('input',{bubbles:true})); }
+    }catch(e){}
+  }
+  function go(){ setTimeout(fill,700); }
+  if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded',go);
+})();
+</script>
+<script>
+/* Companion v2 font bridge (r77): apply the font chosen in v2 (ks_font) to this app's body, live. */
+(function(){
+  function applyFont(){try{
+    var f=localStorage.getItem('ks_font')||'system';
+    var map={system:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',nunito:"'Nunito Sans',system-ui,sans-serif",cinzel:"'Cinzel',Georgia,serif",inter:"'Inter',system-ui,sans-serif"};
+    var fam=map[f]||map.system;
+    if(f!=='system' && !document.getElementById('ks-font-link')){
+      var l=document.createElement('link'); l.id='ks-font-link'; l.rel='stylesheet';
+      l.href='https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Cinzel:wght@600&family=Inter:wght@400;600&display=swap';
+      document.head.appendChild(l);
+    }
+    var st=document.getElementById('ks-font-style'); if(!st){st=document.createElement('style');st.id='ks-font-style';document.head.appendChild(st);}
+    st.textContent='body{font-family:'+fam+' !important;}';
+  }catch(e){}}
+  applyFont();
+  window.addEventListener('storage',function(e){ if(e.key==='ks_font') applyFont(); });
+})();
 </script>
 </body>
 </html>
