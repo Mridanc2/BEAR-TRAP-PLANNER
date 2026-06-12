@@ -4557,17 +4557,17 @@
   }
 
   // Joiner heroes per march position
-  // March 1-3: FIXED heroes (everyone has these — Chenko, Yeonwoo, Amane)
-  // March 4: Amadeus (premium, can be marked as missing)
-  // March 5-6: No hero — these always deploy solo
-  const MARCH_JOINER_OPTIONS = [
-    [{name:'Chenko',  note:'If <4 Chenkos in rally — else no hero'}],
-    [{name:'Yeonwoo', note:'+Lethality joiner'}],
-    [{name:'Amane',   note:'+ATK support'}],
-    [{name:'Amadeus', note:'Best overall joiner'}],
-    [],   // March 5: always no hero
-    [],   // March 6: always no hero
+  // Each of YOUR joiner marches brings a DISTINCT hero (you own one of each).
+  // Heroes already in your rally-leader formation are excluded — you can't field
+  // the same hero twice. Only ~4 joiner skills matter per rally, so 5-6 go solo.
+  const JOINER_POOL = [
+    {name:'Chenko',  note:'Lethality joiner'},
+    {name:'Yeonwoo', note:'Lethality joiner'},
+    {name:'Amane',   note:'Attack joiner'},
+    {name:'Amadeus', note:'Lethality / damage joiner'},
+    {name:'Hilde',   note:'Attack joiner'},
   ];
+  const JOINER_MARCH_LIMIT = 4;
   // Persistent: which heroes the user marked as "don't have"
   function getMissingHeroes() {
     try { return JSON.parse(localStorage.getItem('btMissingHeroes') || '[]'); }
@@ -4585,15 +4585,20 @@
     if (typeof window._marchesList !== 'undefined' && window._marchesList) calculate();
   }
   function pickJoinerHero(marchIdx) {
-    const options = MARCH_JOINER_OPTIONS[Math.min(marchIdx, MARCH_JOINER_OPTIONS.length - 1)];
-    // Marches 5-6 have no options — always solo (intentional, not "missing")
-    if (!options || options.length === 0) {
+    // Beyond the joiner-skill limit, marches deploy solo (intentional).
+    if (marchIdx >= JOINER_MARCH_LIMIT) {
       return { hero: null, primary: null, allMissing: false, alwaysSolo: true };
     }
-    const missing = getMissingHeroes();
-    const available = options.find(h => !missing.includes(h.name));
-    return { hero: available || null, primary: options[0], allMissing: !available, alwaysSolo: false };
+    // Exclude heroes the user lacks AND heroes already used in the leader formation.
+    const excluded = new Set(getMissingHeroes());
+    if (typeof selectedLeaderHeroes !== 'undefined' && Array.isArray(selectedLeaderHeroes)) {
+      selectedLeaderHeroes.forEach(n => excluded.add(n));
+    }
+    const avail = JOINER_POOL.filter(h => !excluded.has(h.name));
+    const hero = avail[marchIdx] || null;
+    return { hero, primary: hero, allMissing: !hero, alwaysSolo: false };
   }
+
 
   function buildJoinerHeroTip(isLeader, marchIdx) {
     if (isLeader) return '';
@@ -4628,7 +4633,7 @@
     const portrait = img
       ? `<img src="${img}" style="width:30px;height:30px;border-radius:5px;object-fit:cover;object-position:center top;flex-shrink:0;">`
       : `<span style="font-size:22px">🐻</span>`;
-    const showDontHaveBtn = (display.name === 'Amadeus');
+    const showDontHaveBtn = true;
     const haveBtn = showDontHaveBtn
       ? `<button onclick="toggleMissingHero('${display.name}', ${marchIdx}); event.stopPropagation();" style="margin-left:auto;background:rgba(100,100,120,0.15);border:1px solid rgba(150,150,170,0.3);color:rgba(180,180,200,0.7);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">✗ Don't have</button>`
       : '';
@@ -7301,7 +7306,6 @@
     const valid = allianceMembers.filter(m => m.name.trim());
     if (valid.length === 0) {
       showAllianceToast('⚠️ ' + t('noValidMembers')); return;
-      return;
     }
     const plan = computeAlliancePlan(valid);
     window._lastAlliancePlan = plan;
@@ -9515,7 +9519,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r75';
+  const BEAR_BUILD = 'v2026.05.01-r78';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
@@ -9592,6 +9596,25 @@ Rules:
   }
   function go(){ setTimeout(fill,700); }
   if(document.readyState!=='loading') go(); else document.addEventListener('DOMContentLoaded',go);
+})();
+</script>
+<script>
+/* Companion v2 font bridge (r77): apply the font chosen in v2 (ks_font) to this app's body, live. */
+(function(){
+  function applyFont(){try{
+    var f=localStorage.getItem('ks_font')||'system';
+    var map={system:'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',nunito:"'Nunito Sans',system-ui,sans-serif",cinzel:"'Cinzel',Georgia,serif",inter:"'Inter',system-ui,sans-serif"};
+    var fam=map[f]||map.system;
+    if(f!=='system' && !document.getElementById('ks-font-link')){
+      var l=document.createElement('link'); l.id='ks-font-link'; l.rel='stylesheet';
+      l.href='https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Cinzel:wght@600&family=Inter:wght@400;600&display=swap';
+      document.head.appendChild(l);
+    }
+    var st=document.getElementById('ks-font-style'); if(!st){st=document.createElement('style');st.id='ks-font-style';document.head.appendChild(st);}
+    st.textContent='body{font-family:'+fam+' !important;}';
+  }catch(e){}}
+  applyFont();
+  window.addEventListener('storage',function(e){ if(e.key==='ks_font') applyFont(); });
 })();
 </script>
 </body>
