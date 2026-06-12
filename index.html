@@ -3146,25 +3146,6 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     <button class="preset-btn" id="preset-btn-2" onclick="switchPreset(2)">🗡 Second Account</button>
   </div>
 
-  <!-- BEAR JOINERS (r70) -->
-  <div style="background:rgba(10,18,30,0.55); border:1px solid var(--gold-dim); border-radius:14px; padding:16px; margin-bottom:18px;">
-    <div class="section-title">🐻 Best Bear Joiners</div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
-        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#7fd39a,var(--archer));">CH</div>
-        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Chenko</div><div style="font-size:12px;color:var(--gold-dim);">Lethality</div></div>
-        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
-        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#e0a868,var(--cavalry));">AM</div>
-        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Amane</div><div style="font-size:12px;color:var(--gold-dim);">Attack</div></div>
-        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
-      </div>
-    </div>
-    <div style="text-align:center;color:var(--gold-dim);font-size:13px;margin-top:12px;"><b style="color:var(--text);">2 lethality + 2 attack</b> = most damage (they multiply).</div>
-    <div style="text-align:center;font-size:12px;color:#c0392b;margin-top:6px;">Avoid as joiner: Zoe, Petra, Marlin &mdash; luck-based, only 1 ever works.</div>
-  </div>
-
   <!-- ARMY EDITOR -->
   <div class="army-editor">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
@@ -3387,6 +3368,26 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
       <table id="summary-table"></table>
       <div id="summary-warning"></div>
     </div>
+  </div>
+
+  <!-- BEAR JOINERS — moved below marches, above tips (r82) -->
+  <div style="background:rgba(10,18,30,0.55); border:1px solid var(--gold-dim); border-radius:14px; padding:16px; margin-top:18px; margin-bottom:0;">
+    <div class="section-title">🐻 Best Joiners For Your Rally</div>
+    <div style="text-align:center;color:var(--gold-dim);font-size:12px;line-height:1.45;margin:-2px 0 12px;">When <b style="color:var(--gold-light);">you open the rally as Rally Leader</b>, this is what you want joining <b style="color:var(--gold-light);">your</b> rally &mdash; aim for these heroes among your joiners (only the first 4 joiner skills count).</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
+        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#7fd39a,var(--archer));">CH</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Chenko</div><div style="font-size:12px;color:var(--gold-dim);">Lethality</div></div>
+        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.03); border:1px solid var(--gold-dim); border-radius:10px; padding:9px 12px;">
+        <div style="width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-weight:800;font-size:13px;color:#08110a;background:linear-gradient(135deg,#e0a868,var(--cavalry));">AM</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--text);">Amane</div><div style="font-size:12px;color:var(--gold-dim);">Attack</div></div>
+        <div style="font-family:'Cinzel Decorative',serif;font-weight:800;color:var(--gold-light);font-size:15px;">&times;2</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--gold-dim);font-size:13px;margin-top:12px;"><b style="color:var(--text);">2 lethality + 2 attack</b> = most damage (they multiply).</div>
+    <div style="text-align:center;font-size:12px;color:#c0392b;margin-top:6px;">Avoid as joiner: Zoe, Petra, Marlin &mdash; luck-based, only 1 ever works.</div>
   </div>
 
   <!-- TIPS (below marches) -->
@@ -3940,7 +3941,7 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r78</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r82</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4543,8 +4544,8 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     }
     buildLeaderPicker();
     if (typeof updateMarchRLInfo === 'function') updateMarchRLInfo(); // r55: refresh portraits
-    // r77: re-run joiner assignment so a hero chosen as leader is removed from joiner marches
-    if (typeof window._marchesList !== 'undefined' && window._marchesList && typeof calculate === 'function') calculate();
+    // r79: re-render joiner tips so a hero chosen as leader is removed from joiner marches
+    if (typeof refreshJoinerTips === 'function') refreshJoinerTips();
     saveArmy(); // persist hero selection to current preset
   }
 
@@ -4576,7 +4577,6 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     {name:'Yeonwoo', note:'Lethality joiner'},
     {name:'Amane',   note:'Attack joiner'},
     {name:'Amadeus', note:'Lethality / damage joiner'},
-    {name:'Hilde',   note:'Attack joiner'},
   ];
   const JOINER_MARCH_LIMIT = 4;
   // Persistent: which heroes the user marked as "don't have"
@@ -4610,6 +4610,17 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     return { hero, primary: hero, allMissing: !hero, alwaysSolo: false };
   }
 
+  // r79: directly re-render every joiner tip with current leader heroes (no full recalc needed)
+  function refreshJoinerTips() {
+    try {
+      var ml = window._marchesList; if (!ml || !ml.length) return;
+      var tips = document.querySelectorAll('#marches-grid .march-hero-tip');
+      if (!tips.length) return;
+      for (var i = 0; i < tips.length && i < ml.length; i++) {
+        tips[i].innerHTML = buildJoinerHeroTip(ml[i].isLeader, ml[i].joinerIdx);
+      }
+    } catch (e) {}
+  }
 
   function buildJoinerHeroTip(isLeader, marchIdx) {
     if (isLeader) return '';
@@ -5828,6 +5839,50 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
       m.cavPct = m.total > 0 ? Math.round(_c / m.total * 100) : 0;
       m.infPct = 100 - m.arcPct - m.cavPct;
     });
+
+    // r81: after the joiner-cap scaling, the proportional shrink can drop a troop type
+    // below 5,000 (the game penalizes a march with <5,000 of any type). Re-floor each
+    // march's infantry and cavalry to 5,000 by pulling from that type's leftover and
+    // trading the slots out of archers (drain T10->T6).
+    {
+      const FLOOR = 5000;
+      const tierTot = (type, d) => {
+        const el = document.getElementById(type + '-t' + d);
+        if (el) return parseInt(el.value) || 0;
+        if (d === 8) return getT8Val(type); if (d === 7) return getT7Val(type); if (d === 6) return getT6Val(type);
+        return 0;
+      };
+      const usedTier = (type, d) => marchesList.reduce((s, mm) => s + (mm[type + 'T' + d] || 0), 0);
+      ['inf', 'cav'].forEach(type => {
+        marchesList.forEach(m => {
+          let cur = (m[type+'T10']||0)+(m[type+'T9']||0)+(m[type+'T8']||0)+(m[type+'T7']||0)+(m[type+'T6']||0);
+          if (cur >= FLOOR) return;
+          let need = FLOOR - cur;
+          let added = 0;
+          ['10','9','8','7','6'].forEach(d => {
+            if (need <= 0) return;
+            const leftover = Math.max(0, tierTot(type, d) - usedTier(type, d));
+            const add = Math.min(need, leftover);
+            if (add > 0) { m[type+'T'+d] = (m[type+'T'+d]||0) + add; need -= add; added += add; }
+          });
+          // remove the same number of archers so the march stays at its cap
+          let rem = added;
+          ['arcT10','arcT9','arcT8','arcT7','arcT6'].forEach(k => {
+            if (rem <= 0) return;
+            const take = Math.min(m[k]||0, rem); m[k] = (m[k]||0) - take; rem -= take;
+          });
+        });
+      });
+      marchesList.forEach(m => {
+        const _a = (m.arcT10||0)+(m.arcT9||0)+(m.arcT8||0)+(m.arcT7||0)+(m.arcT6||0);
+        const _c = (m.cavT10||0)+(m.cavT9||0)+(m.cavT8||0)+(m.cavT7||0)+(m.cavT6||0);
+        const _i = (m.infT10||0)+(m.infT9||0)+(m.infT8||0)+(m.infT7||0)+(m.infT6||0);
+        m.total = _a + _c + _i;
+        m.arcPct = m.total > 0 ? Math.round(_a/m.total*100) : 0;
+        m.cavPct = m.total > 0 ? Math.round(_c/m.total*100) : 0;
+        m.infPct = 100 - m.arcPct - m.cavPct;
+      });
+    }
 
     // r50: archers shouldn't stay home if any march still has capacity.
     // After the 85/10/5 split and the r49 joiner scaling, sweep each march and refill
@@ -9530,7 +9585,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r78';
+  const BEAR_BUILD = 'v2026.05.01-r82';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
