@@ -3941,7 +3941,7 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r82</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r83</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4639,13 +4639,14 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
 
     // March 4 with Amadeus marked missing: show "send without hero" with restore button
     if (allMissing) {
+      const restore = primary ? `<button onclick="toggleMissingHero('${primary.name}', ${marchIdx}); event.stopPropagation();" style="background:rgba(100,180,255,0.15);border:1px solid rgba(100,180,255,0.4);color:rgba(150,200,255,0.9);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">↺ I have it</button>` : '';
       return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 8px;background:rgba(100,100,120,0.08);border:1px dashed rgba(150,150,170,0.25);border-radius:6px;">
         <span style="font-size:22px;opacity:0.6;">🐻</span>
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:700;color:rgba(180,180,200,0.85)">Send without hero</div>
           <div style="font-size:11px;color:var(--gold-dim);opacity:0.85;">No joiner hero — march will deploy solo</div>
         </div>
-        <button onclick="toggleMissingHero('${primary.name}', ${marchIdx}); event.stopPropagation();" style="background:rgba(100,180,255,0.15);border:1px solid rgba(100,180,255,0.4);color:rgba(150,200,255,0.9);font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;letter-spacing:0.05em;white-space:nowrap;">↺ I have it</button>
+        ${restore}
       </div>`;
     }
 
@@ -9585,7 +9586,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r82';
+  const BEAR_BUILD = 'v2026.05.01-r83';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
