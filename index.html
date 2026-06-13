@@ -3088,22 +3088,31 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
 <div class="particles" id="particles"></div>
 <div class="container">
   <header>
-    <div class="lang-bar" style="justify-content:center;align-items:center;">
-      <button class="lang-btn active" onclick="setLang('en')">🇬🇧 EN</button>
-      <button class="lang-btn" onclick="setLang('tr')">🇹🇷 TR</button>
-      <button class="lang-btn" onclick="setLang('fr')">🇫🇷 FR</button>
-      <button class="lang-btn" onclick="setLang('ar')">🇸🇦 AR</button>
-      <button class="lang-btn" onclick="setLang('es')">🇪🇸 ES</button>
-      <button class="lang-btn" onclick="setLang('pt')">🇧🇷 PT</button>
+    <div class="lang-bar" style="justify-content:center;align-items:center;flex-wrap:wrap;gap:4px;">
+      <div class="lang-picker" style="position:relative;display:inline-block;">
+        <button class="lang-btn" id="lang-picker-btn" onclick="__btToggleLangMenu(event)" aria-haspopup="true" aria-expanded="false" title="Language">🌐 <span id="lang-picker-label">EN</span> <span style="opacity:.7;">▾</span></button>
+        <div class="lang-menu" id="lang-picker-menu" role="menu">
+          <button class="lang-opt active" data-lang="en" onclick="__btPickLang('en')">🇬🇧 English</button>
+          <button class="lang-opt" data-lang="es" onclick="__btPickLang('es')">🇪🇸 Español</button>
+          <button class="lang-opt" data-lang="pt" onclick="__btPickLang('pt')">🇧🇷 Português</button>
+          <button class="lang-opt" data-lang="fr" onclick="__btPickLang('fr')">🇫🇷 Français</button>
+          <button class="lang-opt" data-lang="de" onclick="__btPickLang('de')">🇩🇪 Deutsch</button>
+          <button class="lang-opt" data-lang="it" onclick="__btPickLang('it')">🇮🇹 Italiano</button>
+          <button class="lang-opt" data-lang="nl" onclick="__btPickLang('nl')">🇳🇱 Nederlands</button>
+          <button class="lang-opt" data-lang="ru" onclick="__btPickLang('ru')">🇷🇺 Русский</button>
+          <button class="lang-opt" data-lang="pl" onclick="__btPickLang('pl')">🇵🇱 Polski</button>
+          <button class="lang-opt" data-lang="tr" onclick="__btPickLang('tr')">🇹🇷 Türkçe</button>
+          <button class="lang-opt" data-lang="ar" onclick="__btPickLang('ar')">🇸🇦 العربية</button>
+          <button class="lang-opt" data-lang="he" onclick="__btPickLang('he')">🇮🇱 עברית</button>
+          <button class="lang-opt" data-lang="zh" onclick="__btPickLang('zh')">🇨🇳 中文</button>
+          <button class="lang-opt" data-lang="ja" onclick="__btPickLang('ja')">🇯🇵 日本語</button>
+          <button class="lang-opt" data-lang="ko" onclick="__btPickLang('ko')">🇰🇷 한국어</button>
+          <button class="lang-opt" data-lang="id" onclick="__btPickLang('id')">🇮🇩 Bahasa</button>
+          <button class="lang-opt" data-lang="vi" onclick="__btPickLang('vi')">🇻🇳 Tiếng Việt</button>
+          <button class="lang-opt" data-lang="th" onclick="__btPickLang('th')">🇹🇭 ไทย</button>
+        </div>
+      </div>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">🌙</button>
-      <button class="font-size-btn" id="font-size-btn" onclick="cycleFontSize()" title="Change font size" aria-label="Change font size">A</button>
-      <button class="share-floating-btn" id="share-floating-btn" onclick="shareBearApp()" title="Share BEAR with friends" aria-label="Share">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-          <polyline points="16 6 12 2 8 6"/>
-          <line x1="12" y1="2" x2="12" y2="15"/>
-        </svg>
-      </button>
     </div>
     <!-- CLAN NAME -->
     <div class="clan-name">
@@ -3941,7 +3950,7 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
     </div>
     <div class="sig-tagline">Bear Trap Planner · KingShot</div>
     <div class="sig-credit">Made by <span>Mridanc2</span></div>
-    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r83</div>
+    <div class="sig-build" id="sig-build" style="font-size:9px;color:rgba(201,168,76,0.35);letter-spacing:0.1em;margin-top:4px;font-family:monospace;">build v2026.05.01-r86</div>
     <div class="sig-visitors">
       <img src="https://abacus.jasoncameron.dev/hit/xxx-commanders/bear-trap-planner/shield?style=for-the-badge&bgcolor=c9a84c&textcolor=0a1228&label=⚔ COMMANDERS SERVED"
            alt="Visitors counter"
@@ -4444,10 +4453,14 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
   function t(key) { return i18n[currentLang][key] || i18n['en'][key] || key; }
 
   function setLang(lang) {
+    if (!lang) lang = 'en';
+    try { localStorage.setItem('btLang', lang); } catch(e) {}
+    __btEnsureDict(lang).then(function(){ __btSetLangNow(lang); });
+  }
+  function __btSetLangNow(lang) {
     currentLang = lang;
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
-    const isRTL = i18n[lang].dir === 'rtl';
+    if (typeof __btUpdatePicker === 'function') __btUpdatePicker(lang);
+    const isRTL = ((i18n[lang] || i18n['en']).dir) === 'rtl';
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
     // Update all data-i18n elements
@@ -4472,6 +4485,7 @@ html[data-kcfont="inter"] *{font-family:"Inter",system-ui,sans-serif!important;}
         renderAlliancePlan(window._lastAlliancePlan);
       }
     }
+    if (typeof __btApplyHardcoded === 'function') __btApplyHardcoded(lang);
   }
 
   function setMarches(n, btn) {
@@ -9586,7 +9600,7 @@ Rules:
     showAllianceToast('📡 ' + t('companionDone').replace('{a}', added).replace('{u}', updated));
   }
 
-  const BEAR_BUILD = 'v2026.05.01-r83';
+  const BEAR_BUILD = 'v2026.05.01-r86';
   console.log('%c🐻 BEAR Trap Planner ' + BEAR_BUILD, 'background:#c9a84c;color:#0a1228;padding:4px 10px;border-radius:4px;font-weight:700;');
 
   window.onload = () => {
@@ -9643,6 +9657,153 @@ Rules:
     if (msgEl) msgEl.addEventListener('input', updateCommentCounter);
     loadComments();
   };
+
+  /* ============================================================
+     BEAR auto-translation layer
+     Fills any missing language via Google Translate (cached in
+     localStorage), and translates hardcoded static text too.
+     Skips dynamic areas (names, troop counts, generated marches).
+     ============================================================ */
+  var __BT_SUP = ['en','es','pt','fr','ar','tr','he','de','it','nl','ru','pl','zh','ja','ko','id','vi','th'];
+  (function(){
+    var st = document.createElement('style');
+    st.textContent = '#lang-picker-btn{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}'
+      + '.lang-menu{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);display:none;grid-template-columns:repeat(2,minmax(118px,1fr));gap:2px;padding:6px;background:#0b1626;border:1px solid #2a3a52;border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,.6);z-index:99999;max-height:62vh;overflow:auto;}'
+      + '.lang-menu.open{display:grid;}'
+      + '.lang-opt{background:transparent;border:0;color:#e8dfc0;font:600 13px system-ui,sans-serif;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;}'
+      + '.lang-opt:hover{background:#13233a;}'
+      + '.lang-opt.active{background:rgba(240,208,128,.16);color:#f0d080;}'
+      + '@media(max-width:430px){.lang-menu{grid-template-columns:1fr 1fr;min-width:248px;}}';
+    (document.head || document.documentElement).appendChild(st);
+  })();
+  var __BT_LBL = {en:'EN',es:'ES',pt:'PT',fr:'FR',de:'DE',it:'IT',nl:'NL',ru:'RU',pl:'PL',tr:'TR',ar:'AR',he:'HE',zh:'ZH',ja:'JA',ko:'KO',id:'ID',vi:'VI',th:'TH'};
+  var __BT_FLAG = {en:'🇬🇧',es:'🇪🇸',pt:'🇧🇷',fr:'🇫🇷',de:'🇩🇪',it:'🇮🇹',nl:'🇳🇱',ru:'🇷🇺',pl:'🇵🇱',tr:'🇹🇷',ar:'🇸🇦',he:'🇮🇱',zh:'🇨🇳',ja:'🇯🇵',ko:'🇰🇷',id:'🇮🇩',vi:'🇻🇳',th:'🇹🇭'};
+  function __btToggleLangMenu(e){ if(e){e.stopPropagation();} var m=document.getElementById('lang-picker-menu'); if(!m)return; var open=m.classList.toggle('open'); var b=document.getElementById('lang-picker-btn'); if(b)b.setAttribute('aria-expanded', open?'true':'false'); }
+  function __btPickLang(l){ var m=document.getElementById('lang-picker-menu'); if(m)m.classList.remove('open'); var b=document.getElementById('lang-picker-btn'); if(b)b.setAttribute('aria-expanded','false'); setLang(l); }
+  function __btUpdatePicker(lang){
+    var lab=document.getElementById('lang-picker-label');
+    if(lab) lab.textContent=(__BT_FLAG[lang]||'') + ' ' + (__BT_LBL[lang]||String(lang).toUpperCase());
+    var opts=document.querySelectorAll('#lang-picker-menu .lang-opt');
+    opts.forEach(function(o){ o.classList.toggle('active', o.getAttribute('data-lang')===lang); });
+  }
+  document.addEventListener('click', function(e){
+    var p=document.querySelector('.lang-picker'); var m=document.getElementById('lang-picker-menu');
+    if(m && m.classList.contains('open') && p && !p.contains(e.target)){ m.classList.remove('open'); var b=document.getElementById('lang-picker-btn'); if(b)b.setAttribute('aria-expanded','false'); }
+  });
+  function __btCK(l){ return 'btTr_' + l; }
+  function __btLoad(l){ try { return JSON.parse(localStorage.getItem(__btCK(l)) || '{}'); } catch(e) { return {}; } }
+  function __btSave(l,c){ try { localStorage.setItem(__btCK(l), JSON.stringify(c)); } catch(e) {} }
+  function __btTr1(text, l){
+    var tl = (l || 'en').split('-')[0];
+    var g = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&dt=t&tl=' + encodeURIComponent(tl) + '&q=' + encodeURIComponent(text);
+    return fetch(g).then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ try { var o=(j[0]||[]).map(function(x){return x[0];}).join(''); return o || null; } catch(e){ return null; } })
+      .catch(function(){ return null; })
+      .then(function(o){
+        if (o != null) return o;
+        // fallback: MyMemory (same as Companion)
+        var m = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=en|' + encodeURIComponent(tl);
+        return fetch(m).then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){ try { return (j && j.responseData && j.responseData.translatedText) || null; } catch(e){ return null; } })
+          .catch(function(){ return null; });
+      });
+  }
+  function __btTrMany(texts, l){
+    var cache = __btLoad(l), todo = [], seen = {};
+    texts.forEach(function(t){ if (t && !(t in cache) && !seen[t]) { seen[t] = 1; todo.push(t); } });
+    if (!todo.length) return Promise.resolve(cache);
+    var i = 0, CH = 6;
+    function step(){
+      if (i >= todo.length) { __btSave(l, cache); return cache; }
+      var slice = todo.slice(i, i + CH); i += CH;
+      return Promise.all(slice.map(function(tx){ return __btTr1(tx, l).then(function(o){ if (o != null) cache[tx] = o; }); }))
+        .then(function(){ __btSave(l, cache); return step(); });
+    }
+    return Promise.resolve().then(step);
+  }
+  function __btToast(on){
+    var id = '__bt-tr-toast', el = document.getElementById(id);
+    if (on) {
+      if (!el) {
+        el = document.createElement('div'); el.id = id; el.textContent = '🌐 …';
+        el.style.cssText = 'position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(8,14,26,.94);color:#f0d080;border:1px solid #7a6030;border-radius:14px;padding:5px 14px;font:600 13px system-ui,sans-serif;z-index:99999;box-shadow:0 4px 18px rgba(0,0,0,.55)';
+        document.body.appendChild(el);
+      }
+      el.style.display = 'block';
+    } else if (el) { el.style.display = 'none'; }
+  }
+  function __btEnsureDict(lang){
+    if (lang === 'en' || typeof i18n === 'undefined' || !i18n['en']) return Promise.resolve();
+    if (i18n[lang] && Object.keys(i18n[lang]).length > 5) return Promise.resolve();
+    var en = i18n['en'], keys = Object.keys(en).filter(function(k){ return typeof en[k] === 'string'; });
+    var texts = keys.map(function(k){ return en[k]; });
+    __btToast(true);
+    return __btTrMany(texts, lang).then(function(cache){
+      i18n[lang] = i18n[lang] || {};
+      i18n[lang].dir = (lang === 'ar' || lang === 'he') ? 'rtl' : 'ltr';
+      keys.forEach(function(k){ i18n[lang][k] = cache[en[k]] || en[k]; });
+      __btToast(false);
+    }, function(){ __btToast(false); });
+  }
+  var __BT_SKIP = '#marches-grid,#results,#alliance-results,#alliance-results-title,#rally-assignment-results,#rally-assign-waves,#ocr-results-section,#ocr-results-list,#alliance-members-list,#march-tooltips,#plan-history-list,#march-rec-box,#promote-tip-box,.clan-name,.lang-bar,.preset-name-input';
+  function __btSkip(el){
+    if (!el || el.nodeType !== 1) return true;
+    var tg = el.tagName;
+    if (tg === 'SCRIPT' || tg === 'STYLE' || tg === 'INPUT' || tg === 'TEXTAREA' || tg === 'SELECT' || tg === 'OPTION' || tg === 'NOSCRIPT') return true;
+    if (tg === 'svg' || tg === 'path' || tg === 'SVG' || tg === 'PATH') return true;
+    if (el.closest('svg')) return true;
+    if (el.isContentEditable) return true;
+    if (el.hasAttribute('data-i18n')) return true;
+    if (el.closest('[data-i18n]')) return true;
+    if (el.closest(__BT_SKIP)) return true;
+    return false;
+  }
+  function __btWordy(s){
+    s = (s || '').trim();
+    if (s.length < 2) return false;
+    if (!/[A-Za-z\u00C0-\u024F]/.test(s)) return false;
+    if (/^v?\d[\d.\-r]*$/i.test(s)) return false;
+    if (/^[\d\s.,:;%\/+\-x*()|]+$/i.test(s)) return false;
+    return true;
+  }
+  function __btNodes(){
+    var out = [];
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: function(n){
+      if (__btSkip(n.parentElement)) return NodeFilter.FILTER_REJECT;
+      var v = (n.__en != null) ? n.__en : n.nodeValue;
+      if (!__btWordy(v)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    var n; while (n = w.nextNode()) { if (n.__en == null) n.__en = n.nodeValue; out.push(n); }
+    return out;
+  }
+  function __btApplyHardcoded(lang){
+    var nodes = __btNodes();
+    if (lang === 'en') { nodes.forEach(function(n){ if (n.__en != null) n.nodeValue = n.__en; }); return Promise.resolve(); }
+    var texts = nodes.map(function(n){ return n.__en.trim(); });
+    __btToast(true);
+    return __btTrMany(texts, lang).then(function(cache){
+      nodes.forEach(function(n){ var key = n.__en.trim(), tr = cache[key]; if (tr && tr !== key) n.nodeValue = n.__en.replace(key, tr); });
+      __btToast(false);
+    }, function(){ __btToast(false); });
+  }
+  function __btMapBrowser(bl){
+    if (!bl) return null;
+    var base = bl.toLowerCase().split('-')[0];
+    return (__BT_SUP.indexOf(base) >= 0) ? base : null;
+  }
+  function __btInitLang(){
+    var lang = null;
+    try { lang = new URLSearchParams(location.search).get('lang'); } catch(e) {}
+    if (!lang) { try { lang = localStorage.getItem('kingshot-path-lang'); } catch(e) {} }
+    if (!lang) { try { lang = localStorage.getItem('btLang'); } catch(e) {} }
+    if (!lang) lang = __btMapBrowser(navigator.language || (navigator.languages && navigator.languages[0]));
+    if (!lang || __BT_SUP.indexOf(lang) < 0) lang = 'en';
+    if (typeof __btUpdatePicker === 'function') __btUpdatePicker(lang);
+    if (lang !== 'en') setLang(lang);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __btInitLang);
+  else __btInitLang();
 
 </script>
 <script>
